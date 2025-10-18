@@ -1,414 +1,271 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="red">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>n0rm41 base</title>
-  <meta name="description" content="Portfolio styled as a terminal for Red Teaming & Cybersecurity" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>n0rm41 | Red Team & Cybersecurity</title>
+  <meta name="description" content="Portfolio and notes by n0rm41 — Red Teaming, Malware Dev, Reverse Engineering.">
   <meta name="keywords" content="Red Team, Cybersecurity, Malware Development, Reverse Engineering, CTF, Pentest, n0rm41">
   <meta property="og:title" content="n0rm41 | Red Team & Cybersecurity Portfolio">
   <meta property="og:description" content="Portfolio styled as a terminal for Red Teaming & Cybersecurity">
   <meta property="og:type" content="website">
+
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+
   <style>
-    :root{
-      --bg:#0d0d0d;--panel:#111;--muted:#999;--text:#e0e0e0;
-      --primary:#ff5555;--accent:#ffb86c;--ring:rgba(255,85,85,.6);
-      --shadow:0 0 10px rgba(255,85,85,.15);--radius:4px;--gap:16px
+    :root {
+      --bg:#0d0d0d; --panel:#111; --muted:#999; --text:#e0e0e0;
+      --primary:#ff5555; --accent:#ffb86c; --ring:rgba(255,85,85,.6);
+      --shadow:0 0 10px rgba(255,85,85,.15);
+      --radius:4px; --gap:16px;
     }
-    /* Matrix green theme */
-    html[data-theme="green"]{
-      --primary:#00ff88;--accent:#a3ffbf;--ring:rgba(0,255,136,.6);
-      --shadow:0 0 10px rgba(0,255,136,.12)
-    }
-
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0}
-    body{
-      font-family:'Fira Code',monospace;background:var(--bg);color:var(--text);line-height:1.5;overflow-x:hidden;
-      position:relative;
+    html[data-theme="green"] {
+      --primary:#00ff88; --accent:#a3ffbf; --ring:rgba(0,255,136,.6);
+      --shadow:0 0 10px rgba(0,255,136,.12);
     }
 
-    /* CRT + scanlines + subtle noise */
-    .crt-overlay, .noise-overlay{
-      pointer-events:none;position:fixed;inset:0;z-index:1
-    }
-    .crt-overlay{
-      background:linear-gradient(rgba(255,255,255,.03),rgba(0,0,0,0) 2px);
-      background-size:100% 3px;mix-blend-mode:overlay;opacity:.2
-    }
-    .noise-overlay{
-      background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.035"/></svg>');
-      opacity:.25
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: 'Fira Code', monospace;
+      background: var(--bg); color: var(--text);
+      line-height: 1.5; overflow-x: hidden;
     }
 
-    a{color:var(--primary);text-decoration:none;transition:color .2s, text-shadow .2s}
-    a:hover{text-decoration:underline;color:var(--accent);text-shadow:0 0 6px var(--primary)}
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { color: var(--accent); text-shadow: 0 0 6px var(--primary); }
 
-    .wrap{
-      max-width:1100px;margin:0 auto;padding:20px;display:grid;grid-template-columns:260px 1fr;gap:var(--gap);position:relative;z-index:2
+    .wrap {
+      display: grid; grid-template-columns: 260px 1fr; gap: var(--gap);
+      max-width: 1100px; margin: 0 auto; padding: 20px;
     }
 
-    aside{
-      background:var(--panel);padding:20px;border:1px solid #222;border-radius:var(--radius);
-      position:sticky;top:10px;height:fit-content;box-shadow:var(--shadow)
-    }
-    .avatar{
-      width:100%;aspect-ratio:1;background:#222;display:grid;place-items:center;font-size:14px;color:var(--muted);
-      margin-bottom:14px;border:1px solid #333;cursor:pointer;transition:transform .15s, border-color .2s
-    }
-    .avatar:hover{transform:scale(1.01);border-color:var(--primary)}
-    nav a{display:block;padding:6px 0;color:var(--text)}
-    nav a:hover{color:var(--primary)}
-
-    .toolbar{
-      display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap
-    }
-    .btn{
-      border:1px solid #333;background:#0f0f0f;color:var(--text);padding:6px 10px;border-radius:4px;cursor:pointer;
-      transition:box-shadow .2s,border-color .2s
-    }
-    .btn:hover{border-color:var(--primary);box-shadow:0 0 6px var(--primary)}
-    .toggle{display:flex;align-items:center;gap:8px}
-
-    main{display:grid;gap:var(--gap)}
-    .card{
-      background:var(--panel);padding:18px;border:1px solid #222;border-radius:var(--radius);
-      opacity:0;white-space:pre-wrap;box-shadow:var(--shadow)
-    }
-
-    h1,h2,h3{color:var(--primary);margin-top:0}
-    .lead{color:var(--muted)}
-    .grid{display:grid;gap:var(--gap);grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-    .project{border:1px solid #222;padding:12px;background:#0f0f0f;transition:border-color .2s,transform .2s}
-    .project:hover{border-color:var(--primary);transform:scale(1.02)}
-    .timeline{border-left:2px solid var(--primary);padding-left:16px}
-    .t-item{margin-bottom:16px}.t-role{font-weight:700}.t-time{color:var(--muted);font-size:13px}
-    .contact{display:grid;gap:var(--gap);grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
-    .contact a{text-align:center;padding:8px;background:#0f0f0f;border:1px solid #222;transition:all .2s}
-    .contact a:hover{border-color:var(--primary);box-shadow:0 0 6px var(--primary)}
-    footer{text-align:center;color:var(--muted);font-size:13px;padding:20px 0 10px}
-
-    /* Toolbox list */
-    ul.toolbox{list-style:none;padding:0;margin:0}
-    ul.toolbox li::before{content:"➤ ";color:var(--accent)}
-
-    /* Responsive */
-    @media(max-width:800px){
-      .wrap{grid-template-columns:1fr}
-      aside{position:relative;top:0}
-    }
-
-    /* Typing */
-    .cursor{display:inline-block;width:8px;background:var(--primary);margin-left:2px;animation:blink 1s infinite}
-    @keyframes blink{50%{background:transparent}}
-
-    /* ASCII modal */
-    .modal{
-      position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:10
-    }
-    .modal-content{
-      background:#0f0f0f;border:1px solid #333;max-width:90vw;max-height:80vh;overflow:auto;padding:16px;border-radius:6px;
-      box-shadow:0 0 12px var(--ring);white-space:pre;line-height:1.1
-    }
-    .modal .close{position:absolute;top:12px;right:12px}
-    .kbd{border:1px solid #333;padding:2px 6px;border-radius:4px;background:#0f0f0f}
-
-    /* BLOG STYLES */
-    .blog-list {
-      display: grid;
-      gap: 20px;
-      padding: 10px;
-    }
-
-    .blog-post {
-      background: #0f0f0f;
-      border: 1px solid #222;
-      border-left: 4px solid var(--primary);
-      padding: 16px;
-      border-radius: 6px;
-      transition: all 0.2s;
+    aside {
+      background: var(--panel); padding: 20px;
+      border: 1px solid #222; border-radius: var(--radius);
+      position: sticky; top: 10px; height: fit-content;
       box-shadow: var(--shadow);
+    }
+
+    .avatar {
+      width: 100%; aspect-ratio: 1; background: #222; display: grid;
+      place-items: center; color: var(--muted);
+      border: 1px solid #333; border-radius: var(--radius);
+      margin-bottom: 14px; cursor: pointer;
+      transition: transform .15s, border-color .2s;
+    }
+    .avatar:hover { transform: scale(1.02); border-color: var(--primary); }
+
+    nav a { display: block; padding: 6px 0; color: var(--text); }
+    nav a:hover { color: var(--primary); }
+
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .btn {
+      border: 1px solid #333; background: #0f0f0f; color: var(--text);
+      padding: 6px 10px; border-radius: 4px; cursor: pointer;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .btn:hover { border-color: var(--primary); box-shadow: 0 0 6px var(--primary); }
+
+    main { display: grid; gap: var(--gap); }
+    .card {
+      background: var(--panel); padding: 18px;
+      border: 1px solid #222; border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      opacity: 0; white-space: pre-wrap;
+    }
+    h1,h2,h3 { color: var(--primary); margin-top: 0; }
+
+    footer { text-align: center; color: var(--muted); font-size: 13px; padding: 20px 0 10px; }
+
+    /* Blog */
+    .blog-post {
+      background: #0f0f0f; border: 1px solid #222; border-left: 4px solid var(--primary);
+      padding: 14px; border-radius: 6px; transition: transform .2s, border-color .2s;
       cursor: pointer;
     }
+    .blog-post:hover { border-left-color: var(--accent); transform: translateX(4px); }
+    .blog-post h3 { margin: 0 0 6px; color: var(--primary); }
+    .blog-post .meta-row { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .blog-post .tag { font-size: 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 4px; padding: 2px 6px; color: var(--accent); margin-right: 6px; }
+    .blog-post p { margin-top: 8px; color: var(--text); display: none; }
+    .blog-post.expanded p { display: block; }
 
-    .blog-post:hover {
-      border-color: var(--primary);
-      border-left-color: var(--accent);
-      transform: translateX(4px);
+    /* Typing animation */
+    .cursor { display:inline-block; width:8px; background:var(--primary); margin-left:2px; animation: blink 1s infinite; }
+    @keyframes blink { 50% { background: transparent; } }
+
+    @media(max-width:800px){ .wrap{grid-template-columns:1fr;} aside{position:relative;top:0;} }
+
+    /* Modal */
+    .modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,.8);
+      display: none; align-items: center; justify-content: center; z-index: 10;
     }
-
-    .blog-post h3 {
-      margin: 0 0 6px;
-      color: var(--primary);
-    }
-
-    .blog-post .meta-row {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .blog-post .tags {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 8px;
-    }
-
-    .blog-post .tag {
-      background: #1a1a1a;
-      border: 1px solid #333;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 12px;
-      color: var(--accent);
-    }
-
-    .blog-post p {
-      margin: 0;
-      color: var(--text);
-      line-height: 1.4;
-      display: none;
-    }
-
-    .blog-post.expanded p {
-      display: block;
-      margin-top: 8px;
+    .modal-content {
+      background: #0f0f0f; padding: 16px; border: 1px solid #333;
+      border-radius: 6px; max-width: 90vw; max-height: 80vh; overflow: auto;
+      box-shadow: 0 0 12px var(--ring); white-space: pre; color: var(--text);
     }
   </style>
 </head>
 <body>
-  <!-- visual layers -->
-  <div class="crt-overlay"></div>
-  <div class="noise-overlay"></div>
-
   <div class="wrap">
     <aside>
-      <div class="avatar" id="openAscii">[ INSERT PHOTO/LOGO ]</div>
-      <h2>n0rm41</h2><br>
-      <div class="meta">📍 Location: Somewhere</div>
-      <div class="meta">🎓 Role: Student</div>
-
+      <div class="avatar" id="openAscii">[ n0rm41 ]</div>
+      <h2>n0rm41</h2>
+      <div>🎯 Red Team / Security Research</div>
+      <div>📍 Somewhere</div>
+      <br>
       <nav>
         <a href="#whoami">whoami</a>
         <a href="#toolbox">toolbox</a>
         <a href="#operations">operations</a>
-        <a href="#experience">experience</a>
-        <a href="#github">github</a>
         <a href="#blog">blog</a>
-        <a href="#badges">badges</a>
         <a href="#contact">contact</a>
       </nav>
-
       <div class="toolbar">
         <button class="btn" id="playBeep">Beep</button>
-        <label class="toggle">
-          <input type="checkbox" id="themeToggle">
-          <span>Matrix theme</span>
-        </label>
-        <button class="btn" id="replayTyping" title="Riesegui animazione">Replay typing</button>
+        <label><input type="checkbox" id="themeToggle"> Matrix theme</label>
+        <button class="btn" id="replayTyping">Replay typing</button>
       </div>
     </aside>
 
     <main>
-      <!-- TYPED SECTIONS -->
       <section class="card" id="whoami"
         data-text="> whoami
 Hello there!,
-Im n0rm41 and im a student who likes red teaming in the development field(i.e malware development, vulnerability research, reverse engineering etc!)
-Right now im not an expert nor a newbie, i try my best to improve everyday.
-I Hope we might get in contact !">
+I'm n0rm41 — a student interested in Red Teaming, malware development, and reverse engineering.
+I love building and breaking things to understand them better.">
       </section>
 
       <section class="card" id="toolbox"
         data-text="> toolbox
-Here the tools etc i use:
+Tools I often use:
 - Metasploit
 - Burp Suite
-- Wireshark, StratoShark
-- VScode, Visual Studio
+- Wireshark
+- Ghidra, IDA, dnSpy, x64Dbg
+- VSCode, Visual Studio
 - Obsidian
-- VM's
-- dnSpy, PE-bear
-- Tor, HxD
-- Ida, Ghidra, x64Dbg(also other versions)
-I often build my own scripts for specific objectives.">
+- PE-bear, HxD
+- Custom scripts & labs">
       </section>
 
       <section class="card" id="operations"
         data-text="> operations
-[Trace Labs]
-This was a OSINT based CTF, where the players are divided in teams to find actully lost persons to help the authorities to find them.
-
-[ Phishing Campaign ]
-Controlled phishing engagements for security awareness training.
-
-[ Internal Network Breach ]
-Simulated insider threat to assess lateral movement capabilities.">
+- OSINT CTF (Trace Labs)
+- Controlled phishing campaign for training
+- Internal network breach simulation">
       </section>
 
-      <section class="card" id="experience"
-        data-text="> experience
-[ Insert Role e.g. Senior Red Teamer ]   [ YYYY → YYYY ]
-[ Insert description of responsibilities and achievements. ]
-
-[ Insert Role e.g. Penetration Tester ]   [ YYYY → YYYY ]
-[ Insert description of responsibilities and achievements. ]">
-      </section>
-
-      <!-- BLOG -->
       <section class="card" id="blog"
         data-text="> blog
-Welcome to my notes & experiments corner.">
-      </section>
-      <section class="card blog-list" id="blog-posts">
-        <div id="posts"></div>
+Some of my notes & small writeups:">
       </section>
 
-      <!-- CONTACT -->
+      <section class="card" id="blog-posts"></section>
+
       <section class="card" id="contact"
         data-text="> contact
-[ Email ] → [ Insert Email URL ]
-[ Github ] → https://github.com/unknown4real
-[ Linkedin ] → Linkedin(i dont have it yet)
-[ PGP Key ] → PGP Key(None right now)">
+Email: [your email]
+GitHub: https://github.com/unknown4real
+PGP: none yet">
       </section>
 
-      <footer>© 2025 [n0rm41] — Portfolio</footer>
+      <footer>© 2025 n0rm41 — Portfolio</footer>
     </main>
   </div>
 
-  <!-- ASCII Modal -->
-  <div class="modal" id="asciiModal" aria-hidden="true">
-    <button class="btn close" id="closeAscii">Close</button>
-    <pre class="modal-content" id="asciiArt">
+  <div class="modal" id="asciiModal">
+    <div class="modal-content">
       _   _  ____  ____  __  __ _  _  _  _
      | \ | |/ __ \|  _ \|  \/  | || || || |
      |  \| | |  | | |_) | \  / | || || || |_
      | . ` | |  | |  _ <| |\/| | ||_||__   _|
      | |\  | |__| | |_) | |  | | |__   | |  
      |_| \_|\____/|____/|_|  |_|____|  |_|  
-
+     
      n0rm41 — Red Teaming & Cybersecurity
-     click the logo again to toggle this modal
-    </pre>
+    </div>
   </div>
 
   <script>
-    // ---------- Typing animation ----------
-    function typeWriter(el, text, i = 0, speed = 18, done) {
+    const cards = document.querySelectorAll(".card[data-text]");
+    function typeWriter(el, text, i = 0) {
       if (i < text.length) {
-        el.innerHTML = text.substring(0, i+1) + '<span class="cursor"></span>';
-        setTimeout(() => typeWriter(el, text, i+1, speed, done), speed);
-      } else {
-        el.innerHTML = text;
-        if (done) done();
-      }
+        el.innerHTML = text.substring(0, i + 1) + '<span class="cursor"></span>';
+        setTimeout(() => typeWriter(el, text, i + 1), 18);
+      } else el.innerHTML = text;
     }
     function runTypingSequence() {
-      const cards = Array.from(document.querySelectorAll(".card"))
-        .filter(c => c.hasAttribute("data-text"));
       let delay = 0;
-      cards.forEach((card, idx) => {
-        const text = card.getAttribute("data-text") || "";
+      cards.forEach(card => {
+        const text = card.dataset.text;
         setTimeout(() => {
           card.style.opacity = 1;
-          typeWriter(card, text, 0, 18, () => {});
+          typeWriter(card, text);
         }, delay);
-        delay += Math.max(800, text.length * 18 + 600);
+        delay += text.length * 18 + 600;
       });
     }
 
-    // ---------- Theme toggle ----------
-    const themeToggle = document.getElementById('themeToggle');
-    themeToggle.addEventListener('change', () => {
-      document.documentElement.setAttribute('data-theme', themeToggle.checked ? 'green' : 'red');
-      localStorage.setItem('theme', themeToggle.checked ? 'green' : 'red');
-    });
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      document.documentElement.setAttribute('data-theme', savedTheme);
-      themeToggle.checked = savedTheme === 'green';
-    }
+    // Blog posts
+    const BLOG_POSTS = [
+      { title: "Reverse Engineering diary #1", date: "2025-03-10", tags: ["RE","malware"], body: "Notes from a small x64 unpacking exercise. Tools: x64Dbg, PE-bear, Scylla." },
+      { title: "Red Team micro-lab: phishing pretext", date: "2025-04-22", tags: ["redteam","ops"], body: "Internal phishing pretext test. Result: 23% click rate → improved awareness training." },
+      { title: "Ghidra tips for beginners", date: "2025-06-17", tags: ["ghidra","tips"], body: "Use Function Graph + Decompiler sync. Rename aggressively. Utilize Script Manager." }
+    ];
+    const renderBlog = () => {
+      const container = document.getElementById("blog-posts");
+      BLOG_POSTS.sort((a,b)=>new Date(b.date)-new Date(a.date))
+      .forEach(p => {
+        const post = document.createElement("article");
+        post.className = "blog-post";
+        post.innerHTML = `
+          <h3>${p.title}</h3>
+          <div class="meta-row">${p.date}</div>
+          ${p.tags.map(t => `<span class="tag">#${t}</span>`).join("")}
+          <p>${p.body}</p>`;
+        post.addEventListener("click", () => post.classList.toggle("expanded"));
+        container.appendChild(post);
+      });
+    };
 
-    // ---------- Beep ----------
-    document.getElementById('playBeep').addEventListener('click', () => {
+    // Beep
+    document.getElementById("playBeep").addEventListener("click", () => {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const o = ctx.createOscillator(); const g = ctx.createGain();
-      o.type = 'square'; o.frequency.value = 850;
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "square"; o.frequency.value = 850;
       o.connect(g); g.connect(ctx.destination);
-      g.gain.setValueAtTime(0.0001, ctx.currentTime);
+      g.gain.setValueAtTime(0.001, ctx.currentTime);
       g.gain.exponentialRampToValueAtTime(0.1, ctx.currentTime + 0.01);
       o.start();
-      setTimeout(()=>{ g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05); o.stop(ctx.currentTime + 0.06); }, 60);
+      setTimeout(() => { g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05); o.stop(ctx.currentTime + 0.06); }, 60);
     });
 
-    // ---------- Replay typing ----------
-    document.getElementById('replayTyping').addEventListener('click', () => {
-      document.querySelectorAll(".card[data-text]").forEach(c => c.style.opacity = 0);
-      setTimeout(runTypingSequence, 120);
+    // Theme toggle
+    const themeToggle = document.getElementById("themeToggle");
+    themeToggle.addEventListener("change", () => {
+      const theme = themeToggle.checked ? "green" : "red";
+      document.documentElement.dataset.theme = theme;
+      localStorage.setItem("theme", theme);
     });
-
-    // ---------- ASCII Modal ----------
-    const modal = document.getElementById('asciiModal');
-    const openAscii = document.getElementById('openAscii');
-    const closeAscii = document.getElementById('closeAscii');
-    function toggleModal(show){
-      modal.style.display = show ? 'flex' : 'none';
-      modal.setAttribute('aria-hidden', show ? 'false' : 'true');
-    }
-    openAscii.addEventListener('click', ()=>toggleModal(true));
-    closeAscii.addEventListener('click', ()=>toggleModal(false));
-    modal.addEventListener('click', (e)=>{ if(e.target===modal) toggleModal(false); });
-
-    // ---------- Blog posts ----------
-    const BLOG_POSTS = [
-      {
-        title: "Reverse Engineering diary #1",
-        date: "2025-03-10",
-        tags: ["RE","malware-lab"],
-        body: `Notes from a small x64 unpacking exercise. Focus: import resolution, section entropy, IAT reconstruction. Key tools: x64Dbg, PE-bear, Scylla.`
-      },
-      {
-        title: "Red Team micro-lab: phishing pretext",
-        date: "2025-04-22",
-        tags: ["red-team","ops"],
-        body: `Built a safe internal pretext for awareness training. Outcome: 23% click rate → used to improve training materials.`
-      },
-      {
-        title: "Ghidra tips for beginners",
-        date: "2025-06-17",
-        tags: ["ghidra","tips"],
-        body: `Use Function Graph + Decompiler sync; rename aggressively; leverage Data Type Manager for structs; don't forget Script Manager for batch tasks.`
-      }
-    ];
-    function renderBlog(){
-      const wrap = document.getElementById('posts');
-      wrap.innerHTML = "";
-      BLOG_POSTS
-        .sort((a,b)=> new Date(b.date) - new Date(a.date))
-        .forEach(p=>{
-          const el = document.createElement('article');
-          el.className = 'blog-post';
-          el.innerHTML = `
-            <h3>${p.title}</h3>
-            <div class="meta-row">${p.date}</div>
-            <div class="tags">
-              ${p.tags.map(t=>`<span class="tag">#${t}</span>`).join(' ')}
-            </div>
-            <p>${p.body}</p>
-          `;
-          el.addEventListener('click', ()=> el.classList.toggle('expanded'));
-          wrap.appendChild(el);
-        });
+    if (localStorage.getItem("theme") === "green") {
+      document.documentElement.dataset.theme = "green";
+      themeToggle.checked = true;
     }
 
-    // ---------- Console easter eggs ----------
-    console.log("%cWelcome to n0rm41's terminal","color:var(--primary);font-size:14px;font-family:monospace;");
-    console.log("%cTry typing 'ascii' by clicking the logo 😉","color:var(--accent);font-size:12px;font-family:monospace;");
+    // Modal
+    const modal = document.getElementById("asciiModal");
+    document.getElementById("openAscii").onclick = () => modal.style.display = "flex";
+    modal.onclick = e => { if (e.target === modal) modal.style.display = "none"; };
 
-    // ---------- Init ----------
+    // Replay
+    document.getElementById("replayTyping").onclick = () => {
+      cards.forEach(c => c.style.opacity = 0);
+      setTimeout(runTypingSequence, 200);
+    };
+
     document.addEventListener("DOMContentLoaded", () => {
       runTypingSequence();
       renderBlog();
