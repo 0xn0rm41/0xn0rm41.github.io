@@ -3,272 +3,1600 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>n0rm41 | Red Team & Cybersecurity</title>
-  <meta name="description" content="Portfolio and notes by n0rm41 — Red Teaming, Malware Dev, Reverse Engineering.">
-  <meta name="keywords" content="Red Team, Cybersecurity, Malware Development, Reverse Engineering, CTF, Pentest, n0rm41">
-  <meta property="og:title" content="n0rm41 | Red Team & Cybersecurity Portfolio">
-  <meta property="og:description" content="Portfolio styled as a terminal for Red Teaming & Cybersecurity">
+  <title>n0rm41 | Offensive Security & Red Team Operations</title>
+  <meta name="description" content="Professional Red Team portfolio - Offensive Security, Malware Development, Reverse Engineering, and Advanced Persistent Threat Simulation.">
+  <meta name="keywords" content="Red Team, Offensive Security, Malware Development, Reverse Engineering, APT, Penetration Testing, n0rm41">
+  <meta property="og:title" content="n0rm41 | Red Team Operations">
+  <meta property="og:description" content="Professional Red Team & Offensive Security Portfolio">
   <meta property="og:type" content="website">
 
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg:#0d0d0d; --panel:#111; --muted:#999; --text:#e0e0e0;
-      --primary:#ff5555; --accent:#ffb86c; --ring:rgba(255,85,85,.6);
-      --shadow:0 0 10px rgba(255,85,85,.15);
-      --radius:4px; --gap:16px;
+      --bg: #0a0a0a;
+      --panel: #0f0f0f;
+      --panel-hover: #141414;
+      --border: #1a1a1a;
+      --border-light: #252525;
+      --muted: #6b6b6b;
+      --text: #e8e8e8;
+      --text-dim: #b8b8b8;
+      --primary: #dc2626;
+      --primary-bright: #ef4444;
+      --accent: #f97316;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --ring: rgba(220, 38, 38, 0.4);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+      --glow: 0 0 20px rgba(220, 38, 38, 0.15);
+      --radius: 6px;
+      --gap: 24px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
     html[data-theme="green"] {
-      --primary:#00ff88; --accent:#a3ffbf; --ring:rgba(0,255,136,.6);
-      --shadow:0 0 10px rgba(0,255,136,.12);
+      --primary: #059669;
+      --primary-bright: #10b981;
+      --accent: #14b8a6;
+      --ring: rgba(5, 150, 105, 0.4);
+      --glow: 0 0 20px rgba(5, 150, 105, 0.15);
     }
 
-    * { box-sizing: border-box; }
+    html[data-theme="purple"] {
+      --primary: #7c3aed;
+      --primary-bright: #8b5cf6;
+      --accent: #a78bfa;
+      --ring: rgba(124, 58, 237, 0.4);
+      --glow: 0 0 20px rgba(124, 58, 237, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
-      margin: 0; font-family: 'Fira Code', monospace;
-      background: var(--bg); color: var(--text);
-      line-height: 1.5; overflow-x: hidden;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
     }
 
-    a { color: var(--primary); text-decoration: none; }
-    a:hover { color: var(--accent); text-shadow: 0 0 6px var(--primary); }
-
-    .wrap {
-      display: grid; grid-template-columns: 260px 1fr; gap: var(--gap);
-      max-width: 1100px; margin: 0 auto; padding: 20px;
+    a {
+      color: var(--primary-bright);
+      text-decoration: none;
+      transition: var(--transition);
     }
 
+    a:hover {
+      color: var(--accent);
+      text-shadow: 0 0 8px var(--primary);
+    }
+
+    /* Layout */
+    .container {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: var(--gap);
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
     aside {
-      background: var(--panel); padding: 20px;
-      border: 1px solid #222; border-radius: var(--radius);
-      position: sticky; top: 10px; height: fit-content;
+      background: var(--panel);
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      position: sticky;
+      top: 24px;
+      height: fit-content;
       box-shadow: var(--shadow);
+    }
+
+    .profile {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 16px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .avatar-wrapper:hover {
+      transform: scale(1.05);
     }
 
     .avatar {
-      width: 100%; aspect-ratio: 1; background: #222; display: grid;
-      place-items: center; color: var(--muted);
-      border: 1px solid #333; border-radius: var(--radius);
-      margin-bottom: 14px; cursor: pointer;
-      transition: transform .15s, border-color .2s;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--border) 0%, var(--panel-hover) 100%);
+      border: 2px solid var(--border-light);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--primary);
+      position: relative;
+      overflow: hidden;
     }
-    .avatar:hover { transform: scale(1.02); border-color: var(--primary); }
 
-    nav a { display: block; padding: 6px 0; color: var(--text); }
-    nav a:hover { color: var(--primary); }
+    .avatar::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      background: conic-gradient(from 0deg, var(--primary), var(--accent), var(--primary));
+      border-radius: 50%;
+      z-index: -1;
+      opacity: 0;
+      transition: var(--transition);
+    }
 
-    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .avatar-wrapper:hover .avatar::before {
+      opacity: 0.5;
+      animation: rotate 3s linear infinite;
+    }
+
+    @keyframes rotate {
+      100% { transform: rotate(360deg); }
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--panel-hover);
+      border: 1px solid var(--border-light);
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      margin-top: 12px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .profile h2 {
+      color: var(--text);
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .profile-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    /* Navigation */
+    nav {
+      margin: 24px 0;
+    }
+
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      color: var(--text-dim);
+      border-radius: var(--radius);
+      transition: var(--transition);
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    nav a:hover,
+    nav a.active {
+      background: var(--panel-hover);
+      color: var(--primary-bright);
+      border-left: 3px solid var(--primary);
+      padding-left: 9px;
+    }
+
+    nav a::before {
+      content: '>';
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    nav a:hover::before,
+    nav a.active::before {
+      opacity: 1;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
     .btn {
-      border: 1px solid #333; background: #0f0f0f; color: var(--text);
-      padding: 6px 10px; border-radius: 4px; cursor: pointer;
-      transition: border-color .2s, box-shadow .2s;
+      background: var(--panel-hover);
+      border: 1px solid var(--border-light);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      font-size: 12px;
+      text-align: center;
     }
-    .btn:hover { border-color: var(--primary); box-shadow: 0 0 6px var(--primary); }
 
-    main { display: grid; gap: var(--gap); }
-    .card {
-      background: var(--panel); padding: 18px;
-      border: 1px solid #222; border-radius: var(--radius);
+    .btn:hover {
+      background: var(--border);
+      border-color: var(--primary);
+      box-shadow: 0 0 12px var(--ring);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-bright);
+      box-shadow: 0 0 16px var(--ring);
+    }
+
+    .theme-selector {
+      display: flex;
+      gap: 6px;
+      padding: 8px;
+      background: var(--panel-hover);
+      border-radius: var(--radius);
+      border: 1px solid var(--border-light);
+    }
+
+    .theme-btn {
+      flex: 1;
+      padding: 6px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 11px;
+    }
+
+    .theme-btn.active {
+      border-color: var(--primary);
+      background: var(--border);
+    }
+
+    /* Main Content */
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+    }
+
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
       box-shadow: var(--shadow);
-      opacity: 0; white-space: pre-wrap;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out forwards;
     }
-    h1,h2,h3 { color: var(--primary); margin-top: 0; }
 
-    footer { text-align: center; color: var(--muted); font-size: 13px; padding: 20px 0 10px; }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-    /* Blog */
-    .blog-post {
-      background: #0f0f0f; border: 1px solid #222; border-left: 4px solid var(--primary);
-      padding: 14px; border-radius: 6px; transition: transform .2s, border-color .2s;
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-header h2 {
+      color: var(--primary-bright);
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .section-header::before {
+      content: '>';
+      color: var(--primary);
+      font-size: 20px;
+    }
+
+    /* Terminal Output */
+    .terminal {
+      background: #050505;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 16px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      overflow-x: auto;
+    }
+
+    .terminal-line {
+      display: flex;
+      gap: 12px;
+    }
+
+    .terminal-prompt {
+      color: var(--primary);
+      user-select: none;
+    }
+
+    .terminal-output {
+      color: var(--text-dim);
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 16px;
+      background: var(--primary);
+      margin-left: 4px;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% { background: transparent; }
+    }
+
+    /* Skills Grid */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .skill-category {
+      background: var(--panel-hover);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 16px;
+      transition: var(--transition);
+    }
+
+    .skill-category:hover {
+      border-color: var(--primary);
+      box-shadow: var(--glow);
+      transform: translateY(-2px);
+    }
+
+    .skill-category h3 {
+      color: var(--primary-bright);
+      font-size: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .skill-category ul {
+      list-style: none;
+    }
+
+    .skill-category li {
+      color: var(--text-dim);
+      font-size: 12px;
+      padding: 4px 0;
+      padding-left: 16px;
+      position: relative;
+    }
+
+    .skill-category li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+    }
+
+    /* Projects Grid */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .project-card {
+      background: var(--panel-hover);
+      border: 1px solid var(--border-light);
+      border-left: 4px solid var(--primary);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: var(--transition);
       cursor: pointer;
     }
-    .blog-post:hover { border-left-color: var(--accent); transform: translateX(4px); }
-    .blog-post h3 { margin: 0 0 6px; color: var(--primary); }
-    .blog-post .meta-row { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-    .blog-post .tag { font-size: 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 4px; padding: 2px 6px; color: var(--accent); margin-right: 6px; }
-    .blog-post p { margin-top: 8px; color: var(--text); display: none; }
-    .blog-post.expanded p { display: block; }
 
-    /* Typing animation */
-    .cursor { display:inline-block; width:8px; background:var(--primary); margin-left:2px; animation: blink 1s infinite; }
-    @keyframes blink { 50% { background: transparent; } }
+    .project-card:hover {
+      border-left-color: var(--accent);
+      box-shadow: var(--shadow-lg), var(--glow);
+      transform: translateX(4px);
+    }
 
-    @media(max-width:800px){ .wrap{grid-template-columns:1fr;} aside{position:relative;top:0;} }
+    .project-card h3 {
+      color: var(--primary-bright);
+      font-size: 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .project-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .tag {
+      background: #1a1a1a;
+      border: 1px solid var(--border-light);
+      color: var(--accent);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    .project-description {
+      color: var(--text-dim);
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .project-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .status-indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .status-indicator.in-progress {
+      background: var(--warning);
+    }
+
+    .status-indicator.archived {
+      background: var(--muted);
+    }
+
+    /* Gallery */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .gallery-item {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: var(--panel-hover);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .gallery-item:hover {
+      border-color: var(--primary);
+      box-shadow: var(--glow);
+      transform: scale(1.02);
+    }
+
+    .gallery-item-content {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--panel-hover) 0%, var(--border) 100%);
+      color: var(--muted);
+      font-size: 48px;
+    }
+
+    .gallery-item-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 16px;
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .gallery-item:hover .gallery-item-overlay {
+      opacity: 1;
+    }
+
+    .gallery-item-title {
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .gallery-item-description {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 32px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border-light);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .timeline-item:last-child {
+      border-bottom: none;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -37px;
+      top: 6px;
+      width: 10px;
+      height: 10px;
+      background: var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--ring);
+    }
+
+    .timeline-date {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .timeline-title {
+      color: var(--primary-bright);
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    .timeline-description {
+      color: var(--text-dim);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* Contact */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+
+    .contact-card {
+      background: var(--panel-hover);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 16px;
+      transition: var(--transition);
+    }
+
+    .contact-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--glow);
+    }
+
+    .contact-card h3 {
+      color: var(--primary-bright);
+      font-size: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .contact-item a {
+      word-break: break-all;
+    }
+
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--panel-hover);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .stat-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--glow);
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--primary-bright);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Blog Posts */
+    .blog-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .blog-post {
+      background: var(--panel-hover);
+      border: 1px solid var(--border-light);
+      border-left: 4px solid var(--primary);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .blog-post:hover {
+      border-left-color: var(--accent);
+      box-shadow: var(--shadow-lg), var(--glow);
+      transform: translateX(4px);
+    }
+
+    .blog-post h3 {
+      color: var(--primary-bright);
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .blog-post-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .blog-post-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .blog-post-excerpt {
+      color: var(--text-dim);
+      font-size: 13px;
+      line-height: 1.6;
+      display: none;
+    }
+
+    .blog-post.expanded .blog-post-excerpt {
+      display: block;
+    }
 
     /* Modal */
     .modal {
-      position: fixed; inset: 0; background: rgba(0,0,0,.8);
-      display: none; align-items: center; justify-content: center; z-index: 10;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 24px;
     }
+
+    .modal.active {
+      display: flex;
+    }
+
     .modal-content {
-      background: #0f0f0f; padding: 16px; border: 1px solid #333;
-      border-radius: 6px; max-width: 90vw; max-height: 80vh; overflow: auto;
-      box-shadow: 0 0 12px var(--ring); white-space: pre; color: var(--text);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow: auto;
+      box-shadow: var(--shadow-lg), var(--glow);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: var(--panel-hover);
+      border: 1px solid var(--border-light);
+      color: var(--text);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: var(--transition);
+    }
+
+    .modal-close:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .ascii-art {
+      font-family: 'Fira Code', monospace;
+      font-size: 10px;
+      line-height: 1.2;
+      color: var(--primary);
+      white-space: pre;
+      text-align: center;
+      margin: 24px 0;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+      margin-top: 24px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        position: relative;
+        top: 0;
+      }
+
+      .projects-grid,
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 16px;
+      }
+
+      .section {
+        padding: 20px;
+      }
+
+      .section-header h2 {
+        font-size: 20px;
+      }
+
+      .stats-grid,
+      .skills-grid,
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Animations */
+    .fade-in {
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Scroll Progress */
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      z-index: 9999;
+      transition: width 0.1s ease;
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="scroll-progress" id="scrollProgress"></div>
+
+  <div class="container">
     <aside>
-      <div class="avatar" id="openAscii">[ n0rm41 ]</div>
-      <h2>n0rm41</h2>
-      <div>🎯 Red Team / Security Research</div>
-      <div>📍 Somewhere</div>
-      <br>
-      <nav>
-        <a href="#whoami">whoami</a>
-        <a href="#toolbox">toolbox</a>
-        <a href="#operations">operations</a>
-        <a href="#blog">blog</a>
-        <a href="#contact">contact</a>
+      <div class="profile">
+        <div class="avatar-wrapper" id="avatarBtn">
+          <div class="avatar">N</div>
+        </div>
+        <h2>n0rm41</h2>
+        <div class="profile-meta">
+          Red Team Operator<br>
+          Offensive Security Specialist<br>
+          <div class="status">
+            <span class="status-dot"></span>
+            Available for Projects
+          </div>
+        </div>
+      </div>
+
+      <nav id="mainNav">
+        <a href="#about" class="nav-link active">About</a>
+        <a href="#skills" class="nav-link">Skills & Tools</a>
+        <a href="#projects" class="nav-link">Projects</a>
+        <a href="#operations" class="nav-link">Operations</a>
+        <a href="#blog" class="nav-link">Blog & Notes</a>
+        <a href="#gallery" class="nav-link">Gallery</a>
+        <a href="#certifications" class="nav-link">Certifications</a>
+        <a href="#contact" class="nav-link">Contact</a>
       </nav>
-      <div class="toolbar">
-        <button class="btn" id="playBeep">Beep</button>
-        <label><input type="checkbox" id="themeToggle"> Matrix theme</label>
-        <button class="btn" id="replayTyping">Replay typing</button>
+
+      <div class="controls">
+        <div class="theme-selector">
+          <button class="theme-btn active" data-theme="red">Red</button>
+          <button class="theme-btn" data-theme="green">Green</button>
+          <button class="theme-btn" data-theme="purple">Purple</button>
+        </div>
+        <button class="btn" id="terminalBeep">Terminal Beep</button>
+        <button class="btn btn-primary" id="downloadCV">Download Resume</button>
       </div>
     </aside>
 
     <main>
-      <section class="card" id="whoami"
-        data-text="> whoami
-Hello there!,
-I'm n0rm41 — a student interested in Red Teaming, malware development, and reverse engineering.
-I love building and breaking things to understand them better.">
+      <!-- About Section -->
+      <section class="section" id="about" style="animation-delay: 0.1s;">
+        <div class="section-header">
+          <h2>whoami</h2>
+        </div>
+        <div class="terminal">
+          <div class="terminal-line">
+            <span class="terminal-prompt">n0rm41@redteam:~$</span>
+            <span class="terminal-output">whoami</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-output">
+Red Team Aspirant specializing in offensive security operations, advanced persistent threat simulation, and custom malware development. Passionate about understanding complex systems through controlled exploitation and building defensive strategies from an attacker's perspective.
+(I'm still learning and im not 18+ yet.)
+              
+Core Focus Areas:
+• Advanced Persistent Threat (APT) Simulation
+• Custom Malware & Payload Development
+• Reverse Engineering & Exploit Analysis
+• Internal Network Penetration & Lateral Movement
+• Social Engineering & Physical Security Assessment
+            </span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-prompt">n0rm41@redteam:~$</span>
+            <span class="cursor"></span>
+          </div>
+        </div>
+
+        <div class="stats-grid" style="margin-top: 24px;">
+          <div class="stat-card">
+            <div class="stat-value">2+</div>
+            <div class="stat-label">Years Experience while Learning</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">10+</div>
+            <div class="stat-label">Projects Completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">CVEs Discovered</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Client Engagements</div>
+          </div>
+        </div>
       </section>
 
-      <section class="card" id="toolbox"
-        data-text="> toolbox
-Tools I often use:
-- Metasploit
-- Burp Suite
-- Wireshark
-- Ghidra, IDA, dnSpy, x64Dbg
-- VSCode, Visual Studio
-- Obsidian
-- PE-bear, HxD
-- Custom scripts & labs">
+      <!-- Skills Section -->
+      <section class="section" id="skills" style="animation-delay: 0.2s;">
+        <div class="section-header">
+          <h2>Skills & Toolbox</h2>
+        </div>
+        <div class="skills-grid">
+          <div class="skill-category">
+            <h3>🎯 Offensive Tools</h3>
+            <ul>
+              <li>Metasploit Framework</li>
+              <li>Cobalt Strike</li>
+              <li>Burp Suite Pro</li>
+              <li>BloodHound & SharpHound</li>
+              <li>Impacket Suite</li>
+              <li>PowerShell Empire</li>
+              <!-- <li>Responder & NTLMRelayx</li> -->
+            </ul>
+          </div>
+          <div class="skill-category">
+            <h3>🔬 Reverse Engineering</h3>
+            <ul>
+              <li>Ghidra & IDA</li>
+              <li>x64dbg & WinDbg</li>
+              <li>dnSpy & ILSpy</li>
+              <li>Binary Ninja</li>
+              <li>Frida & Radare2</li>
+              <li>PE-bear & CFF Explorer</li>
+            </ul>
+          </div>
+          <div class="skill-category">
+            <h3>💻 Development</h3>
+            <ul>
+              <li>C/C++ & Assembly</li>
+              <li>Python & Go</li>
+              <li>PowerShell & Bash</li>
+              <li>Rust</li>
+              <li>JavaScript</li>
+            </ul>
+          </div>
+          <div class="skill-category">
+            <h3>🌐 Network & Web</h3>
+            <ul>
+              <li>Wireshark & tcpdump</li>
+              <li>Nmap & Masscan</li>
+              <li>Proxychains & Tor</li>
+              <li>SQLMap & NoSQLMap</li>
+              <li>OWASP Testing Guide</li>
+              <li>Custom Exploit Development</li>
+            </ul>
+          </div>
+          <div class="skill-category">
+            <h3>☁️ Cloud & Infra</h3>
+            <ul>
+              <li>AWS Security Assessment</li>
+              <li>Azure AD Exploitation</li>
+              <li>Docker & Kubernetes</li>
+              <li>Active Directory Attacks</li>
+              <li>SIEM Evasion Techniques</li>
+            </ul>
+          </div>
+          <div class="skill-category">
+            <h3>🛠️ Utilities</h3>
+            <ul>
+              <li>VSCode & Visual Studio</li>
+              <li>Vim</li>
+              <li>Docker</li>
+              <li>Git & GitHub</li>
+              <li>Obsidian & Notion</li>
+              <li>VirtualBox & VMware</li>
+              <li>Kali & Parrot OS</li>
+              <li>Custom Lab Infrastructure</li>
+            </ul>
+          </div>
+        </div>
       </section>
 
-      <section class="card" id="operations"
-        data-text="> operations
-- OSINT CTF (Trace Labs)
-- Controlled phishing campaign for training
-- Internal network breach simulation">
+      <!-- Projects Section -->
+      <section class="section" id="projects" style="animation-delay: 0.3s;">
+        <div class="section-header">
+          <h2>Featured Projects</h2>
+        </div>
+        <div class="projects-grid" id="projectsContainer"></div>
       </section>
 
-      <section class="card" id="blog"
-        data-text="> blog
-Some of my notes & small writeups:">
+      <!-- Operations Section -->
+      <section class="section" id="operations" style="animation-delay: 0.4s;">
+        <div class="section-header">
+          <h2>Red Team Operations</h2>
+        </div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-date">Example (testing website)</div>
+            <div class="timeline-title">Financial Sector APT Simulation</div>
+            <div class="timeline-description">
+              Full-scope red team engagement simulating advanced persistent threat against a major financial institution. Achieved domain admin within 72 hours through multi-stage attack chain involving spear-phishing, credential harvesting, and lateral movement via Kerberoasting.
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">Q3 2024(example)</div>
+            <div class="timeline-title">Healthcare Network Penetration</div>
+            <div class="timeline-description">
+              Conducted internal network assessment for healthcare provider. Identified critical vulnerabilities in medical device network segmentation and compromised PACS systems. Delivered comprehensive remediation roadmap.
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">Q2 2024(example)</div>
+            <div class="timeline-title">Cloud Infrastructure Assessment (AWS)</div>
+            <div class="timeline-description">
+              Performed security assessment of multi-account AWS environment. Discovered IAM misconfigurations, exposed S3 buckets, and privilege escalation paths. Achieved cross-account access through role assumption chain.
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">Q1 2024(this is not an example)</div>
+            <div class="timeline-title">OSINT & Social Engineering Campaign</div>
+            <div class="timeline-description">
+              Led OSINT operation for Trace Labs CTF, successfully locating 3 missing persons.
+            </div>
+          </div>
+        </div>
       </section>
 
-      <section class="card" id="blog-posts"></section>
-
-      <section class="card" id="contact"
-        data-text="> contact
-Email: [your email]
-GitHub: https://github.com/unknown4real
-PGP: none yet">
+      <!-- Blog Section -->
+      <section class="section" id="blog" style="animation-delay: 0.5s;">
+        <div class="section-header">
+          <h2>Blog & Technical Notes</h2>
+        </div>
+        <div class="blog-list" id="blogContainer"></div>
       </section>
 
-      <footer>© 2025 n0rm41 — Portfolio</footer>
+      <!-- Gallery Section -->
+      <section class="section" id="gallery" style="animation-delay: 0.6s;">
+        <div class="section-header">
+          <h2>Lab & Screenshots</h2>
+        </div>
+        <div class="gallery-grid">
+          <div class="gallery-item">
+            <div class="gallery-item-content">🎯</div>
+            <div class="gallery-item-overlay">
+              <div class="gallery-item-title">BloodHound Attack Path</div>
+              <div class="gallery-item-description">Domain Admin compromise visualization</div>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <div class="gallery-item-content">🔬</div>
+            <div class="gallery-item-overlay">
+              <div class="gallery-item-title">Malware Analysis</div>
+              <div class="gallery-item-description">Reverse engineering APT28 sample</div>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <div class="gallery-item-content">💉</div>
+            <div class="gallery-item-overlay">
+              <div class="gallery-item-title">Process Injection</div>
+              <div class="gallery-item-description">Custom shellcode injection technique</div>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <div class="gallery-item-content">🌐</div>
+            <div class="gallery-item-overlay">
+              <div class="gallery-item-title">C2 Infrastructure</div>
+              <div class="gallery-item-description">Custom command & control framework</div>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <div class="gallery-item-content">🔐</div>
+            <div class="gallery-item-overlay">
+              <div class="gallery-item-title">Privilege Escalation</div>
+              <div class="gallery-item-description">Windows kernel exploit development</div>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <div class="gallery-item-content">📡</div>
+            <div class="gallery-item-overlay">
+              <div class="gallery-item-title">Network Pivoting</div>
+              <div class="gallery-item-description">Multi-hop tunnel configuration</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Certifications Section -->
+      <section class="section" id="certifications" style="animation-delay: 0.7s;">
+        <div class="section-header">
+          <h2>Certifications & Training(Still needed)</h2>
+        </div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-date">Still needed</div>
+            <div class="timeline-title">OSEP - Offensive Security Experienced Penetration Tester</div>
+            <div class="timeline-description">Advanced penetration testing certification focusing on evasion techniques and custom exploit development.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">Still needed</div>
+            <div class="timeline-title">OSCP - Offensive Security Certified Professional</div>
+            <div class="timeline-description">Hands-on penetration testing certification covering manual exploitation and privilege escalation.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">Still needed</div>
+            <div class="timeline-title">CRTP - Certified Red Team Professional</div>
+            <div class="timeline-description">Active Directory security and attack simulation certification by Pentester Academy.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">Still needed</div>
+            <div class="timeline-title">eWPTX - Web Application Penetration Testing eXtreme</div>
+            <div class="timeline-description">Advanced web application security testing certification by eLearnSecurity.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">Still needed</div>
+            <div class="timeline-title">GIAC GPEN - Penetration Tester</div>
+            <div class="timeline-description">Validates ability to conduct penetration tests with best practice methodologies.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact Section -->
+      <section class="section" id="contact" style="animation-delay: 0.8s;">
+        <div class="section-header">
+          <h2>Contact & Links</h2>
+        </div>
+        <div class="contact-grid">
+          <div class="contact-card">
+            <h3>📧 Email</h3>
+            <div class="contact-item">
+              <a href="mailto:n0rm41@protonmail.com">n0rm41@protonmail.com</a>
+            </div>
+          </div>
+          <div class="contact-card">
+            <h3>💼 GitHub</h3>
+            <div class="contact-item">
+              <a href="https://github.com/unknown4real" target="_blank" rel="noopener">github.com/unknown4real</a>
+            </div>
+          </div>
+          <div class="contact-card">
+            <h3>🐦 Twitter</h3>
+            <div class="contact-item">
+              <a href="https://twitter.com/n0rm41sec" target="_blank" rel="noopener">@n0rm41sec</a>
+            </div>
+          </div>
+          <div class="contact-card">
+            <h3>💬 Discord</h3>
+            <div class="contact-item">
+              n0rm41#1337
+            </div>
+          </div>
+          <div class="contact-card">
+            <h3>🔐 PGP Key</h3>
+            <div class="contact-item">
+              <a href="#" id="pgpKeyBtn">View Public Key</a>
+            </div>
+          </div>
+          <div class="contact-card">
+            <h3>📝 Blog</h3>
+            <div class="contact-item">
+              <a href="https://n0rm41.blog" target="_blank" rel="noopener">n0rm41.blog</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="terminal" style="margin-top: 24px;">
+          <div class="terminal-line">
+            <span class="terminal-prompt">n0rm41@redteam:~$</span>
+            <span class="terminal-output">gpg --import n0rm41.asc</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-output">gpg: key 0xDEADBEEF: public key "n0rm41 &lt;n0rm41@protonmail.com&gt;" imported</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-output">gpg: Total number processed: 1</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-output">gpg:               imported: 1</span>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <p>© 2025 n0rm41 — Red Team Operations Portfolio</p>
+        <p style="margin-top: 8px; font-size: 11px; color: var(--muted);">
+          All operations conducted under authorized engagement contracts with proper scope and legal approval.
+        </p>
+      </footer>
     </main>
   </div>
 
+  <!-- Modals -->
   <div class="modal" id="asciiModal">
     <div class="modal-content">
-      _   _  ____  ____  __  __ _  _  _  _
-     | \ | |/ __ \|  _ \|  \/  | || || || |
-     |  \| | |  | | |_) | \  / | || || || |_
-     | . ` | |  | |  _ <| |\/| | ||_||__   _|
-     | |\  | |__| | |_) | |  | | |__   | |  
-     |_| \_|\____/|____/|_|  |_|____|  |_|  
-     
-     n0rm41 — Red Teaming & Cybersecurity
+      <button class="modal-close" id="closeAscii">✕</button>
+      <div class="ascii-art">
+ ███▄    █  ▒█████   ██▀███   ███▄ ▄███▓ ▄▄▄       ██▓    
+ ██ ▀█   █ ▒██▒  ██▒▓██ ▒ ██▒▓██▒▀█▀ ██▒▒████▄    ▓██▒    
+▓██  ▀█ ██▒▒██░  ██▒▓██ ░▄█ ▒▓██    ▓██░▒██  ▀█▄  ▒██░    
+▓██▒  ▐▌██▒▒██   ██░▒██▀▀█▄  ▒██    ▒██ ░██▄▄▄▄██ ▒██░    
+▒██░   ▓██░░ ████▓▒░░██▓ ▒██▒▒██▒   ░██▒ ▓█   ▓██▒░██████▒
+░ ▒░   ▒ ▒ ░ ▒░▒░▒░ ░ ▒▓ ░▒▓░░ ▒░   ░  ░ ▒▒   ▓▒█░░ ▒░▓  ░
+░ ░░   ░ ▒░  ░ ▒ ▒░   ░▒ ░ ▒░░  ░      ░  ▒   ▒▒ ░░ ░ ▒  ░
+   ░   ░ ░ ░ ░ ░ ▒    ░░   ░ ░      ░     ░   ▒     ░ ░   
+         ░     ░ ░     ░            ░         ░  ░    ░  ░
+
+         Red Team Operations | Offensive Security
+      </div>
+      <p style="text-align: center; color: var(--muted); font-size: 13px; margin-top: 16px;">
+        "The best defense is a good understanding of offense."
+      </p>
+    </div>
+  </div>
+
+  <div class="modal" id="pgpModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closePgp">✕</button>
+      <h2 style="color: var(--primary-bright); margin-bottom: 16px;">PGP Public Key</h2>
+      <div class="terminal">
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+mDMEaXX6vxYJKwYBBAHaRw8BAQdA7JqVSvxJ4leqHKP9y/USjuORymQjD9qW9+ud
+w1IFw+W0BUFzdHJviJkEExYKAEEWIQStaKUmjizun5ORD6C/5cNox5oc1QUCaXX6
+vwIbAwUJBaT3AQULCQgHAgIiAgYVCgkICwIEFgIDAQIeBwIXgAAKCRC/5cNox5oc
+1d+HAQDPDd0dn4LjZseNu3s/sl5Y5xytxf/Hzb4yGgCfin7tMgEA4DPE9N8nmSTl
+XLzBwjUnsiiV+phIshxt/R6NiN3JjAW4OARpdfq/EgorBgEEAZdVAQUBAQdALJim
+ytBJzq2SQwc0eCi25KFHLlIBRl8eMCyYjaKN5WcDAQgHiH4EGBYKACYWIQStaKUm
+jizun5ORD6C/5cNox5oc1QUCaXX6vwIbDAUJBaT3AQAKCRC/5cNox5oc1fMbAQCu
+l14hsDWeawiEEcDJug9ZNZWVbrR3O17J9czqfj/NrAD/UxZMyacRkbwQMeII6Mbj
+Q+ykhYbs6z9CIMNV3y+yOgo=
+=lE98
+-----END PGP PUBLIC KEY BLOCK-----
+      </div>
+      <p style="margin-top: 16px; font-size: 12px; color: var(--muted);">
+        Fingerprint: AD68A5268E2CEE9F93910FA0BFE5C368C79A1CD5
+      </p>
     </div>
   </div>
 
   <script>
-    const cards = document.querySelectorAll(".card[data-text]");
-    function typeWriter(el, text, i = 0) {
-      if (i < text.length) {
-        el.innerHTML = text.substring(0, i + 1) + '<span class="cursor"></span>';
-        setTimeout(() => typeWriter(el, text, i + 1), 18);
-      } else el.innerHTML = text;
-    }
-    function runTypingSequence() {
-      let delay = 0;
-      cards.forEach(card => {
-        const text = card.dataset.text;
-        setTimeout(() => {
-          card.style.opacity = 1;
-          typeWriter(card, text);
-        }, delay);
-        delay += text.length * 18 + 600;
-      });
-    }
-
-    // Blog posts
-    const BLOG_POSTS = [
-      { title: "Reverse Engineering diary #1", date: "2025-03-10", tags: ["RE","malware"], body: "Notes from a small x64 unpacking exercise. Tools: x64Dbg, PE-bear, Scylla." },
-      { title: "Red Team micro-lab: phishing pretext", date: "2025-04-22", tags: ["redteam","ops"], body: "Internal phishing pretext test. Result: 23% click rate → improved awareness training." },
-      { title: "Ghidra tips for beginners", date: "2025-06-17", tags: ["ghidra","tips"], body: "Use Function Graph + Decompiler sync. Rename aggressively. Utilize Script Manager." }
+    // Projects Data
+    const PROJECTS = [
+      {
+        title: "ShadowStrike - Custom C2 Framework",
+        tags: ["C++", "Networking", "Evasion"],
+        description: "Lightweight command and control framework with built-in AV/EDR evasion, encrypted C2 channels, and modular payload system. Supports HTTP/S, DNS, and custom protocol communications.",
+        status: "active"
+      },
+      {
+        title: "MemoryHunter - Process Injection Toolkit",
+        tags: ["C#", "Windows API", "Injection"],
+        description: "Collection of advanced process injection techniques including APC injection, thread hijacking, process hollowing, and reflective DLL injection with syscall stubs for EDR bypass.",
+        status: "active"
+      },
+      {
+        title: "ADRecon Pro - Active Directory Enumeration",
+        tags: ["PowerShell", "LDAP", "Active Directory"],
+        description: "Comprehensive Active Directory reconnaissance tool with automated attack path identification, ACL analysis, and credential hunting capabilities. Integrates with BloodHound.",
+        status: "active"
+      },
+      {
+        title: "PhantomLoader - Shellcode Crypter",
+        tags: ["Rust", "Cryptography", "Obfuscation"],
+        description: "Multi-stage shellcode crypter with polymorphic stub generation, entropy analysis, and sandbox detection. Supports AES-256, XOR, and custom encryption schemes.",
+        status: "active"
+      },
+      {
+        title: "NetGhost - Network Pivoting Tool",
+        tags: ["Go", "Networking", "Tunneling"],
+        description: "Advanced network tunneling and pivoting tool supporting SOCKS5, port forwarding, and reverse port forwarding through multiple hops with minimal footprint.",
+        status: "in-progress"
+      },
+      {
+        title: "CredVault - Credential Harvesting Suite",
+        tags: ["Python", "Windows", "Post-Exploitation"],
+        description: "Automated credential extraction from memory, registry, browsers, and various applications. Includes LSASS dumping, SAM extraction, and WiFi password recovery.",
+        status: "active"
+      },
+      {
+        title: "OpSec Analyzer - OPSEC Validation Tool",
+        tags: ["Python", "Detection", "Blue Team"],
+        description: "Automated tool for testing operational security of red team infrastructure, payloads, and techniques against common detection mechanisms and threat intelligence feeds.",
+        status: "in-progress"
+      },
+      {
+        title: "ExploitDB Scanner - Vulnerability Research",
+        tags: ["Python", "Exploits", "Research"],
+        description: "Automated vulnerability scanning and exploit matching tool. Indexes CVE databases, proof-of-concept exploits, and provides contextual information for discovered vulnerabilities.",
+        status: "archived"
+      }
     ];
-    const renderBlog = () => {
-      const container = document.getElementById("blog-posts");
-      BLOG_POSTS.sort((a,b)=>new Date(b.date)-new Date(a.date))
-      .forEach(p => {
-        const post = document.createElement("article");
-        post.className = "blog-post";
-        post.innerHTML = `
-          <h3>${p.title}</h3>
-          <div class="meta-row">${p.date}</div>
-          ${p.tags.map(t => `<span class="tag">#${t}</span>`).join("")}
-          <p>${p.body}</p>`;
-        post.addEventListener("click", () => post.classList.toggle("expanded"));
-        container.appendChild(post);
+
+    // Blog Posts Data
+    const BLOG_POSTS = [
+      {
+        title: "Advanced Evasion Techniques: Bypassing Modern EDR Solutions",
+        date: "2024-12-15",
+        tags: ["EDR", "Evasion", "Malware Dev"],
+        excerpt: "Deep dive into defeating endpoint detection and response systems using syscall direct invocation, unhooking techniques, and heaven's gate. Includes working proof-of-concept code and detection analysis.",
+        readTime: "12 min"
+      },
+      {
+        title: "Active Directory Exploitation: From Zero to Domain Admin",
+        date: "2024-11-28",
+        tags: ["Active Directory", "Red Team", "Privilege Escalation"],
+        excerpt: "Complete walkthrough of compromising a hardened Active Directory environment. Covers initial access, enumeration, Kerberoasting, golden ticket attacks, and persistence mechanisms.",
+        readTime: "18 min"
+      },
+      {
+        title: "Building Undetectable Malware with Rust",
+        date: "2024-10-10",
+        tags: ["Rust", "Malware", "Development"],
+        excerpt: "Tutorial on leveraging Rust's memory safety and low-level capabilities for malware development. Covers shellcode execution, process injection, and achieving zero-detection rates on VirusTotal.",
+        readTime: "15 min"
+      },
+      {
+        title: "Reverse Engineering APT Malware: Analysis of APT28 Campaign",
+        date: "2024-09-05",
+        tags: ["Reverse Engineering", "APT", "Threat Intel"],
+        excerpt: "Static and dynamic analysis of real-world APT28 malware samples. Examines anti-analysis techniques, C2 communication protocols, and extraction of IOCs for threat hunting.",
+        readTime: "20 min"
+      },
+      {
+        title: "OSINT Techniques for Red Team Operations",
+        date: "2024-07-18",
+        tags: ["OSINT", "Reconnaissance", "Social Engineering"],
+        excerpt: "Advanced OSINT methodologies for gathering intelligence on target organizations. Includes automation scripts, data correlation techniques, and operational security considerations.",
+        readTime: "10 min"
+      },
+    ];
+
+    // Render Projects
+    function renderProjects() {
+      const container = document.getElementById('projectsContainer');
+      PROJECTS.forEach(project => {
+        const statusClass = project.status === 'active' ? '' : project.status;
+        const card = document.createElement('div');
+        card.className = 'project-card';
+        card.innerHTML = `
+          <h3>${project.title}</h3>
+          <div class="project-meta">
+            ${project.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+          </div>
+          <div class="project-description">${project.description}</div>
+          <div class="project-status">
+            <span class="status-indicator ${statusClass}"></span>
+            ${project.status.charAt(0).toUpperCase() + project.status.slice(1).replace('-', ' ')}
+          </div>
+        `;
+        container.appendChild(card);
       });
-    };
-
-    // Beep
-    document.getElementById("playBeep").addEventListener("click", () => {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = "square"; o.frequency.value = 850;
-      o.connect(g); g.connect(ctx.destination);
-      g.gain.setValueAtTime(0.001, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.1, ctx.currentTime + 0.01);
-      o.start();
-      setTimeout(() => { g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05); o.stop(ctx.currentTime + 0.06); }, 60);
-    });
-
-    // Theme toggle
-    const themeToggle = document.getElementById("themeToggle");
-    themeToggle.addEventListener("change", () => {
-      const theme = themeToggle.checked ? "green" : "red";
-      document.documentElement.dataset.theme = theme;
-      localStorage.setItem("theme", theme);
-    });
-    if (localStorage.getItem("theme") === "green") {
-      document.documentElement.dataset.theme = "green";
-      themeToggle.checked = true;
     }
 
-    // Modal
-    const modal = document.getElementById("asciiModal");
-    document.getElementById("openAscii").onclick = () => modal.style.display = "flex";
-    modal.onclick = e => { if (e.target === modal) modal.style.display = "none"; };
+    // Render Blog Posts
+    function renderBlog() {
+      const container = document.getElementById('blogContainer');
+      BLOG_POSTS.forEach(post => {
+        const article = document.createElement('article');
+        article.className = 'blog-post';
+        article.innerHTML = `
+          <h3>${post.title}</h3>
+          <div class="blog-post-meta">
+            <span>📅 ${post.date}</span>
+            <span>•</span>
+            <span>⏱️ ${post.readTime}</span>
+          </div>
+          <div class="blog-post-tags">
+            ${post.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
+          </div>
+          <div class="blog-post-excerpt">${post.excerpt}</div>
+        `;
+        article.addEventListener('click', () => {
+          article.classList.toggle('expanded');
+        });
+        container.appendChild(article);
+      });
+    }
 
-    // Replay
-    document.getElementById("replayTyping").onclick = () => {
-      cards.forEach(c => c.style.opacity = 0);
-      setTimeout(runTypingSequence, 200);
+    // Terminal Beep
+    function playBeep() {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.type = 'square';
+      oscillator.frequency.value = 800;
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      gainNode.gain.setValueAtTime(0.001, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
+      
+      oscillator.start(audioContext.currentTime);
+      setTimeout(() => {
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
+        oscillator.stop(audioContext.currentTime + 0.06);
+      }, 60);
+    }
+
+    // Theme Switching
+    const themeButtons = document.querySelectorAll('.theme-btn');
+    themeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.dataset.theme = theme;
+        localStorage.setItem('theme', theme);
+        
+        themeButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      document.documentElement.dataset.theme = savedTheme;
+      themeButtons.forEach(btn => {
+        if (btn.dataset.theme === savedTheme) {
+          btn.classList.add('active');
+          themeButtons.forEach(b => {
+            if (b !== btn) b.classList.remove('active');
+          });
+        }
+      });
+    }
+
+    // Navigation
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href').substring(1);
+        const targetElement = document.getElementById(targetId);
+        
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          
+          navLinks.forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Scroll progress
+    window.addEventListener('scroll', () => {
+      const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (window.scrollY / windowHeight) * 100;
+      document.getElementById('scrollProgress').style.width = scrolled + '%';
+    });
+
+    // Intersection Observer for active nav
+    const sections = document.querySelectorAll('.section');
+    const observerOptions = {
+      root: null,
+      rootMargin: '-20% 0px -70% 0px',
+      threshold: 0
     };
 
-    document.addEventListener("DOMContentLoaded", () => {
-      runTypingSequence();
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    // Modals
+    const asciiModal = document.getElementById('asciiModal');
+    const pgpModal = document.getElementById('pgpModal');
+    
+    document.getElementById('avatarBtn').addEventListener('click', () => {
+      asciiModal.classList.add('active');
+    });
+    
+    document.getElementById('closeAscii').addEventListener('click', () => {
+      asciiModal.classList.remove('active');
+    });
+    
+    document.getElementById('pgpKeyBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      pgpModal.classList.add('active');
+    });
+    
+    document.getElementById('closePgp').addEventListener('click', () => {
+      pgpModal.classList.remove('active');
+    });
+
+    // Close modals on outside click
+    [asciiModal, pgpModal].forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+    });
+
+    // Terminal beep button
+    document.getElementById('terminalBeep').addEventListener('click', playBeep);
+
+    // Download CV (placeholder)
+    document.getElementById('downloadCV').addEventListener('click', () => {
+      alert('CV download functionality - connect to your actual resume file');
+    });
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      renderProjects();
       renderBlog();
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Ctrl/Cmd + K for terminal beep
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        playBeep();
+      }
     });
   </script>
 </body>
