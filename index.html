@@ -815,7 +815,7 @@ Core Focus Areas:
       <section class="section" id="contact" style="animation-delay:0.8s;">
         <div class="section-header"><h2>Contact & Links</h2></div>
         <div class="contact-grid">
-          <div class="contact-card"><h3>📧 Email</h3><div class="contact-item"><a href="mailto:n0rm41@protonmail.com">n0rm41@protonmail.com</a></div></div>
+          <div class="contact-card"><h3>📧 Email</h3><div class="contact-item"><a href="/cdn-cgi/l/email-protection#523c62203f66631222203d263d3c3f333b3e7c313d3f"><span class="__cf_email__" data-cfemail="4f217f3d227b7e0f3f3d203b2021222e2623612c2022">[email&#160;protected]</span></a></div></div>
           <div class="contact-card"><h3>💼 GitHub</h3><div class="contact-item"><a href="https://github.com/unknown4real" target="_blank" rel="noopener">github.com/unknown4real</a></div></div>
           <div class="contact-card"><h3>🐦 Twitter</h3><div class="contact-item"><a href="https://twitter.com/n0rm41sec" target="_blank" rel="noopener">@n0rm41sec</a></div></div>
           <div class="contact-card"><h3>💬 Discord</h3><div class="contact-item">fgjffghnf</div></div>
@@ -824,7 +824,7 @@ Core Focus Areas:
         </div>
         <div class="terminal" style="margin-top:24px;">
           <div class="terminal-line"><span class="terminal-prompt">n0rm41@redteam:~$</span><span class="terminal-output">gpg --import n0rm41.asc</span></div>
-          <div class="terminal-line"><span class="terminal-output">gpg: key 0xDEADBEEF: public key "n0rm41 &lt;n0rm41@protonmail.com&gt;" imported</span></div>
+          <div class="terminal-line"><span class="terminal-output">gpg: key 0xDEADBEEF: public key "n0rm41 &lt;<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="bfd18fcdd28b8effcfcdd0cbd0d1d2ded6d391dcd0d2">[email&#160;protected]</a>&gt;" imported</span></div>
           <div class="terminal-line"><span class="terminal-output">gpg: Total number processed: 1</span></div>
           <div class="terminal-line"><span class="terminal-output">gpg:               imported: 1</span></div>
         </div>
@@ -950,7 +950,7 @@ Q+ykhYbs6z9CIMNV3y+yOgo=
     </div>
   </div>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // ====================================================
     // PROJECT DATA WITH FULL WALKTHROUGH CONTENT
     // ====================================================
@@ -2728,7 +2728,33 @@ Q+ykhYbs6z9CIMNV3y+yOgo=
     });
 
     document.getElementById('terminalBeep').addEventListener('click', playBeep);
-    document.getElementById('downloadCV').addEventListener('click', () => alert('CV download functionality — connect to your actual resume file'));
+
+    // ── CV DOWNLOAD ──────────────────────────────────────────
+    // Place your PDF next to this HTML file and set the name below.
+    // ─────────────────────────────────────────────────────────
+    const CV_FILENAME = 'cv.pdf';
+
+    const cvBtn = document.getElementById('downloadCV');
+    cvBtn.addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = CV_FILENAME;
+      a.download = CV_FILENAME;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      // Visual feedback
+      const orig = cvBtn.textContent;
+      cvBtn.textContent = '✓ Downloading...';
+      cvBtn.style.background = 'var(--success)';
+      cvBtn.style.borderColor = 'var(--success)';
+      setTimeout(() => {
+        cvBtn.textContent = orig;
+        cvBtn.style.background = '';
+        cvBtn.style.borderColor = '';
+      }, 2000);
+    });
 
     // Init
     renderProjects();
