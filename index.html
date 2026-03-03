@@ -1441,6 +1441,53 @@ Q+ykhYbs6z9CIMNV3y+yOgo=
         }
       },
       {
+        title: "Scraper Tool",
+        tags: ["Python", "Intelligence", "OSINT"],
+        description: "Automated tool for scraping the content of websites, dumps, and documents for threat intelligence purposes.",
+        status: "active",
+        walkthrough: {
+          tabs: ["Overview", "Checks", "Usage", "Notes"],
+          content: [
+            {
+              type: "overview",
+              body: `My scraper is a tool for Threat Intellingence. Before going on an active engagement, run the Scraper on the Target to get the most info you can, so you can plan for the active engagement.\n\nStatus: core checks are operational. Threat intel feed integration is still being developed.`,
+              tech: ["Python 3", "Shodan API", "abuseipdb API", "Concurrent", "Ip-api"]
+            },
+            {
+              type: "steps",
+              steps: [
+                {
+                  title: "Target Check",
+                  desc: "Checks your input against Shodan, Abuseipdb, and Ip-api to see if it's already flagged as associated with known threat actors."
+                },
+                {
+                  title: "Domain Category Check",
+                  desc: "Verifies your C2 domains are categorized as benign (e.g., 'Business', 'Technology') by common web filtering proxies. Uncategorized domains are often blocked by enterprise proxies."
+                }
+              ]
+            },
+            {
+              type: "steps",
+              steps: [
+                {
+                  title: "Full infrastructure check",
+                  desc: "Run all checks against your Target before engagement start.",
+                  code: `<span class="prompt">$</span> python scrape.py \\\n    203.0.113.42  \\\n <span class="comment">  [*] Scrape v0.8 | Running checks...</span>\n<span class="comment">  [+] Shodan: IP not flagged</span>\n<span class="comment">  [+] Abuseipdb: Not in threat feed</span>\n<span class="comment">  [+] Domain categories: Business/Technology ✓</span>\n<span class="comment"></span>`
+                }
+              ]
+            },
+            {
+              type: "notes",
+              items: [
+                { type: "warn", title: "WIP", body: "This tool is under development. The threat intel feed integrations (MISP, OpenCTI) and automated remediation suggestions are not yet implemented." },
+                { type: "tip", title: "Before Every Engagement", body: "Make it a habit to run Scraper before every engagement. Infrastructure that was clean last month might now be flagged if your IP space was used by another group." },
+                { type: "note", title: "API Keys", body: "Most checks require API keys for Shodan, VirusTotal, and Censys. Free tiers work for most checks but rate limits apply. Store keys in a .env file, never hardcode." }
+              ]
+            }
+          ]
+        }
+      },
+      {
         title: "ExploitDB Scanner - Vulnerability Research",
         tags: ["Python", "Exploits", "Research"],
         description: "Automated vulnerability scanning and exploit matching tool. Indexes CVE databases, proof-of-concept exploits, and provides contextual information for discovered vulnerabilities.",
