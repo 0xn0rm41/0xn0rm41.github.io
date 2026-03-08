@@ -3,15 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>n0rm41 | Offensive Security & Red Team Operations</title>
-  <meta name="description" content="Professional Red Team portfolio - Offensive Security, Malware Development, Reverse Engineering, and Advanced Persistent Threat Simulation.">
-  <meta name="keywords" content="Red Team, Offensive Security, Malware Development, Reverse Engineering, APT, Penetration Testing, n0rm41">
-  <meta property="og:title" content="n0rm41 | Red Team Operations">
-  <meta property="og:description" content="Professional Red Team & Offensive Security Portfolio">
-  <meta property="og:type" content="website">
-
+  <title>n0rm41 | Offensive Security Portfolio</title>
+  
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-
+  
   <style>
     :root {
       --bg: #0a0a0a;
@@ -27,52 +22,28 @@
       --accent: #f97316;
       --success: #10b981;
       --warning: #f59e0b;
-      --ring: rgba(220, 38, 38, 0.4);
-      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
       --glow: 0 0 20px rgba(220, 38, 38, 0.15);
       --radius: 6px;
-      --gap: 24px;
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    html[data-theme="green"] {
-      --primary: #059669;
-      --primary-bright: #10b981;
-      --accent: #14b8a6;
-      --ring: rgba(5, 150, 105, 0.4);
-      --glow: 0 0 20px rgba(5, 150, 105, 0.15);
-    }
-
-    html[data-theme="purple"] {
-      --primary: #7c3aed;
-      --primary-bright: #8b5cf6;
-      --accent: #a78bfa;
-      --ring: rgba(124, 58, 237, 0.4);
-      --glow: 0 0 20px rgba(124, 58, 237, 0.15);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
+    
     body {
-      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-family: 'JetBrains Mono', monospace;
       background: var(--bg);
       color: var(--text);
       line-height: 1.6;
-      overflow-x: hidden;
     }
 
-    a { color: var(--primary-bright); text-decoration: none; transition: var(--transition); }
-    a:hover { color: var(--accent); text-shadow: 0 0 8px var(--primary); }
-
     .container {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: var(--gap);
       max-width: 1400px;
       margin: 0 auto;
       padding: 24px;
-      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
     }
 
     aside {
@@ -83,25 +54,13 @@
       position: sticky;
       top: 24px;
       height: fit-content;
-      box-shadow: var(--shadow);
     }
 
-    .profile { text-align: center; margin-bottom: 24px; }
-
-    .avatar-wrapper {
-      position: relative;
+    .avatar {
       width: 120px;
       height: 120px;
       margin: 0 auto 16px;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .avatar-wrapper:hover { transform: scale(1.05); }
-
-    .avatar {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, var(--border) 0%, var(--panel-hover) 100%);
+      background: linear-gradient(135deg, var(--border), var(--panel-hover));
       border: 2px solid var(--border-light);
       border-radius: 50%;
       display: grid;
@@ -109,51 +68,26 @@
       font-size: 48px;
       font-weight: 700;
       color: var(--primary);
-      position: relative;
-      overflow: hidden;
     }
 
-    .avatar::before {
-      content: '';
-      position: absolute;
-      inset: -2px;
-      background: conic-gradient(from 0deg, var(--primary), var(--accent), var(--primary));
-      border-radius: 50%;
-      z-index: -1;
-      opacity: 0;
-      transition: var(--transition);
+    h2 { color: var(--text); font-size: 20px; margin-bottom: 8px; text-align: center; }
+    
+    .profile-meta {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
     }
-    .avatar-wrapper:hover .avatar::before { opacity: 0.5; animation: rotate 3s linear infinite; }
-    @keyframes rotate { 100% { transform: rotate(360deg); } }
-
-    .status {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--panel-hover);
-      border: 1px solid var(--border-light);
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 11px;
-      margin-top: 12px;
-    }
-    .status-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-    .profile h2 { color: var(--text); font-size: 20px; margin-bottom: 8px; }
-    .profile-meta { color: var(--muted); font-size: 13px; line-height: 1.8; }
 
     nav { margin: 24px 0; }
     nav a {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      display: block;
       padding: 10px 12px;
       color: var(--text-dim);
+      text-decoration: none;
       border-radius: var(--radius);
-      transition: var(--transition);
-      font-size: 14px;
       margin-bottom: 4px;
+      transition: all 0.3s;
     }
     nav a:hover, nav a.active {
       background: var(--panel-hover);
@@ -161,10 +95,6 @@
       border-left: 3px solid var(--primary);
       padding-left: 9px;
     }
-    nav a::before { content: '>'; opacity: 0; transition: var(--transition); }
-    nav a:hover::before, nav a.active::before { opacity: 1; }
-
-    .controls { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); }
 
     .btn {
       background: var(--panel-hover);
@@ -173,35 +103,37 @@
       padding: 8px 12px;
       border-radius: var(--radius);
       cursor: pointer;
-      transition: var(--transition);
       font-family: inherit;
       font-size: 12px;
       text-align: center;
+      margin-top: 8px;
+      display: block;
+      width: 100%;
+      transition: all 0.3s;
     }
-    .btn:hover { background: var(--border); border-color: var(--primary); box-shadow: 0 0 12px var(--ring); }
+    .btn:hover { background: var(--border); border-color: var(--primary); }
     .btn-primary { background: var(--primary); border-color: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-bright); box-shadow: 0 0 16px var(--ring); }
+    .btn-primary:hover { background: var(--primary-bright); }
 
-    .theme-selector { display: flex; gap: 6px; padding: 8px; background: var(--panel-hover); border-radius: var(--radius); border: 1px solid var(--border-light); }
-    .theme-btn { flex: 1; padding: 6px; border: 1px solid transparent; border-radius: 4px; cursor: pointer; transition: var(--transition); font-size: 11px; background: transparent; color: var(--text-dim); font-family: inherit; }
-    .theme-btn.active { border-color: var(--primary); background: var(--border); color: var(--text); }
-
-    main { display: flex; flex-direction: column; gap: var(--gap); }
+    main { display: flex; flex-direction: column; gap: 24px; }
 
     .section {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 28px;
-      box-shadow: var(--shadow);
-      opacity: 0;
-      animation: fadeInUp 0.6s ease-out forwards;
     }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-    .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-    .section-header h2 { color: var(--primary-bright); font-size: 24px; font-weight: 600; }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
     .section-header::before { content: '>'; color: var(--primary); font-size: 20px; }
+    .section-header h3 { color: var(--primary-bright); font-size: 24px; font-weight: 600; }
 
     .terminal {
       background: #050505;
@@ -211,24 +143,8 @@
       font-family: 'Fira Code', monospace;
       font-size: 13px;
       line-height: 1.8;
-      overflow-x: auto;
+      color: var(--text-dim);
     }
-    .terminal-line { display: flex; gap: 12px; }
-    .terminal-prompt { color: var(--primary); user-select: none; }
-    .terminal-output { color: var(--text-dim); }
-    .cursor { display: inline-block; width: 8px; height: 16px; background: var(--primary); margin-left: 4px; animation: blink 1s step-end infinite; }
-    @keyframes blink { 50% { background: transparent; } }
-
-    .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
-    .skill-category { background: var(--panel-hover); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 16px; transition: var(--transition); }
-    .skill-category:hover { border-color: var(--primary); box-shadow: var(--glow); transform: translateY(-2px); }
-    .skill-category h3 { color: var(--primary-bright); font-size: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-    .skill-category ul { list-style: none; }
-    .skill-category li { color: var(--text-dim); font-size: 12px; padding: 4px 0; padding-left: 16px; position: relative; }
-    .skill-category li::before { content: '▸'; position: absolute; left: 0; color: var(--primary); }
-
-    /* ===== PROJECT CARDS ===== */
-    .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
 
     .project-card {
       background: var(--panel-hover);
@@ -236,2596 +152,197 @@
       border-left: 4px solid var(--primary);
       border-radius: var(--radius);
       padding: 20px;
-      transition: var(--transition);
-      cursor: pointer;
-      position: relative;
+      margin-bottom: 16px;
     }
-    .project-card:hover {
-      border-left-color: var(--accent);
-      box-shadow: var(--shadow-lg), var(--glow);
-      transform: translateX(4px);
-    }
-    .project-card h3 { color: var(--primary-bright); font-size: 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .project-card h4 { color: var(--primary-bright); margin-bottom: 8px; }
+    .project-card p { color: var(--text-dim); font-size: 13px; }
 
-    .project-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-    .tag { background: #1a1a1a; border: 1px solid var(--border-light); color: var(--accent); padding: 3px 8px; border-radius: 4px; font-size: 11px; }
-
-    .project-description { color: var(--text-dim); font-size: 13px; line-height: 1.6; margin-bottom: 12px; }
-
-    .project-status { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
-    .status-indicator { width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
-    .status-indicator.in-progress { background: var(--warning); }
-    .status-indicator.archived { background: var(--muted); }
-
-    /* "View Walkthrough" button on cards */
-    .project-walkthrough-btn {
-      margin-top: 14px;
-      width: 100%;
-      background: transparent;
+    .tag {
+      display: inline-block;
+      background: #1a1a1a;
       border: 1px solid var(--border-light);
-      color: var(--primary-bright);
-      padding: 8px 0;
-      border-radius: var(--radius);
-      cursor: pointer;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .project-walkthrough-btn:hover {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: white;
-      box-shadow: 0 0 14px var(--ring);
-    }
-    .project-walkthrough-btn .arrow { transition: var(--transition); }
-    .project-walkthrough-btn:hover .arrow { transform: translateX(4px); }
-
-    /* ===== PROJECT WALKTHROUGH MODAL ===== */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.88);
-      backdrop-filter: blur(6px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 24px;
-    }
-    .modal.active { display: flex; }
-
-    /* General small modals */
-    .modal-content {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 32px;
-      max-width: 600px;
-      max-height: 80vh;
-      overflow: auto;
-      box-shadow: var(--shadow-lg), var(--glow);
-      position: relative;
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: var(--panel-hover);
-      border: 1px solid var(--border-light);
-      color: var(--text);
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      transition: var(--transition);
-      font-family: inherit;
-      font-size: 14px;
-    }
-    .modal-close:hover { background: var(--primary); border-color: var(--primary); color: white; }
-
-    /* ===== WALKTHROUGH MODAL (wide) ===== */
-    #walkthroughModal .modal-content {
-      max-width: 860px;
-      width: 100%;
-      padding: 0;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      max-height: 90vh;
-    }
-
-    .wt-header {
-      padding: 24px 28px 20px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-      flex-shrink: 0;
-    }
-    .wt-header-left { display: flex; flex-direction: column; gap: 8px; }
-    .wt-title { color: var(--primary-bright); font-size: 20px; font-weight: 600; margin: 0; }
-    .wt-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-
-    /* Tab bar */
-    .wt-tabs {
-      display: flex;
-      gap: 0;
-      border-bottom: 1px solid var(--border);
-      padding: 0 28px;
-      flex-shrink: 0;
-      overflow-x: auto;
-    }
-    .wt-tab {
-      background: transparent;
-      border: none;
-      border-bottom: 2px solid transparent;
-      color: var(--muted);
-      padding: 12px 18px;
-      cursor: pointer;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      transition: var(--transition);
-      white-space: nowrap;
-      margin-bottom: -1px;
-    }
-    .wt-tab:hover { color: var(--text-dim); }
-    .wt-tab.active { color: var(--primary-bright); border-bottom-color: var(--primary); }
-
-    /* Tab content area */
-    .wt-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    /* Scrollbar styling */
-    .wt-body::-webkit-scrollbar { width: 5px; }
-    .wt-body::-webkit-scrollbar-track { background: var(--panel); }
-    .wt-body::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
-    .wt-body::-webkit-scrollbar-thumb:hover { background: var(--primary); }
-
-    .wt-panel { display: none; flex-direction: column; gap: 20px; }
-    .wt-panel.active { display: flex; }
-
-    /* Step blocks */
-    .wt-step {
-      background: var(--panel-hover);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius);
-      overflow: hidden;
-      transition: var(--transition);
-    }
-    .wt-step:hover { border-color: var(--border); }
-
-    .wt-step-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .wt-step-num {
-      width: 26px;
-      height: 26px;
-      background: var(--primary);
-      color: white;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-size: 12px;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-    .wt-step-title { color: var(--text); font-size: 14px; flex: 1; }
-    .wt-step-chevron { color: var(--muted); font-size: 11px; transition: var(--transition); }
-    .wt-step.open .wt-step-chevron { transform: rotate(90deg); }
-
-    .wt-step-body {
-      display: none;
-      padding: 0 16px 16px;
-      border-top: 1px solid var(--border);
-      flex-direction: column;
-      gap: 12px;
-    }
-    .wt-step.open .wt-step-body { display: flex; }
-
-    .wt-step-desc {
-      color: var(--text-dim);
-      font-size: 13px;
-      line-height: 1.7;
-      padding-top: 12px;
-    }
-
-    /* Code blocks inside steps */
-    .wt-code {
-      background: #050505;
-      border: 1px solid var(--border-light);
-      border-radius: 4px;
-      padding: 12px 14px;
-      font-family: 'Fira Code', monospace;
-      font-size: 12px;
-      color: var(--text-dim);
-      overflow-x: auto;
-      white-space: pre;
-      position: relative;
-    }
-    .wt-code .prompt { color: var(--primary); user-select: none; }
-    .wt-code .cmd { color: var(--accent); }
-    .wt-code .comment { color: var(--muted); }
-    .wt-code .string { color: #a5d6ff; }
-    .wt-code .keyword { color: var(--primary-bright); }
-
-    .wt-code-label {
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-
-    /* Note / tip blocks */
-    .wt-note {
-      background: rgba(220, 38, 38, 0.05);
-      border: 1px solid rgba(220, 38, 38, 0.2);
-      border-left: 3px solid var(--primary);
-      border-radius: 4px;
-      padding: 10px 14px;
-      font-size: 12px;
-      color: var(--text-dim);
-      line-height: 1.6;
-    }
-    .wt-note strong { color: var(--primary-bright); }
-
-    .wt-tip {
-      background: rgba(16, 185, 129, 0.05);
-      border: 1px solid rgba(16, 185, 129, 0.2);
-      border-left: 3px solid var(--success);
-      border-radius: 4px;
-      padding: 10px 14px;
-      font-size: 12px;
-      color: var(--text-dim);
-      line-height: 1.6;
-    }
-    .wt-tip strong { color: var(--success); }
-
-    .wt-warn {
-      background: rgba(245, 158, 11, 0.05);
-      border: 1px solid rgba(245, 158, 11, 0.2);
-      border-left: 3px solid var(--warning);
-      border-radius: 4px;
-      padding: 10px 14px;
-      font-size: 12px;
-      color: var(--text-dim);
-      line-height: 1.6;
-    }
-    .wt-warn strong { color: var(--warning); }
-
-    /* Architecture / Overview text */
-    .wt-overview {
-      color: var(--text-dim);
-      font-size: 13px;
-      line-height: 1.8;
-    }
-
-    /* Tech stack pills */
-    .wt-tech-row { display: flex; gap: 8px; flex-wrap: wrap; }
-    .wt-tech {
-      background: var(--border);
-      border: 1px solid var(--border-light);
-      color: var(--text-dim);
-      padding: 4px 10px;
+      color: var(--accent);
+      padding: 3px 8px;
       border-radius: 4px;
       font-size: 11px;
+      margin-right: 6px;
+      margin-top: 8px;
     }
-
-    /* Nav buttons at bottom of modal */
-    .wt-footer {
-      padding: 16px 28px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-shrink: 0;
-    }
-    .wt-nav-btn {
-      background: var(--panel-hover);
-      border: 1px solid var(--border-light);
-      color: var(--text-dim);
-      padding: 8px 16px;
-      border-radius: var(--radius);
-      cursor: pointer;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      transition: var(--transition);
-    }
-    .wt-nav-btn:hover { border-color: var(--primary); color: var(--primary-bright); }
-    .wt-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .wt-nav-btn:disabled:hover { border-color: var(--border-light); color: var(--text-dim); }
-    .wt-step-counter { font-size: 12px; color: var(--muted); }
-
-    /* Gallery, timeline, contact (unchanged) */
-    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
-    .gallery-item { position: relative; aspect-ratio: 16/9; background: var(--panel-hover); border: 1px solid var(--border-light); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: var(--transition); }
-    .gallery-item:hover { border-color: var(--primary); box-shadow: var(--glow); transform: scale(1.02); }
-    .gallery-item-content { width: 100%; height: 100%; display: grid; place-items: center; background: linear-gradient(135deg, var(--panel-hover) 0%, var(--border) 100%); color: var(--muted); font-size: 48px; }
-    .gallery-item-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 16px; opacity: 0; transition: var(--transition); }
-    .gallery-item:hover .gallery-item-overlay { opacity: 1; }
-    .gallery-item-title { color: var(--text); font-size: 14px; font-weight: 600; }
-    .gallery-item-description { color: var(--muted); font-size: 11px; }
-
-    .timeline { position: relative; padding-left: 32px; }
-    .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--border-light); }
-    .timeline-item { position: relative; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
-    .timeline-item:last-child { border-bottom: none; }
-    .timeline-item::before { content: ''; position: absolute; left: -37px; top: 6px; width: 10px; height: 10px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 12px var(--ring); }
-    .timeline-date { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
-    .timeline-title { color: var(--primary-bright); font-size: 15px; margin-bottom: 8px; }
-    .timeline-description { color: var(--text-dim); font-size: 13px; line-height: 1.6; }
-
-    /* Operation walkthrough button inside timeline items */
-    .op-walkthrough-btn {
-      margin-top: 12px;
-      background: transparent;
-      border: 1px solid var(--border-light);
-      color: var(--primary-bright);
-      padding: 7px 14px;
-      border-radius: var(--radius);
-      cursor: pointer;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-    }
-    .op-walkthrough-btn:hover {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: white;
-      box-shadow: 0 0 14px var(--ring);
-    }
-    .op-walkthrough-btn .arrow { transition: var(--transition); }
-    .op-walkthrough-btn:hover .arrow { transform: translateX(4px); }
-
-    .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
-    .contact-card { background: var(--panel-hover); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 16px; transition: var(--transition); }
-    .contact-card:hover { border-color: var(--primary); box-shadow: var(--glow); }
-    .contact-card h3 { color: var(--primary-bright); font-size: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-    .contact-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 13px; color: var(--text-dim); }
-    .contact-item a { word-break: break-all; }
-
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: var(--panel-hover); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 16px; text-align: center; transition: var(--transition); }
-    .stat-card:hover { border-color: var(--primary); box-shadow: var(--glow); }
-    .stat-value { font-size: 32px; font-weight: 700; color: var(--primary-bright); line-height: 1; margin-bottom: 8px; }
-    .stat-label { font-size: 12px; color: var(--muted); }
-
-    .blog-list { display: flex; flex-direction: column; gap: 16px; }
-    .blog-post { background: var(--panel-hover); border: 1px solid var(--border-light); border-left: 4px solid var(--primary); border-radius: var(--radius); padding: 20px; transition: var(--transition); cursor: pointer; }
-    .blog-post:hover { border-left-color: var(--accent); box-shadow: var(--shadow-lg), var(--glow); transform: translateX(4px); }
-    .blog-post h3 { color: var(--primary-bright); font-size: 16px; margin-bottom: 10px; }
-    .blog-post-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 12px; color: var(--muted); }
-    .blog-post-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-    .blog-post-excerpt { color: var(--text-dim); font-size: 13px; line-height: 1.6; display: none; }
-    .blog-post.expanded .blog-post-excerpt { display: block; }
-
-    .ascii-art { font-family: 'Fira Code', monospace; font-size: 10px; line-height: 1.2; color: var(--primary); white-space: pre; text-align: center; margin: 24px 0; }
-
-    footer { text-align: center; color: var(--muted); font-size: 12px; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 24px; }
-
-    .scroll-progress { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: linear-gradient(90deg, var(--primary), var(--accent)); z-index: 9999; transition: width 0.1s ease; }
 
     @media (max-width: 1024px) {
       .container { grid-template-columns: 1fr; }
       aside { position: relative; top: 0; }
-      .projects-grid, .gallery-grid { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 640px) {
-      .container { padding: 16px; }
-      .section { padding: 20px; }
-      .section-header h2 { font-size: 20px; }
-      .stats-grid, .skills-grid, .contact-grid { grid-template-columns: 1fr; }
-      #walkthroughModal .modal-content { max-height: 95vh; }
     }
   </style>
 </head>
 <body>
-  <div class="scroll-progress" id="scrollProgress"></div>
-
   <div class="container">
     <aside>
-      <div class="profile">
-        <div class="avatar-wrapper" id="avatarBtn">
-          <div class="avatar">N</div>
-        </div>
-        <h2>n0rm41</h2>
-        <div class="profile-meta">
-          Red Team Aspirant<br>
-          Offensive Security Aspirant<br>
-          <div class="status">
-            <span class="status-dot"></span>
-            Available for Projects
-          </div>
-        </div>
+      <div class="avatar">N</div>
+      <h2>n0rm41</h2>
+      <div class="profile-meta">
+        Red Team Aspirant<br>
+        Offensive Security<br>
+        (Still learning, under 18)
       </div>
 
-      <nav id="mainNav">
+      <nav>
         <a href="#about" class="nav-link active">About</a>
-        <a href="#skills" class="nav-link">Skills & Tools</a>
         <a href="#projects" class="nav-link">Projects</a>
         <a href="#operations" class="nav-link">Operations</a>
-        <a href="#blog" class="nav-link">Blog & Notes</a>
-        <a href="#gallery" class="nav-link">Gallery</a>
-        <a href="#certifications" class="nav-link">Certifications</a>
+        <a href="#blog" class="nav-link">Blog</a>
         <a href="#contact" class="nav-link">Contact</a>
       </nav>
 
-      <div class="controls">
-        <div class="theme-selector">
-          <button class="theme-btn active" data-theme="red">Red</button>
-          <button class="theme-btn" data-theme="green">Green</button>
-          <button class="theme-btn" data-theme="purple">Purple</button>
-        </div>
-        <button class="btn" id="terminalBeep">Terminal Beep</button>
-        <button class="btn btn-primary" id="downloadCV">Download Resume</button>
-      </div>
+      <button class="btn btn-primary" id="downloadCV">Download Resume</button>
     </aside>
 
     <main>
       <!-- About -->
-      <section class="section" id="about" style="animation-delay:0.1s;">
-        <div class="section-header"><h2>whoami</h2></div>
+      <section class="section" id="about">
+        <div class="section-header"><h3>whoami</h3></div>
         <div class="terminal">
-          <div class="terminal-line">
-            <span class="terminal-prompt">n0rm41@redteam:~$</span>
-            <span class="terminal-output">whoami</span>
-          </div>
-          <div class="terminal-line">
-            <span class="terminal-output">
-Red Team Aspirant specializing in offensive security operations, advanced persistent threat simulation, and custom malware development. Passionate about understanding complex systems through controlled exploitation and building defensive strategies from an attacker's perspective.
-(I'm still learning and im not 18+ yet.)
+Red Team Aspirant specializing in offensive security operations and OSINT. 
+Passionate about understanding complex systems through controlled exploitation.
 
-Core Focus Areas:
-• Advanced Persistent Threat (APT) Simulation
-• Custom Malware &amp; Payload Development
-• Reverse Engineering &amp; Exploit Analysis
-• Internal Network Penetration &amp; Lateral Movement
-• Social Engineering &amp; Physical Security Assessment
-            </span>
-          </div>
-          <div class="terminal-line">
-            <span class="terminal-prompt">n0rm41@redteam:~$</span>
-            <span class="cursor"></span>
-          </div>
-        </div>
-        <div class="stats-grid" style="margin-top:24px;">
-          <div class="stat-card"><div class="stat-value">2+</div><div class="stat-label">Years Experience while Learning</div></div>
-          <div class="stat-card"><div class="stat-value">10+</div><div class="stat-label">Projects Completed</div></div>
-          <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">CVEs Discovered</div></div>
-          <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Client Engagements</div></div>
-        </div>
-      </section>
-
-      <!-- Skills -->
-      <section class="section" id="skills" style="animation-delay:0.2s;">
-        <div class="section-header"><h2>Skills & Toolbox</h2></div>
-        <div class="skills-grid">
-          <div class="skill-category">
-            <h3>🎯 Offensive Tools</h3>
-            <ul>
-              <li>Metasploit Framework</li><li>Cobalt Strike</li><li>Burp Suite Pro</li>
-              <li>BloodHound & SharpHound</li><li>Impacket Suite</li><li>PowerShell Empire</li>
-            </ul>
-          </div>
-          <div class="skill-category">
-            <h3>🔬 Reverse Engineering</h3>
-            <ul>
-              <li>Ghidra & IDA</li><li>x64dbg & WinDbg</li><li>dnSpy & ILSpy</li>
-              <li>Binary Ninja</li><li>Frida & Radare2</li><li>PE-bear & CFF Explorer</li>
-            </ul>
-          </div>
-          <div class="skill-category">
-            <h3>💻 Development</h3>
-            <ul>
-              <li>C/C++ & Assembly</li><li>Python & Go</li><li>PowerShell & Bash</li>
-              <li>Rust</li><li>JavaScript</li>
-            </ul>
-          </div>
-          <div class="skill-category">
-            <h3>🌐 Network & Web</h3>
-            <ul>
-              <li>Wireshark & tcpdump</li><li>Nmap & Masscan</li><li>Proxychains & Tor</li>
-              <li>SQLMap & NoSQLMap</li><li>OWASP Testing Guide</li><li>Custom Exploit Development</li>
-            </ul>
-          </div>
-          <div class="skill-category">
-            <h3>☁️ Cloud & Infra</h3>
-            <ul>
-              <li>AWS Security Assessment</li><li>Azure AD Exploitation</li><li>Docker & Kubernetes</li>
-              <li>Active Directory Attacks</li><li>SIEM Evasion Techniques</li>
-            </ul>
-          </div>
-          <div class="skill-category">
-            <h3>🛠️ Utilities</h3>
-            <ul>
-              <li>VSCode & Visual Studio</li><li>Vim</li><li>Docker</li><li>Git & GitHub</li>
-              <li>Obsidian & Notion</li><li>VirtualBox & VMware</li>
-              <li>Kali & Parrot OS</li><li>Custom Lab Infrastructure</li>
-            </ul>
-          </div>
+Core Focus:
+• OSINT & Intelligence Gathering
+• Reverse Engineering
+• Python Automation
+• CTF Competitions
         </div>
       </section>
 
       <!-- Projects -->
-      <section class="section" id="projects" style="animation-delay:0.3s;">
-        <div class="section-header"><h2>Featured Projects</h2></div>
-        <div class="projects-grid" id="projectsContainer"></div>
-      </section>
-
-      <!-- Operations -->
-      <section class="section" id="operations" style="animation-delay:0.4s;">
-        <div class="section-header"><h2>Red Team Operations</h2></div>
-        <div class="timeline" id="operationsContainer"></div>
-      </section>
-
-      <!-- Blog -->
-      <section class="section" id="blog" style="animation-delay:0.5s;">
-        <div class="section-header"><h2>Blog & Technical Notes</h2></div>
-        <div class="blog-list" id="blogContainer"></div>
-      </section>
-
-      <!-- Gallery -->
-      <section class="section" id="gallery" style="animation-delay:0.6s;">
-        <div class="section-header"><h2>Lab & Screenshots</h2></div>
-        <div class="gallery-grid">
-          <div class="gallery-item"><div class="gallery-item-content">🎯</div><div class="gallery-item-overlay"><div class="gallery-item-title">BloodHound Attack Path</div><div class="gallery-item-description">Domain Admin compromise visualization</div></div></div>
-          <div class="gallery-item"><div class="gallery-item-content">🔬</div><div class="gallery-item-overlay"><div class="gallery-item-title">Malware Analysis</div><div class="gallery-item-description">Reverse engineering APT28 sample</div></div></div>
-          <div class="gallery-item"><div class="gallery-item-content">💉</div><div class="gallery-item-overlay"><div class="gallery-item-title">Process Injection</div><div class="gallery-item-description">Custom shellcode injection technique</div></div></div>
-          <div class="gallery-item"><div class="gallery-item-content">🌐</div><div class="gallery-item-overlay"><div class="gallery-item-title">C2 Infrastructure</div><div class="gallery-item-description">Custom command & control framework</div></div></div>
-          <div class="gallery-item"><div class="gallery-item-content">🔐</div><div class="gallery-item-overlay"><div class="gallery-item-title">Privilege Escalation</div><div class="gallery-item-description">Windows kernel exploit development</div></div></div>
-          <div class="gallery-item"><div class="gallery-item-content">📡</div><div class="gallery-item-overlay"><div class="gallery-item-title">Network Pivoting</div><div class="gallery-item-description">Multi-hop tunnel configuration</div></div></div>
+      <section class="section" id="projects">
+        <div class="section-header"><h3>Projects</h3></div>
+        
+        <div class="project-card">
+          <h4>iKnowItAll - OSINT Intelligence Pipeline</h4>
+          <div>
+            <span class="tag">Python</span>
+            <span class="tag">OSINT</span>
+            <span class="tag">Automation</span>
+          </div>
+          <p style="margin-top:12px;">
+            Modular OSINT automation framework with 9 specialized tools: Web scraper, username enumerator, 
+            IP intelligence tool, Tor session manager, JavaScript scraper, news monitor, forum aggregator, 
+            change detector, and unified correlation pipeline.
+          </p>
+          <p style="margin-top:8px; font-size:12px; color:var(--muted);">
+            <strong>Tools Built:</strong> Web Scraper • Username Enum • IP Intel • Tor Manager • JS Scraper • 
+            News Scraper • Forum Aggregator • Change Monitor • Unified Pipeline
+          </p>
+          <p style="margin-top:8px; font-size:12px; color:var(--muted);">
+            <strong>Tech:</strong> requests, BeautifulSoup, Playwright, concurrent.futures, feedparser, stem
+          </p>
+          <p style="margin-top:8px; font-size:12px; color:var(--muted);">
+            <strong>APIs:</strong> Shodan, AbuseIPDB, ip-api.com, Reddit, HackerNews, 40+ RSS feeds
+          </p>
         </div>
       </section>
 
-      <!-- Certifications -->
-      <section class="section" id="certifications" style="animation-delay:0.7s;">
-        <div class="section-header"><h2>Certifications & Training (Still needed)</h2></div>
-        <div class="timeline">
-          <div class="timeline-item"><div class="timeline-date">Still needed</div><div class="timeline-title">OSEP - Offensive Security Experienced Penetration Tester</div><div class="timeline-description">Advanced penetration testing certification focusing on evasion techniques and custom exploit development.</div></div>
-          <div class="timeline-item"><div class="timeline-date">Still needed</div><div class="timeline-title">OSCP - Offensive Security Certified Professional</div><div class="timeline-description">Hands-on penetration testing certification covering manual exploitation and privilege escalation.</div></div>
-          <div class="timeline-item"><div class="timeline-date">Still needed</div><div class="timeline-title">CRTP - Certified Red Team Professional</div><div class="timeline-description">Active Directory security and attack simulation certification by Pentester Academy.</div></div>
-          <div class="timeline-item"><div class="timeline-date">Still needed</div><div class="timeline-title">eWPTX - Web Application Penetration Testing eXtreme</div><div class="timeline-description">Advanced web application security testing certification by eLearnSecurity.</div></div>
-          <div class="timeline-item"><div class="timeline-date">Still needed</div><div class="timeline-title">GIAC GPEN - Penetration Tester</div><div class="timeline-description">Validates ability to conduct penetration tests with best practice methodologies.</div></div>
+      <!-- Operations -->
+      <section class="section" id="operations">
+        <div class="section-header"><h3>Operations</h3></div>
+        
+        <div class="project-card">
+          <h4>OSINT Trace Labs CTF</h4>
+          <div>
+            <span class="tag">OSINT</span>
+            <span class="tag">CTF</span>
+            <span class="tag">Real Operation</span>
+          </div>
+          <p style="margin-top:12px;">
+            Participated in Trace Labs Search Party CTF using OSINT techniques to assist in real missing 
+            persons cases. Successfully identified multiple leads submitted to law enforcement.
+          </p>
+          <p style="margin-top:8px; font-size:12px; color:var(--muted);">
+            <strong>Results:</strong> 3 social media accounts discovered • 2 geolocation leads verified • 
+            1 associate connection identified
+          </p>
+          <p style="margin-top:8px; font-size:12px; color:var(--muted);">
+            <strong>Tools:</strong> Maltego, Sherlock, ExifTool, Google Dorks, Shodan, TinEye, theHarvester
+          </p>
+        </div>
+      </section>
+
+      <!-- Blog -->
+      <section class="section" id="blog">
+        <div class="section-header"><h3>Blog & Writeups</h3></div>
+        
+        <div class="project-card">
+          <h4>OSINT Workflow for Trace Labs CTF</h4>
+          <div>
+            <span class="tag">#OSINT</span>
+            <span class="tag">#CTF</span>
+            <span class="tag">#Methodology</span>
+          </div>
+          <p style="margin-top:12px;">
+            Detailed methodology and results from Trace Labs Search Party CTF. Covers initial research, 
+            social media deep dive, geolocation analysis, username enumeration, and data aggregation.
+          </p>
+        </div>
+
+        <div class="project-card">
+          <h4>Reverse Engineering: crackit Challenge Writeup</h4>
+          <div>
+            <span class="tag">#ReverseEngineering</span>
+            <span class="tag">#CTF</span>
+            <span class="tag">#BinaryAnalysis</span>
+          </div>
+          <p style="margin-top:12px;">
+            Walkthrough of solving a simple crackme challenge using hexdump to extract embedded strings.
+          </p>
+          <div class="terminal" style="margin-top:12px; font-size:11px;">
+$ hexdump -C crackit | grep -A 2 "CTF"
+00002090  00 43 54 46 7b 00 4d 79  5f 00 53 33 63 00 72 33  |.CTF{.My_.S3c.r3|
+000020a0  74 5f 00 46 6c 34 67 00  7d 57 30 57 00 59 30 75  |t_.Fl4g.}W0W.Y0u|
+
+$ ./crackit "CTF{My_S3cr3t_Fl4g}W0WY0uF0undM3{0r N0t}"
+You cracked me!
+          </div>
+          <p style="margin-top:8px; font-size:12px; color:var(--muted);">
+            <strong>Key Lesson:</strong> Always check for low-hanging fruit with strings/hexdump before disassembly.
+          </p>
         </div>
       </section>
 
       <!-- Contact -->
-      <section class="section" id="contact" style="animation-delay:0.8s;">
-        <div class="section-header"><h2>Contact & Links</h2></div>
-        <div class="contact-grid">
-          <div class="contact-card"><h3>📧 Email</h3><div class="contact-item"><a href="/cdn-cgi/l/email-protection#523c62203f66631222203d263d3c3f333b3e7c313d3f"><span class="__cf_email__" data-cfemail="4f217f3d227b7e0f3f3d203b2021222e2623612c2022">[email&#160;protected]</span></a></div></div>
-          <div class="contact-card"><h3>💼 GitHub</h3><div class="contact-item"><a href="https://github.com/unknown4real" target="_blank" rel="noopener">github.com/unknown4real</a></div></div>
-          <div class="contact-card"><h3>🐦 Twitter</h3><div class="contact-item"><a href="https://twitter.com/n0rm41sec" target="_blank" rel="noopener">@n0rm41sec</a></div></div>
-          <div class="contact-card"><h3>💬 Discord</h3><div class="contact-item">fgjffghnf</div></div>
-          <div class="contact-card"><h3>🔐 PGP Key</h3><div class="contact-item"><a href="#" id="pgpKeyBtn">View Public Key</a></div></div>
-          <div class="contact-card"><h3>📝 Blog</h3><div class="contact-item"><a href="https://n0rm41.blog" target="_blank" rel="noopener">n0rm41.github.io/#blog</a></div></div>
-        </div>
-        <div class="terminal" style="margin-top:24px;">
-          <div class="terminal-line"><span class="terminal-prompt">n0rm41@redteam:~$</span><span class="terminal-output">gpg --import n0rm41.asc</span></div>
-          <div class="terminal-line"><span class="terminal-output">gpg: key 0xDEADBEEF: public key "n0rm41 &lt;<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="bfd18fcdd28b8effcfcdd0cbd0d1d2ded6d391dcd0d2">[email&#160;protected]</a>&gt;" imported</span></div>
-          <div class="terminal-line"><span class="terminal-output">gpg: Total number processed: 1</span></div>
-          <div class="terminal-line"><span class="terminal-output">gpg:               imported: 1</span></div>
-        </div>
+      <section class="section" id="contact">
+        <div class="section-header"><h3>Contact</h3></div>
+        <p style="color:var(--text-dim); margin-bottom:12px;">
+          📧 Email: norm41@proton.me<br>
+          💼 GitHub: <a href="https://github.com/unknown4real" style="color:var(--primary-bright);">github.com/unknown4real</a><br>
+          🐦 Twitter: <a href="https://twitter.com/n0rm41sec" style="color:var(--primary-bright);">@</a><br>
+          💬 Discord: fgjffghnf
+        </p>
       </section>
-
-      <footer>
-        <p>© 2025 n0rm41 — Red Team Operations Portfolio</p>
-        <p style="margin-top:8px;font-size:11px;color:var(--muted);">All operations conducted under authorized engagement contracts with proper scope and legal approval.</p>
-      </footer>
     </main>
   </div>
 
-  <!-- ASCII Modal -->
-  <div class="modal" id="asciiModal">
-    <div class="modal-content">
-      <button class="modal-close" id="closeAscii">✕</button>
-      <div class="ascii-art">
- ███▄    █  ▒█████   ██▀███   ███▄ ▄███▓ ▄▄▄       ██▓    
- ██ ▀█   █ ▒██▒  ██▒▓██ ▒ ██▒▓██▒▀█▀ ██▒▒████▄    ▓██▒    
-▓██  ▀█ ██▒▒██░  ██▒▓██ ░▄█ ▒▓██    ▓██░▒██  ▀█▄  ▒██░    
-▓██▒  ▐▌██▒▒██   ██░▒██▀▀█▄  ▒██    ▒██ ░██▄▄▄▄██ ▒██░    
-▒██░   ▓██░░ ████▓▒░░██▓ ▒██▒▒██▒   ░██▒ ▓█   ▓██▒░██████▒
-░ ▒░   ▒ ▒ ░ ▒░▒░▒░ ░ ▒▓ ░▒▓░░ ▒░   ░  ░ ▒▒   ▓▒█░░ ▒░▓  ░
-░ ░░   ░ ▒░  ░ ▒ ▒░   ░▒ ░ ▒░░  ░      ░  ▒   ▒▒ ░░ ░ ▒  ░
-   ░   ░ ░ ░ ░ ░ ▒    ░░   ░ ░      ░     ░   ▒     ░ ░   
-         ░     ░ ░     ░            ░         ░  ░    ░  ░
-
-         Red Team Operations | Offensive Security
-      </div>
-      <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:16px;">"The best defense is a good understanding of offense."</p>
-    </div>
-  </div>
-
-  <!-- PGP Modal -->
-  <div class="modal" id="pgpModal">
-    <div class="modal-content">
-      <button class="modal-close" id="closePgp">✕</button>
-      <h2 style="color:var(--primary-bright);margin-bottom:16px;">PGP Public Key</h2>
-      <div class="terminal">
------BEGIN PGP PUBLIC KEY BLOCK-----
-
-mDMEaXX6vxYJKwYBBAHaRw8BAQdA7JqVSvxJ4leqHKP9y/USjuORymQjD9qW9+ud
-w1IFw+W0BUFzdHJviJkEExYKAEEWIQStaKUmjizun5ORD6C/5cNox5oc1QUCaXX6
-vwIbAwUJBaT3AQULCQgHAgIiAgYVCgkICwIEFgIDAQIeBwIXgAAKCRC/5cNox5oc
-1d+HAQDPDd0dn4LjZseNu3s/sl5Y5xytxf/Hzb4yGgCfin7tMgEA4DPE9N8nmSTl
-XLzBwjUnsiiV+phIshxt/R6NiN3JjAW4OARpdfq/EgorBgEEAZdVAQUBAQdALJim
-ytBJzq2SQwc0eCi25KFHLlIBRl8eMCyYjaKN5WcDAQgHiH4EGBYKACYWIQStaKUm
-jizun5ORD6C/5cNox5oc1QUCaXX6vwIbDAUJBaT3AQAKCRC/5cNox5oc1fMbAQCu
-l14hsDWeawiEEcDJug9ZNZWVbrR3O17J9czqfj/NrAD/UxZMyacRkbwQMeII6Mbj
-Q+ykhYbs6z9CIMNV3y+yOgo=
-=lE98
------END PGP PUBLIC KEY BLOCK-----
-      </div>
-      <p style="margin-top:16px;font-size:12px;color:var(--muted);">Fingerprint: AD68A5268E2CEE9F93910FA0BFE5C368C79A1CD5</p>
-    </div>
-  </div>
-
-  <!-- ===== PROJECT WALKTHROUGH MODAL ===== -->
-  <div class="modal" id="walkthroughModal">
-    <div class="modal-content">
-      <div class="wt-header">
-        <div class="wt-header-left">
-          <h2 class="wt-title" id="wtTitle">Project Title</h2>
-          <div class="wt-tags" id="wtTags"></div>
-        </div>
-        <button class="modal-close" id="closeWalkthrough">✕</button>
-      </div>
-
-      <div class="wt-tabs" id="wtTabs">
-        <!-- populated by JS -->
-      </div>
-
-      <div class="wt-body" id="wtBody">
-        <!-- populated by JS -->
-      </div>
-
-      <div class="wt-footer">
-        <button class="wt-nav-btn" id="wtPrev">← Prev</button>
-        <span class="wt-step-counter" id="wtCounter">Tab 1 of 4</span>
-        <button class="wt-nav-btn" id="wtNext">Next →</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== OPERATION WALKTHROUGH MODAL ===== -->
-  <div class="modal" id="opWalkthroughModal">
-    <div class="modal-content" style="max-width:860px;width:100%;padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:90vh;">
-      <div class="wt-header">
-        <div class="wt-header-left">
-          <h2 class="wt-title" id="opWtTitle">Operation Title</h2>
-          <div class="wt-tags" id="opWtTags"></div>
-        </div>
-        <button class="modal-close" id="closeOpWalkthrough">✕</button>
-      </div>
-      <div class="wt-tabs" id="opWtTabs"></div>
-      <div class="wt-body" id="opWtBody"></div>
-      <div class="wt-footer">
-        <button class="wt-nav-btn" id="opWtPrev">← Prev</button>
-        <span class="wt-step-counter" id="opWtCounter">Tab 1 of 4</span>
-        <button class="wt-nav-btn" id="opWtNext">Next →</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== BLOG WALKTHROUGH MODAL ===== -->
-  <div class="modal" id="blogWalkthroughModal">
-    <div class="modal-content" style="max-width:860px;width:100%;padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:90vh;">
-      <div class="wt-header">
-        <div class="wt-header-left">
-          <h2 class="wt-title" id="blogWtTitle">Post Title</h2>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;" id="blogWtMeta"></div>
-          <div class="wt-tags" id="blogWtTags"></div>
-        </div>
-        <button class="modal-close" id="closeBlogWalkthrough">✕</button>
-      </div>
-      <div class="wt-tabs" id="blogWtTabs"></div>
-      <div class="wt-body" id="blogWtBody"></div>
-      <div class="wt-footer">
-        <button class="wt-nav-btn" id="blogWtPrev">← Prev</button>
-        <span class="wt-step-counter" id="blogWtCounter">Tab 1 of 5</span>
-        <button class="wt-nav-btn" id="blogWtNext">Next →</button>
-      </div>
-    </div>
-  </div>
-
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-    // ====================================================
-    // PROJECT DATA WITH FULL WALKTHROUGH CONTENT
-    // ====================================================
-    const PROJECTS = [
-    {
-        title: "iKnowItAll - OSINT Intelligence Pipeline",
-        tags: ["Python", "OSINT", "Automation", "Data Correlation"],
-        description: "Modular, automated open-source intelligence toolkit capable of collecting, correlating, and reporting intelligence from multiple concurrent sources. Built with 9 specialized tools unified into a single pipeline.",
-        status: "active",
-        github: "https://github.com/yourusername/iKnowItAll",
-        walkthrough: {
-          tabs: ["Overview", "Architecture", "Core Tools", "Correlation Engine", "Usage"],
-          content: [
-            {
-              type: "overview",
-              body: `iKnowItAll is a modular OSINT automation framework built in Python. It aggregates intelligence from web scraping, username enumeration, IP analysis, news monitoring, forum tracking, and change detection — then correlates findings across all sources to surface actionable intelligence.
-
-The correlation engine identifies overlaps in usernames, URLs, timing, and even writing style across disparate data sources, making it possible to track entities and attribute activity across the web.`,
-              tech: ["Python 3", "requests", "BeautifulSoup", "Playwright", "concurrent.futures", "Tor/stem", "feedparser"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Modular Tool Design",
-                  desc: "Each intelligence source is a standalone module that can be used independently or integrated into the unified pipeline. All modules return normalized data structures for correlation.",
-                  code: null
-                },
-                {
-                  title: "Concurrent Collection",
-                  desc: "ThreadPoolExecutor runs all collection modules simultaneously. News scraper checks 40+ RSS feeds, IP tool queries 4 APIs, username enumerator checks 10+ platforms — all in parallel.",
-                  code: `<span class="keyword">from</span> concurrent.futures <span class="keyword">import</span> ThreadPoolExecutor
-
-<span class="keyword">with</span> ThreadPoolExecutor(max_workers=10) <span class="keyword">as</span> executor:
-    news_future = executor.submit(scrape_news, keywords)
-    forum_future = executor.submit(scrape_forums, keywords)
-    ip_future = executor.submit(analyze_ip, target_ip)
-    
-    results = {
-        <span class="string">'news'</span>: news_future.result(),
-        <span class="string">'forums'</span>: forum_future.result(),
-        <span class="string">'ip'</span>: ip_future.result()
-    }`
-                },
-                {
-                  title: "Correlation Engine",
-                  desc: "After collection, the correlation engine analyzes findings to identify connections: username overlap, URL/domain overlap, temporal proximity (events within 24hrs), and stylometric similarity (writing fingerprint matching).",
-                  code: null
-                },
-                {
-                  title: "Report Generation",
-                  desc: "Outputs both CSV (structured data) and HTML (human-readable intelligence briefing with dark theme). The HTML report highlights correlations with visual indicators.",
-                  code: null
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Web Scraper",
-                  desc: "Scrapes static HTML websites with pagination support. Includes browser impersonation via User-Agent rotation and exponential backoff for rate limiting.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python scraper.py</span> --url https://target.com/data --pages 5
-<span class="comment">  [*] Scraping page 1...</span>
-<span class="comment">  [*] Scraping page 2...</span>
-<span class="comment">  [+] Scraped 247 records → output.csv</span>`
-                },
-                {
-                  title: "Username Enumerator",
-                  desc: "Checks a username across 10+ platforms simultaneously (GitHub, Twitter, Reddit, Instagram, etc.). Concurrent requests with smart 404/403/200 handling.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python enumerate.py</span> --username target_user
-<span class="comment">  [+] GitHub: https://github.com/target_user</span>
-<span class="comment">  [+] Reddit: https://reddit.com/user/target_user</span>
-<span class="comment">  [+] Twitter: https://twitter.com/target_user</span>
-<span class="comment">  [-] Instagram: Not found</span>`
-                },
-                {
-                  title: "IP Intelligence Tool",
-                  desc: "Correlates data from Shodan, AbuseIPDB, ip-api.com, and reverse DNS lookups. Detects VPN/proxy/hosting infrastructure. All 4 APIs queried concurrently.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python iptool.py</span> --ip 203.0.113.42
-<span class="comment">  [Shodan] Open ports: 80, 443, 22</span>
-<span class="comment">  [AbuseIPDB] Confidence: 0% (clean)</span>
-<span class="comment">  [ip-api] ISP: Digital Ocean (hosting)</span>
-<span class="comment">  [DNS] PTR: droplet-42.digitalocean.com</span>`
-                },
-                {
-                  title: "Tor Session Manager",
-                  desc: "Routes traffic through Tor SOCKS5 proxy with circuit rotation via stem library. Verifies anonymity by checking exit node IP. Reusable module.",
-                  code: `<span class="keyword">from</span> tor_session <span class="keyword">import</span> TorSession
-
-session = TorSession()
-session.rotate_circuit()  <span class="comment"># New exit node</span>
-
-resp = session.get(<span class="string">'https://check.torproject.org'</span>)
-<span class="keyword">print</span>(session.get_current_ip())  <span class="comment"># Shows exit node</span>`
-                },
-                {
-                  title: "JavaScript Scraper",
-                  desc: "Handles JavaScript-rendered pages using Playwright browser automation. Full Chromium instance scrapes dynamic content invisible to requests.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python js_scraper.py</span> --url https://dynamic-site.com
-<span class="comment">  [*] Launching headless Chromium...</span>
-<span class="comment">  [*] Waiting for JS render...</span>
-<span class="comment">  [+] Scraped 189 elements → output.csv</span>`
-                },
-                {
-                  title: "News Intelligence Scraper",
-                  desc: "Scrapes 40+ RSS feeds from global news sources concurrently. Keyword-based relevance scoring (title matches weighted 3x body). Sorted output.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python news_scraper.py</span> --keywords <span class="string">"cybersecurity breach"</span>
-<span class="comment">  [*] Checking 42 RSS feeds...</span>
-<span class="comment">  [+] Found 18 relevant articles</span>
-<span class="comment">  [+] Top match: "Major Healthcare Breach..." (score: 6)</span>`
-                },
-                {
-                  title: "Multi-Forum Aggregator",
-                  desc: "Scrapes Reddit (5 subreddits, hot + new) and HackerNews simultaneously. Adapter pattern normalizes data. Deduplication and keyword scoring.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python forum_scraper.py</span> --keywords <span class="string">"zero day"</span>
-<span class="comment">  [*] Scraping r/netsec, r/blackhat, r/ReverseEngineering...</span>
-<span class="comment">  [*] Scraping HackerNews...</span>
-<span class="comment">  [+] Found 23 posts (12 Reddit, 11 HN)</span>`
-                },
-                {
-                  title: "Change Monitoring System",
-                  desc: "Monitors URLs for content changes via SHA-256 hashing. Persistent state in JSON. Generates unified diffs showing exact changes.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python change_monitor.py</span> --add https://target.com/page
-<span class="comment">  [+] Now monitoring https://target.com/page</span>
-
-<span class="prompt">$</span> <span class="cmd">python change_monitor.py</span> --check
-<span class="comment">  [!] CHANGE DETECTED on https://target.com/page</span>
-<span class="comment">  --- Original</span>
-<span class="comment">  +++ Current</span>
-<span class="comment">  @@ -12,3 +12,3 @@</span>
-<span class="comment">  -Version 1.2.3</span>
-<span class="comment">  +Version 1.2.4</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Username Overlap Detection",
-                  desc: "If a username appears in both news articles and forum posts, flag it as a correlation. Useful for tracking individuals across platforms.",
-                  code: `<span class="comment"># Example correlation:</span>
-<span class="comment"># Username "h4x0r_dev" found in:</span>
-<span class="comment">#   - HackerNews post about kernel exploits</span>
-<span class="comment">#   - News article comments on security breach</span>
-<span class="comment">#   → Correlated entity</span>`
-                },
-                {
-                  title: "URL/Domain Overlap",
-                  desc: "Extracts all URLs from news and forums, normalizes domains, flags overlaps. Surfaces infrastructure or campaigns referenced across sources.",
-                  code: `<span class="keyword">from</span> urllib.parse <span class="keyword">import</span> urlparse
-
-<span class="keyword">def</span> extract_domain(url):
-    <span class="keyword">return</span> urlparse(url).netloc
-
-domains_news = {extract_domain(u) <span class="keyword">for</span> u <span class="keyword">in</span> news_urls}
-domains_forums = {extract_domain(u) <span class="keyword">for</span> u <span class="keyword">in</span> forum_urls}
-overlap = domains_news & domains_forums`
-                },
-                {
-                  title: "Temporal Correlation",
-                  desc: "Events occurring within 24 hours of each other are flagged. Useful for tracking coordinated campaigns or incident response timelines.",
-                  code: `<span class="keyword">from</span> email.utils <span class="keyword">import</span> parsedate_to_datetime
-
-time_a = parsedate_to_datetime(article[<span class="string">'published'</span>])
-time_b = parsedate_to_datetime(post[<span class="string">'created'</span>])
-
-<span class="keyword">if</span> abs((time_a - time_b).total_seconds()) < 86400:
-    correlations.append((<span class="string">'temporal'</span>, article, post))`
-                },
-                {
-                  title: "Stylometric Similarity",
-                  desc: "Writing fingerprint analysis. Compares linguistic patterns across posts to attribute authorship. Detects if the same person is posting under different usernames.",
-                  code: `<span class="comment"># Simplified stylometric features:</span>
-<span class="comment"># - Average sentence length</span>
-<span class="comment"># - Lexical diversity (unique words / total words)</span>
-<span class="comment"># - Punctuation frequency</span>
-<span class="comment"># - Function word usage patterns</span>
-<span class="comment"># If fingerprints match → likely same author</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Full pipeline execution",
-                  desc: "Run all modules, correlate findings, generate reports.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python iKnowItAll.py</span> \
-    --keywords <span class="string">"APT28 campaign"</span> \
-    --username suspect_user \
-    --ip 203.0.113.42 \
-    --output intel_report
-
-<span class="comment">  [*] Running news scraper (40+ feeds)...</span>
-<span class="comment">  [*] Running forum aggregator (Reddit + HN)...</span>
-<span class="comment">  [*] Running username enumeration...</span>
-<span class="comment">  [*] Running IP analysis...</span>
-<span class="comment">  [*] Correlating findings...</span>
-<span class="comment">  [+] Found 3 username overlaps</span>
-<span class="comment">  [+] Found 2 domain overlaps</span>
-<span class="comment">  [+] Found 1 temporal correlation</span>
-<span class="comment">  [+] Reports saved:</span>
-<span class="comment">      intel_report.csv</span>
-<span class="comment">      intel_report.html</span>`
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "tip", title: "API Keys", body: "Shodan and AbuseIPDB require free API keys. Sign up at shodan.io and abuseipdb.com. Store keys in environment variables or a config file, never hardcode." },
-                { type: "warn", title: "Rate Limits", body: "All tools include exponential backoff retry logic. If you hit rate limits, the tool will automatically slow down. For heavy scraping, consider rotating proxies or using Tor session manager." },
-                { type: "note", title: "Legal Use Only", body: "This toolkit is for authorized OSINT research, threat intelligence, and educational purposes only. Always respect robots.txt, terms of service, and applicable laws. Do not use for unauthorized surveillance or harassment." },
-                { type: "tip", title: "Tor Setup", body: "Tor session manager requires Tor to be running locally. Install with apt install tor on Linux or download Tor Browser Bundle. The control port (9051) must be accessible and authentication configured." }
-              ]
-            }
-          ]
-        }
-    }
-  ];
-
-    // Blog posts
-    const BLOG_POSTS = [
-    {
-      title: 'OSINT Workflow for Trace Labs CTF',
-      date: 'March 2026',
-      tags: ['OSINT', 'CTF', 'Trace Labs'],
-      excerpt: 'Detailed methodology and results from participating in Trace Labs Search Party CTF, using open-source intelligence techniques to assist in real missing persons cases.',
-      readTime: '12 min read',
-      walkthrough: {
-        tabs: ['Introduction', 'Methodology', 'Tools & Techniques', 'Results', 'Key Takeaways'],
-        content: [
-          {
-            type: 'overview',
-            text: `Trace Labs hosts Search Party CTFs where participants use OSINT (Open Source Intelligence) techniques to gather actionable information on real missing persons cases. Unlike traditional CTFs focused on exploitation or forensics, this event channels the skills of the infosec community toward a humanitarian cause.
-
-Points are awarded for verified findings submitted to law enforcement through the Trace Labs platform. Each piece of information — a new social media account, a geolocated photo, a potential sighting — is vetted by moderators before being passed to investigators.
-
-This writeup documents my approach, tools, methodology, and results from my first Trace Labs CTF participation.`,
-            tech: []
-          },
-          {
-            type: 'steps',
-            steps: [
-              {
-                num: 1,
-                title: 'Initial Research & Case Review',
-                desc: 'Started by thoroughly reviewing case files and all available baseline information provided by Trace Labs.',
-                points: [
-                  'Read full case details and timeline',
-                  'Noted last known location and date',
-                  'Identified known social media profiles',
-                  'Documented known associates and family members',
-                  'Created initial mind map of connections'
-                ]
-              },
-              {
-                num: 2,
-                title: 'Social Media Deep Dive',
-                desc: 'Systematic enumeration and analysis of social media presence across multiple platforms.',
-                points: [
-                  'Facebook: Used graph search operators to find tagged photos, check-ins, and friend connections',
-                  'Instagram: Analyzed location tags, follower/following lists, and tagged photos',
-                  'Twitter: Deployed advanced search operators to find mentions and interactions',
-                  'LinkedIn: Mapped professional network and employment history',
-                  'TikTok/Snapchat: Searched for username variations and linked accounts'
-                ]
-              },
-              {
-                num: 3,
-                title: 'Geolocation Analysis',
-                desc: 'Leveraging posted images and metadata to identify potential locations.',
-                points: [
-                  'Extracted EXIF data from downloaded images',
-                  'Performed reverse image searches (Google, TinEye, Yandex)',
-                  'Cross-referenced landmarks and backgrounds with Google Maps',
-                  'Analyzed shadows and sun angles in outdoor photos',
-                  'Identified cell tower and WiFi metadata where available'
-                ]
-              },
-              {
-                num: 4,
-                title: 'Username & Email Enumeration',
-                desc: 'Pivoting on known identifiers to discover additional online presence.',
-                points: [
-                  'Used Sherlock for username enumeration across 300+ sites',
-                  'Checked username variations and common patterns',
-                  'Email permutation and verification (Hunter.io, theHarvester)',
-                  'Searched paste sites for credential leaks',
-                  'Checked domain registration records (WHOIS)'
-                ]
-              },
-              {
-                num: 5,
-                title: 'Data Aggregation & Timeline Construction',
-                desc: 'Organizing findings into actionable intelligence.',
-                points: [
-                  'Built Maltego graph showing all discovered connections',
-                  'Created detailed timeline in spreadsheet format',
-                  'Cross-referenced findings for consistency',
-                  'Identified patterns in posting behavior',
-                  'Flagged high-confidence leads for submission'
-                ]
-              }
-            ]
-          },
-          {
-            type: 'overview',
-            title: 'Tools & Techniques',
-            text: 'A combination of automated tools and manual analysis techniques were employed throughout the investigation.',
-            tech: [
-              'Maltego Community Edition — link analysis and visualization',
-              'Sherlock — username enumeration across platforms',
-              'Google Dorks — advanced search operators for targeted results',
-              'Shodan — infrastructure and IoT device reconnaissance',
-              'OSINT Framework — comprehensive tool directory',
-              'Social-Searcher — real-time social media monitoring',
-              'TinEye & Google Reverse Image — image attribution and geolocation',
-              'ExifTool — metadata extraction from images',
-              'theHarvester — email and subdomain enumeration',
-              'SpiderFoot — automated OSINT collection'
-            ]
-          },
-          {
-            type: 'steps',
-            steps: [
-              {
-                num: 1,
-                title: 'Verified Social Media Accounts',
-                desc: 'Discovered 3 previously unknown accounts across different platforms that were confirmed by moderators and submitted to law enforcement.',
-                points: [
-                  'Instagram account under username variation',
-                  'Twitter account with different display name',
-                  'Facebook profile using maiden name'
-                ]
-              },
-              {
-                num: 2,
-                title: 'Geolocation Leads',
-                desc: '2 potential location leads were identified through image analysis and verified by the moderation team.',
-                points: [
-                  'Photo geolocated to specific shopping center via landmark matching',
-                  'Check-in data correlated with cell tower triangulation'
-                ]
-              },
-              {
-                num: 3,
-                title: 'Associate Connections',
-                desc: 'Identified 1 key associate connection that led to additional information channels.',
-                points: [
-                  'Previously unknown friend with recent interactions',
-                  'Connection led to discovery of private group membership',
-                  'Provided additional timeline context'
-                ]
-              },
-              {
-                num: 4,
-                title: 'Metadata Extraction',
-                desc: 'Multiple photos yielded extractable metadata that provided investigative value.',
-                points: [
-                  'GPS coordinates from EXIF data (4 images)',
-                  'Device fingerprinting from camera make/model',
-                  'Timestamp verification for timeline accuracy'
-                ]
-              }
-            ]
-          },
-          {
-            type: 'notes',
-            notes: [
-              {
-                type: 'tip',
-                title: 'Systematic Methodology is Critical',
-                text: 'Document every step, every search, every finding. Use spreadsheets, mind maps, and timelines. What seems insignificant early on may become a crucial puzzle piece later.'
-              },
-              {
-                type: 'tip',
-                title: 'Cross-Reference Everything',
-                text: 'Never submit a finding based on a single source. Verify information across multiple platforms and data points. False leads waste investigator time.'
-              },
-              {
-                type: 'tip',
-                title: 'Respect Privacy & Legal Boundaries',
-                text: 'This is not a penetration test. Do not attempt to access private accounts, do not social engineer friends/family, do not contact anyone involved in the case. Stay strictly within legal OSINT boundaries.'
-              },
-              {
-                type: 'warn',
-                title: 'OPSEC is Non-Negotiable',
-                text: 'Use a VPN. Use dedicated research accounts. Do not accidentally "like" or interact with content. Do not tip off the subject or associates. Maintain operational security at all times.'
-              },
-              {
-                type: 'tip',
-                title: 'Collaborate & Share Techniques',
-                text: 'Trace Labs events are team-based for a reason. Share your methodology, help others learn, and learn from others. The mission is bigger than points.'
-              },
-              {
-                type: 'note',
-                title: 'Emotional Awareness',
-                text: 'These are real cases involving real people and families. Take breaks if needed. The work is meaningful but can be emotionally taxing. Prioritize your mental health.'
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-        title: "iKnowItAll - OSINT Intelligence Pipeline",
-        tags: ["Python", "OSINT", "Automation", "Data Correlation"],
-        description: "Modular, automated open-source intelligence toolkit capable of collecting, correlating, and reporting intelligence from multiple concurrent sources. Built with 9 specialized tools unified into a single pipeline.",
-        status: "active",
-        github: "https://github.com/yourusername/iKnowItAll",
-        walkthrough: {
-          tabs: ["Overview", "Architecture", "Core Tools", "Correlation Engine", "Usage"],
-          content: [
-            {
-              type: "overview",
-              body: `iKnowItAll is a modular OSINT automation framework built in Python. It aggregates intelligence from web scraping, username enumeration, IP analysis, news monitoring, forum tracking, and change detection — then correlates findings across all sources to surface actionable intelligence.
-
-The correlation engine identifies overlaps in usernames, URLs, timing, and even writing style across disparate data sources, making it possible to track entities and attribute activity across the web.`,
-              tech: ["Python 3", "requests", "BeautifulSoup", "Playwright", "concurrent.futures", "Tor/stem", "feedparser"]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Modular Tool Design",
-                  desc: "Each intelligence source is a standalone module that can be used independently or integrated into the unified pipeline. All modules return normalized data structures for correlation.",
-                  code: null
-                },
-                {
-                  title: "Concurrent Collection",
-                  desc: "ThreadPoolExecutor runs all collection modules simultaneously. News scraper checks 40+ RSS feeds, IP tool queries 4 APIs, username enumerator checks 10+ platforms — all in parallel.",
-                  code: `<span class="keyword">from</span> concurrent.futures <span class="keyword">import</span> ThreadPoolExecutor
-
-<span class="keyword">with</span> ThreadPoolExecutor(max_workers=10) <span class="keyword">as</span> executor:
-    news_future = executor.submit(scrape_news, keywords)
-    forum_future = executor.submit(scrape_forums, keywords)
-    ip_future = executor.submit(analyze_ip, target_ip)
-    
-    results = {
-        <span class="string">'news'</span>: news_future.result(),
-        <span class="string">'forums'</span>: forum_future.result(),
-        <span class="string">'ip'</span>: ip_future.result()
-    }`
-                },
-                {
-                  title: "Correlation Engine",
-                  desc: "After collection, the correlation engine analyzes findings to identify connections: username overlap, URL/domain overlap, temporal proximity (events within 24hrs), and stylometric similarity (writing fingerprint matching).",
-                  code: null
-                },
-                {
-                  title: "Report Generation",
-                  desc: "Outputs both CSV (structured data) and HTML (human-readable intelligence briefing with dark theme). The HTML report highlights correlations with visual indicators.",
-                  code: null
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Web Scraper",
-                  desc: "Scrapes static HTML websites with pagination support. Includes browser impersonation via User-Agent rotation and exponential backoff for rate limiting.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python scraper.py</span> --url https://target.com/data --pages 5
-<span class="comment">  [*] Scraping page 1...</span>
-<span class="comment">  [*] Scraping page 2...</span>
-<span class="comment">  [+] Scraped 247 records → output.csv</span>`
-                },
-                {
-                  title: "Username Enumerator",
-                  desc: "Checks a username across 10+ platforms simultaneously (GitHub, Twitter, Reddit, Instagram, etc.). Concurrent requests with smart 404/403/200 handling.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python enumerate.py</span> --username target_user
-<span class="comment">  [+] GitHub: https://github.com/target_user</span>
-<span class="comment">  [+] Reddit: https://reddit.com/user/target_user</span>
-<span class="comment">  [+] Twitter: https://twitter.com/target_user</span>
-<span class="comment">  [-] Instagram: Not found</span>`
-                },
-                {
-                  title: "IP Intelligence Tool",
-                  desc: "Correlates data from Shodan, AbuseIPDB, ip-api.com, and reverse DNS lookups. Detects VPN/proxy/hosting infrastructure. All 4 APIs queried concurrently.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python iptool.py</span> --ip 203.0.113.42
-<span class="comment">  [Shodan] Open ports: 80, 443, 22</span>
-<span class="comment">  [AbuseIPDB] Confidence: 0% (clean)</span>
-<span class="comment">  [ip-api] ISP: Digital Ocean (hosting)</span>
-<span class="comment">  [DNS] PTR: droplet-42.digitalocean.com</span>`
-                },
-                {
-                  title: "Tor Session Manager",
-                  desc: "Routes traffic through Tor SOCKS5 proxy with circuit rotation via stem library. Verifies anonymity by checking exit node IP. Reusable module.",
-                  code: `<span class="keyword">from</span> tor_session <span class="keyword">import</span> TorSession
-
-session = TorSession()
-session.rotate_circuit()  <span class="comment"># New exit node</span>
-
-resp = session.get(<span class="string">'https://check.torproject.org'</span>)
-<span class="keyword">print</span>(session.get_current_ip())  <span class="comment"># Shows exit node</span>`
-                },
-                {
-                  title: "JavaScript Scraper",
-                  desc: "Handles JavaScript-rendered pages using Playwright browser automation. Full Chromium instance scrapes dynamic content invisible to requests.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python js_scraper.py</span> --url https://dynamic-site.com
-<span class="comment">  [*] Launching headless Chromium...</span>
-<span class="comment">  [*] Waiting for JS render...</span>
-<span class="comment">  [+] Scraped 189 elements → output.csv</span>`
-                },
-                {
-                  title: "News Intelligence Scraper",
-                  desc: "Scrapes 40+ RSS feeds from global news sources concurrently. Keyword-based relevance scoring (title matches weighted 3x body). Sorted output.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python news_scraper.py</span> --keywords <span class="string">"cybersecurity breach"</span>
-<span class="comment">  [*] Checking 42 RSS feeds...</span>
-<span class="comment">  [+] Found 18 relevant articles</span>
-<span class="comment">  [+] Top match: "Major Healthcare Breach..." (score: 6)</span>`
-                },
-                {
-                  title: "Multi-Forum Aggregator",
-                  desc: "Scrapes Reddit (5 subreddits, hot + new) and HackerNews simultaneously. Adapter pattern normalizes data. Deduplication and keyword scoring.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python forum_scraper.py</span> --keywords <span class="string">"zero day"</span>
-<span class="comment">  [*] Scraping r/netsec, r/blackhat, r/ReverseEngineering...</span>
-<span class="comment">  [*] Scraping HackerNews...</span>
-<span class="comment">  [+] Found 23 posts (12 Reddit, 11 HN)</span>`
-                },
-                {
-                  title: "Change Monitoring System",
-                  desc: "Monitors URLs for content changes via SHA-256 hashing. Persistent state in JSON. Generates unified diffs showing exact changes.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python change_monitor.py</span> --add https://target.com/page
-<span class="comment">  [+] Now monitoring https://target.com/page</span>
-
-<span class="prompt">$</span> <span class="cmd">python change_monitor.py</span> --check
-<span class="comment">  [!] CHANGE DETECTED on https://target.com/page</span>
-<span class="comment">  --- Original</span>
-<span class="comment">  +++ Current</span>
-<span class="comment">  @@ -12,3 +12,3 @@</span>
-<span class="comment">  -Version 1.2.3</span>
-<span class="comment">  +Version 1.2.4</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Username Overlap Detection",
-                  desc: "If a username appears in both news articles and forum posts, flag it as a correlation. Useful for tracking individuals across platforms.",
-                  code: `<span class="comment"># Example correlation:</span>
-<span class="comment"># Username "h4x0r_dev" found in:</span>
-<span class="comment">#   - HackerNews post about kernel exploits</span>
-<span class="comment">#   - News article comments on security breach</span>
-<span class="comment">#   → Correlated entity</span>`
-                },
-                {
-                  title: "URL/Domain Overlap",
-                  desc: "Extracts all URLs from news and forums, normalizes domains, flags overlaps. Surfaces infrastructure or campaigns referenced across sources.",
-                  code: `<span class="keyword">from</span> urllib.parse <span class="keyword">import</span> urlparse
-
-<span class="keyword">def</span> extract_domain(url):
-    <span class="keyword">return</span> urlparse(url).netloc
-
-domains_news = {extract_domain(u) <span class="keyword">for</span> u <span class="keyword">in</span> news_urls}
-domains_forums = {extract_domain(u) <span class="keyword">for</span> u <span class="keyword">in</span> forum_urls}
-overlap = domains_news & domains_forums`
-                },
-                {
-                  title: "Temporal Correlation",
-                  desc: "Events occurring within 24 hours of each other are flagged. Useful for tracking coordinated campaigns or incident response timelines.",
-                  code: `<span class="keyword">from</span> email.utils <span class="keyword">import</span> parsedate_to_datetime
-
-time_a = parsedate_to_datetime(article[<span class="string">'published'</span>])
-time_b = parsedate_to_datetime(post[<span class="string">'created'</span>])
-
-<span class="keyword">if</span> abs((time_a - time_b).total_seconds()) < 86400:
-    correlations.append((<span class="string">'temporal'</span>, article, post))`
-                },
-                {
-                  title: "Stylometric Similarity",
-                  desc: "Writing fingerprint analysis. Compares linguistic patterns across posts to attribute authorship. Detects if the same person is posting under different usernames.",
-                  code: `<span class="comment"># Simplified stylometric features:</span>
-<span class="comment"># - Average sentence length</span>
-<span class="comment"># - Lexical diversity (unique words / total words)</span>
-<span class="comment"># - Punctuation frequency</span>
-<span class="comment"># - Function word usage patterns</span>
-<span class="comment"># If fingerprints match → likely same author</span>`
-                }
-              ]
-            },
-            {
-              type: "steps",
-              steps: [
-                {
-                  title: "Full pipeline execution",
-                  desc: "Run all modules, correlate findings, generate reports.",
-                  code: `<span class="prompt">$</span> <span class="cmd">python iKnowItAll.py</span> \
-    --keywords <span class="string">"APT28 campaign"</span> \
-    --username suspect_user \
-    --ip 203.0.113.42 \
-    --output intel_report
-
-<span class="comment">  [*] Running news scraper (40+ feeds)...</span>
-<span class="comment">  [*] Running forum aggregator (Reddit + HN)...</span>
-<span class="comment">  [*] Running username enumeration...</span>
-<span class="comment">  [*] Running IP analysis...</span>
-<span class="comment">  [*] Correlating findings...</span>
-<span class="comment">  [+] Found 3 username overlaps</span>
-<span class="comment">  [+] Found 2 domain overlaps</span>
-<span class="comment">  [+] Found 1 temporal correlation</span>
-<span class="comment">  [+] Reports saved:</span>
-<span class="comment">      intel_report.csv</span>
-<span class="comment">      intel_report.html</span>`
-                }
-              ]
-            },
-            {
-              type: "notes",
-              items: [
-                { type: "tip", title: "API Keys", body: "Shodan and AbuseIPDB require free API keys. Sign up at shodan.io and abuseipdb.com. Store keys in environment variables or a config file, never hardcode." },
-                { type: "warn", title: "Rate Limits", body: "All tools include exponential backoff retry logic. If you hit rate limits, the tool will automatically slow down. For heavy scraping, consider rotating proxies or using Tor session manager." },
-                { type: "note", title: "Legal Use Only", body: "This toolkit is for authorized OSINT research, threat intelligence, and educational purposes only. Always respect robots.txt, terms of service, and applicable laws. Do not use for unauthorized surveillance or harassment." },
-                { type: "tip", title: "Tor Setup", body: "Tor session manager requires Tor to be running locally. Install with apt install tor on Linux or download Tor Browser Bundle. The control port (9051) must be accessible and authentication configured." }
-              ]
-            }
-          ]
-        }
-    }
-,
-    {
-      title: 'Reverse Engineering: crackit Challenge Writeup',
-      date: 'March 2026',
-      tags: ['Reverse Engineering', 'CTF', 'Binary Analysis'],
-      excerpt: 'Walkthrough of solving a simple crackme challenge using hexdump to extract embedded strings and validate the flag.',
-      readTime: '5 min read',
-      walkthrough: {
-        tabs: ['Challenge', 'Analysis', 'Solution', 'Key Takeaways'],
-        content: [
-          {
-            type: 'overview',
-            body: `The "crackit" challenge is a simple crackme — a reverse engineering puzzle where the goal is to find the correct input (flag) that makes the program output a success message.
-
-Unlike more complex crackmes that require disassembly, debugging, or decompilation, this one can be solved with basic binary analysis using hexdump.`,
-            tech: ['hexdump', 'Binary Analysis', 'String Extraction', 'CTF']
-          },
-          {
-            type: 'steps',
-            steps: [
-              {
-                title: 'Initial reconnaissance',
-                desc: 'First step when analyzing any binary: check what kind of file it is and run it to observe behavior.',
-                code: `<span class="prompt">$</span> <span class="cmd">file</span> crackit
-<span class="comment">crackit: ELF 64-bit LSB executable, x86-64</span>
-
-<span class="prompt">$</span> <span class="cmd">./crackit</span>
-<span class="comment">Usage: ./crackit <flag></span>
-
-<span class="prompt">$</span> <span class="cmd">./crackit</span> "test"
-<span class="comment">Nope!</span>`
-              },
-              {
-                title: 'Search for embedded strings',
-                desc: 'The binary requires a flag as input. Rather than reverse engineering the validation logic, check if the flag is embedded in the binary as plaintext.',
-                code: `<span class="prompt">$</span> <span class="cmd">strings</span> crackit | <span class="cmd">grep</span> -i ctf
-<span class="comment">CTF{</span>
-<span class="comment">My_</span>
-<span class="comment">S3c</span>
-<span class="comment">...</span>
-
-<span class="comment"># Strings are present but fragmented</span>`
-              },
-              {
-                title: 'Hexdump analysis',
-                desc: 'Use hexdump to view the raw binary content and locate the flag string. The flag appears to be null-byte separated.',
-                code: `<span class="prompt">$</span> <span class="cmd">hexdump -C</span> crackit | <span class="cmd">grep</span> -A 2 "CTF"
-<span class="comment">00002090  00 43 54 46 7b 00 4d 79  5f 00 53 33 63 00 72 33  |.CTF{.My_.S3c.r3|</span>
-<span class="comment">000020a0  74 5f 00 46 6c 34 67 00  7d 57 30 57 00 59 30 75  |t_.Fl4g.}W0W.Y0u|</span>
-<span class="comment">000020b0  00 46 30 75 6e 64 00 4d  33 00 7b 30 72 20 00 4e  |.F0und.M3.{0r .N|</span>
-<span class="comment">000020c0  30 74 7d 00 01 1b 03 3b  58 00 00 00 0a 00 00 00  |0t}....;X.......|</span>`
-              },
-              {
-                title: 'Extract and reconstruct the flag',
-                desc: 'Reading the hex dump output, extract each fragment and remove the null bytes to reconstruct the full flag.',
-                code: `<span class="comment">Fragments visible in hex dump:</span>
-<span class="comment">CTF{</span>
-<span class="comment">My_</span>
-<span class="comment">S3c</span>
-<span class="comment">r3</span>
-<span class="comment">t_</span>
-<span class="comment">Fl4g</span>
-<span class="comment">}W0W</span>
-<span class="comment">Y0u</span>
-<span class="comment">F0und</span>
-<span class="comment">M3</span>
-<span class="comment">{0r </span>
-<span class="comment">N0t}</span>
-
-<span class="comment">Reconstructed flag:</span>
-<span class="string">CTF{My_S3cr3t_Fl4g}W0WY0uF0undM3{0r N0t}</span>`
-              }
-            ]
-          },
-          {
-            type: 'steps',
-            steps: [
-              {
-                title: 'Validate the flag',
-                desc: 'Run the binary with the reconstructed flag to verify it is correct.',
-                code: `<span class="prompt">$</span> <span class="cmd">./crackit</span> "CTF{My_S3cr3t_Fl4g}W0WY0uF0undM3{0r N0t}"
-<span class="comment">You cracked me!</span>
-
-<span class="comment">✅ Success! The flag is valid.</span>`
-              }
-            ]
-          },
-          {
-            type: 'notes',
-            items: [
-              {
-                type: 'tip',
-                title: 'Always check for low-hanging fruit',
-                text: 'Before diving into disassembly with Ghidra or IDA, always run basic checks: strings, hexdump, file, ltrace, strace. Many CTF challenges (and even real malware) contain secrets in plaintext or lightly obfuscated.'
-              },
-              {
-                type: 'note',
-                title: 'Why null-byte separation?',
-                text: 'The flag was split with null bytes to evade the strings command, which stops at null terminators. This is a simple anti-analysis technique. hexdump -C shows the raw hex and ASCII side-by-side, revealing the full pattern.'
-              },
-              {
-                type: 'tip',
-                title: 'Hexdump is underrated',
-                text: 'hexdump (or xxd) is one of the most useful tools for binary analysis. Use hexdump -C for canonical hex+ASCII output. Combine with grep to search for specific patterns.'
-              },
-              {
-                type: 'note',
-                title: 'Next steps in reverse engineering',
-                text: 'This was a beginner-level challenge. More complex crackmes require disassembly (objdump, Ghidra, IDA), debugging (gdb, x64dbg), or decompilation. Start with challenges on crackmes.one or reversing.kr to build skills.'
-              }
-            ]
-          }
-        ]
-      }
-    }  ];
-
-    // ====================================================
-    // OPERATIONS DATA
-    // ====================================================
-    const OPERATIONS = [
-    {
-      title: 'OSINT Trace Labs CTF',
-      type: 'Real Operation',
-      date: 'March 2026',
-      tags: ['OSINT', 'CTF', 'Investigation'],
-      description: 'Participated in Trace Labs Search Party CTF using OSINT techniques to assist in real missing persons cases. Successfully identified multiple leads submitted to law enforcement.',
-      walkthrough: {
-        tabs: ['Overview', 'Methodology', 'Tools Used', 'Results', 'Key Takeaways'],
-        content: [
-          {
-            type: 'overview',
-            text: `Trace Labs hosts Search Party CTFs where participants use OSINT (Open Source Intelligence) techniques to gather actionable information on real missing persons cases. Unlike traditional CTFs, this event channels infosec skills toward a humanitarian cause.
-
-Points are awarded for verified findings submitted to law enforcement through the Trace Labs platform. Each piece of information is vetted by moderators before being passed to investigators.`,
-            tech: ['OSINT', 'Social Media Analysis', 'Geolocation', 'Metadata Extraction', 'Link Analysis']
-          },
-          {
-            type: 'steps',
-            steps: [
-              {
-                num: 1,
-                title: 'Initial Research',
-                desc: 'Reviewed case files and baseline information',
-                points: [
-                  'Analyzed case timeline and last known location',
-                  'Mapped known social media profiles',
-                  'Documented associates and family connections',
-                  'Created initial relationship graph'
-                ]
-              },
-              {
-                num: 2,
-                title: 'Social Media Deep Dive',
-                desc: 'Systematic platform enumeration',
-                points: [
-                  'Facebook graph search and tagged photos',
-                  'Instagram location analysis and followers',
-                  'Twitter advanced search operators',
-                  'LinkedIn professional network mapping',
-                  'Username variation searches'
-                ]
-              },
-              {
-                num: 3,
-                title: 'Geolocation Analysis',
-                desc: 'Image and metadata exploitation',
-                points: [
-                  'EXIF data extraction from photos',
-                  'Reverse image searches (Google, TinEye, Yandex)',
-                  'Landmark and background correlation',
-                  'Cell tower and WiFi metadata analysis'
-                ]
-              },
-              {
-                num: 4,
-                title: 'Data Aggregation',
-                desc: 'Organizing findings into actionable intelligence',
-                points: [
-                  'Built Maltego link analysis graph',
-                  'Created detailed timeline',
-                  'Cross-referenced all findings',
-                  'Identified high-confidence leads for submission'
-                ]
-              }
-            ]
-          },
-          {
-            type: 'overview',
-            title: 'Tools & Techniques',
-            text: 'Combination of automated tools and manual analysis.',
-            tech: [
-              'Maltego Community Edition',
-              'Sherlock (username enumeration)',
-              'Google Dorks',
-              'Shodan',
-              'Social-Searcher',
-              'TinEye & Google Reverse Image',
-              'ExifTool',
-              'theHarvester',
-              'SpiderFoot'
-            ]
-          },
-          {
-            type: 'steps',
-            steps: [
-              {
-                num: 1,
-                title: 'Social Media Accounts',
-                desc: '3 previously unknown accounts discovered and verified',
-                points: [
-                  'Instagram account under username variation',
-                  'Twitter account with different display name',
-                  'Facebook profile using maiden name'
-                ]
-              },
-              {
-                num: 2,
-                title: 'Geolocation Leads',
-                desc: '2 potential location leads verified by moderators',
-                points: [
-                  'Photo geolocated to specific shopping center',
-                  'Check-in data correlated with cell tower info'
-                ]
-              },
-              {
-                num: 3,
-                title: 'Associate Connections',
-                desc: '1 key connection identified',
-                points: [
-                  'Previously unknown friend with recent interactions',
-                  'Led to discovery of private group membership'
-                ]
-              }
-            ]
-          },
-          {
-            type: 'notes',
-            notes: [
-              {
-                type: 'tip',
-                title: 'Systematic Methodology',
-                text: 'Document every step. What seems insignificant early on may become crucial later.'
-              },
-              {
-                type: 'tip',
-                title: 'Cross-Reference Everything',
-                text: 'Never submit findings based on a single source. Verify across multiple platforms.'
-              },
-              {
-                type: 'warn',
-                title: 'OPSEC is Critical',
-                text: 'Use VPN, dedicated research accounts, avoid interactions with content. Maintain operational security at all times.'
-              },
-              {
-                type: 'note',
-                title: 'Legal Boundaries',
-                text: 'Stay strictly within legal OSINT boundaries. No social engineering, no unauthorized access.'
-              }
-            ]
-          }
-        ]
-      }
-    }
-  ];
-
-    // ====================================================
-    // RENDER OPERATIONS
-    // ====================================================
-    function renderOperations() {
-      const container = document.getElementById('operationsContainer');
-      OPERATIONS.forEach((op, idx) => {
-        const item = document.createElement('div');
-        item.className = 'timeline-item';
-        item.innerHTML = `
-          <div class="timeline-date">${op.date}</div>
-          <div class="timeline-title">${op.title}</div>
-          <div class="timeline-description">${op.description}</div>
-          <button class="op-walkthrough-btn" data-idx="${idx}">
-            <span>▶ View Walkthrough</span>
-            <span class="arrow">→</span>
-          </button>
-        `;
-        container.appendChild(item);
-      });
-
-      container.addEventListener('click', e => {
-        const btn = e.target.closest('.op-walkthrough-btn');
-        if (btn) openOpWalkthrough(parseInt(btn.dataset.idx));
-      });
-    }
-
-    // ====================================================
-    // OPERATION WALKTHROUGH MODAL
-    // ====================================================
-    let opCurrentTab = 0;
-    let opCurrentProject = null;
-
-    function openOpWalkthrough(idx) {
-      opCurrentProject = OPERATIONS[idx];
-      opCurrentTab = 0;
-      const wt = opCurrentProject.walkthrough;
-
-      document.getElementById('opWtTitle').textContent = opCurrentProject.title;
-
-      const tagsEl = document.getElementById('opWtTags');
-      tagsEl.innerHTML = opCurrentProject.tags.map(t => `<span class="tag">${t}</span>`).join('');
-
-      const tabsEl = document.getElementById('opWtTabs');
-      tabsEl.innerHTML = wt.tabs.map((name, i) =>
-        `<button class="wt-tab ${i===0?'active':''}" data-tab="${i}">${name}</button>`
-      ).join('');
-
-      buildOpPanels(wt);
-      updateOpTabState();
-      document.getElementById('opWalkthroughModal').classList.add('active');
-      document.getElementById('opWtBody').scrollTop = 0;
-    }
-
-    function buildOpPanels(wt) {
-      const body = document.getElementById('opWtBody');
-      body.innerHTML = '';
-
-      wt.content.forEach((panel, i) => {
-        const div = document.createElement('div');
-        div.className = `wt-panel ${i===0?'active':''}`;
-
-        if (panel.type === 'overview') {
-          div.innerHTML = `
-            <p class="wt-overview">${escHtml(panel.body).replace(/\n\n/g,'</p><p class="wt-overview">').replace(/\n/g,'<br>')}</p>
-            <div>
-              <div class="wt-code-label">Techniques & Tools</div>
-              <div class="wt-tech-row">${panel.tech.map(t=>`<span class="wt-tech">${t}</span>`).join('')}</div>
-            </div>
-          `;
-        } else if (panel.type === 'steps') {
-          div.innerHTML = panel.steps.map((step, si) => `
-            <div class="wt-step" data-step="${i}-${si}">
-              <div class="wt-step-header" onclick="toggleStep(this)">
-                <span class="wt-step-num">${si+1}</span>
-                <span class="wt-step-title">${step.title}</span>
-                <span class="wt-step-chevron">▶</span>
-              </div>
-              <div class="wt-step-body">
-                ${step.desc ? `<p class="wt-step-desc">${step.desc}</p>` : ''}
-                ${step.code ? `<div class="wt-code">${step.code}</div>` : ''}
-              </div>
-            </div>
-          `).join('');
-        } else if (panel.type === 'notes') {
-          div.innerHTML = panel.items.map(item => `
-            <div class="wt-${item.type}">
-              <strong>${item.type==='warn'?'⚠ ':item.type==='tip'?'💡 ':'ℹ '}${item.title}</strong><br>
-              ${item.body}
-            </div>
-          `).join('');
-        }
-
-        body.appendChild(div);
-      });
-    }
-
-    function updateOpTabState() {
-      const wt = opCurrentProject.walkthrough;
-      document.querySelectorAll('#opWtTabs .wt-tab').forEach((btn,i) =>
-        btn.classList.toggle('active', i===opCurrentTab));
-      document.querySelectorAll('#opWtBody .wt-panel').forEach((p,i) =>
-        p.classList.toggle('active', i===opCurrentTab));
-      document.getElementById('opWtCounter').textContent =
-        `Tab ${opCurrentTab+1} of ${wt.tabs.length}`;
-      document.getElementById('opWtPrev').disabled = opCurrentTab === 0;
-      document.getElementById('opWtNext').disabled = opCurrentTab === wt.tabs.length - 1;
-    }
-
-    function switchOpTab(idx) {
-      opCurrentTab = Math.max(0, Math.min(idx, opCurrentProject.walkthrough.tabs.length - 1));
-      updateOpTabState();
-      document.getElementById('opWtBody').scrollTop = 0;
-    }
-
-    document.getElementById('opWtTabs').addEventListener('click', e => {
-      const btn = e.target.closest('.wt-tab');
-      if (btn) switchOpTab(parseInt(btn.dataset.tab));
-    });
-
-    document.getElementById('opWtPrev').addEventListener('click', () => switchOpTab(opCurrentTab - 1));
-    document.getElementById('opWtNext').addEventListener('click', () => switchOpTab(opCurrentTab + 1));
-
-    document.getElementById('closeOpWalkthrough').addEventListener('click', () => {
-      document.getElementById('opWalkthroughModal').classList.remove('active');
-    });
-
-    // ====================================================
-    // RENDER PROJECTS
-    // ====================================================
-    function renderProjects() {
-      const container = document.getElementById('projectsContainer');
-      PROJECTS.forEach((project, idx) => {
-        const statusClass = project.status === 'active' ? '' : project.status;
-        const card = document.createElement('div');
-        card.className = 'project-card';
-        card.innerHTML = `
-          <h3>${project.title}</h3>
-          <div class="project-meta">
-            ${project.tags.map(t => `<span class="tag">${t}</span>`).join('')}
-          </div>
-          <div class="project-description">${project.description}</div>
-          <div class="project-status">
-            <span class="status-indicator ${statusClass}"></span>
-            ${project.status.charAt(0).toUpperCase() + project.status.slice(1).replace('-', ' ')}
-          </div>
-          <button class="project-walkthrough-btn" data-idx="${idx}">
-            <span>▶ View Walkthrough</span>
-            <span class="arrow">→</span>
-          </button>
-        `;
-        container.appendChild(card);
-      });
-
-      container.addEventListener('click', e => {
-        const btn = e.target.closest('.project-walkthrough-btn');
-        if (btn) openWalkthrough(parseInt(btn.dataset.idx));
-      });
-    }
-
-    // ====================================================
-    // WALKTHROUGH MODAL
-    // ====================================================
-    let currentTab = 0;
-    let currentProject = null;
-
-    function openWalkthrough(idx) {
-      currentProject = PROJECTS[idx];
-      currentTab = 0;
-      const wt = currentProject.walkthrough;
-
-      document.getElementById('wtTitle').textContent = currentProject.title;
-
-      // Tags
-      const tagsEl = document.getElementById('wtTags');
-      tagsEl.innerHTML = currentProject.tags.map(t => `<span class="tag">${t}</span>`).join('');
-
-      // Build tabs
-      const tabsEl = document.getElementById('wtTabs');
-      tabsEl.innerHTML = wt.tabs.map((name, i) =>
-        `<button class="wt-tab ${i===0?'active':''}" data-tab="${i}">${name}</button>`
-      ).join('');
-
-      // Build body panels
-      buildPanels(wt);
-
-      updateTabState();
-      document.getElementById('walkthroughModal').classList.add('active');
-      document.getElementById('wtBody').scrollTop = 0;
-    }
-
-    function buildPanels(wt) {
-      const body = document.getElementById('wtBody');
-      body.innerHTML = '';
-
-      wt.content.forEach((panel, i) => {
-        const div = document.createElement('div');
-        div.className = `wt-panel ${i===0?'active':''}`;
-
-        if (panel.type === 'overview') {
-          div.innerHTML = `
-            <p class="wt-overview">${escHtml(panel.body).replace(/\n\n/g, '</p><p class="wt-overview">').replace(/\n/g, '<br>')}</p>
-            <div>
-              <div class="wt-code-label">Tech Stack</div>
-              <div class="wt-tech-row">${panel.tech.map(t=>`<span class="wt-tech">${t}</span>`).join('')}</div>
-            </div>
-          `;
-        } else if (panel.type === 'steps') {
-          div.innerHTML = panel.steps.map((step, si) => `
-            <div class="wt-step" data-step="${i}-${si}">
-              <div class="wt-step-header" onclick="toggleStep(this)">
-                <span class="wt-step-num">${si+1}</span>
-                <span class="wt-step-title">${step.title}</span>
-                <span class="wt-step-chevron">▶</span>
-              </div>
-              <div class="wt-step-body">
-                ${step.desc ? `<p class="wt-step-desc">${step.desc}</p>` : ''}
-                ${step.code ? `<div class="wt-code">${step.code}</div>` : ''}
-              </div>
-            </div>
-          `).join('');
-        } else if (panel.type === 'notes') {
-          div.innerHTML = panel.items.map(item => `
-            <div class="wt-${item.type}">
-              <strong>${item.type === 'warn' ? '⚠ ' : item.type === 'tip' ? '💡 ' : 'ℹ '}${item.title}</strong><br>
-              ${item.body}
-            </div>
-          `).join('');
-        }
-
-        body.appendChild(div);
-      });
-    }
-
-    function toggleStep(header) {
-      const step = header.parentElement;
-      step.classList.toggle('open');
-    }
-
-    function escHtml(str) {
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
-    function switchTab(idx) {
-      const wt = currentProject.walkthrough;
-      currentTab = Math.max(0, Math.min(idx, wt.tabs.length - 1));
-      updateTabState();
-      document.getElementById('wtBody').scrollTop = 0;
-    }
-
-    function updateTabState() {
-      const wt = currentProject.walkthrough;
-      const tabBtns = document.querySelectorAll('.wt-tab');
-      const panels = document.querySelectorAll('.wt-panel');
-
-      tabBtns.forEach((btn, i) => btn.classList.toggle('active', i === currentTab));
-      panels.forEach((p, i) => p.classList.toggle('active', i === currentTab));
-
-      document.getElementById('wtCounter').textContent =
-        `Tab ${currentTab+1} of ${wt.tabs.length}`;
-      document.getElementById('wtPrev').disabled = currentTab === 0;
-      document.getElementById('wtNext').disabled = currentTab === wt.tabs.length - 1;
-    }
-
-    // Tab clicks
-    document.getElementById('wtTabs').addEventListener('click', e => {
-      const btn = e.target.closest('.wt-tab');
-      if (btn) switchTab(parseInt(btn.dataset.tab));
-    });
-
-    document.getElementById('wtPrev').addEventListener('click', () => switchTab(currentTab - 1));
-    document.getElementById('wtNext').addEventListener('click', () => switchTab(currentTab + 1));
-
-    document.getElementById('closeWalkthrough').addEventListener('click', () => {
-      document.getElementById('walkthroughModal').classList.remove('active');
-    });
-
-    // ====================================================
-    // RENDER BLOG
-    // ====================================================
-    function renderBlog() {
-      const container = document.getElementById('blogContainer');
-      BLOG_POSTS.forEach((post, idx) => {
-        const article = document.createElement('article');
-        article.className = 'blog-post';
-        article.innerHTML = `
-          <h3>${post.title}</h3>
-          <div class="blog-post-meta"><span>📅 ${post.date}</span><span>•</span><span>⏱️ ${post.readTime}</span></div>
-          <div class="blog-post-tags">${post.tags.map(t=>`<span class="tag">#${t}</span>`).join('')}</div>
-          <div class="blog-post-excerpt">${post.excerpt}</div>
-          <button class="op-walkthrough-btn blog-wt-btn" data-idx="${idx}" style="margin-top:12px;">
-            <span>▶ Read Full Post</span>
-            <span class="arrow">→</span>
-          </button>
-        `;
-        container.appendChild(article);
-      });
-
-      container.addEventListener('click', e => {
-        const btn = e.target.closest('.blog-wt-btn');
-        if (btn) { e.stopPropagation(); openBlogWalkthrough(parseInt(btn.dataset.idx)); }
-      });
-    }
-
-    // ====================================================
-    // BLOG WALKTHROUGH MODAL
-    // ====================================================
-    let blogCurrentTab = 0;
-    let blogCurrentPost = null;
-
-    function openBlogWalkthrough(idx) {
-      blogCurrentPost = BLOG_POSTS[idx];
-      blogCurrentTab = 0;
-      const wt = blogCurrentPost.walkthrough;
-
-      document.getElementById('blogWtTitle').textContent = blogCurrentPost.title;
-      document.getElementById('blogWtMeta').textContent =
-        `📅 ${blogCurrentPost.date}  •  ⏱️ ${blogCurrentPost.readTime}`;
-
-      const tagsEl = document.getElementById('blogWtTags');
-      tagsEl.innerHTML = blogCurrentPost.tags.map(t => `<span class="tag">#${t}</span>`).join('');
-
-      const tabsEl = document.getElementById('blogWtTabs');
-      tabsEl.innerHTML = wt.tabs.map((name, i) =>
-        `<button class="wt-tab ${i===0?'active':''}" data-tab="${i}">${name}</button>`
-      ).join('');
-
-      buildBlogPanels(wt);
-      updateBlogTabState();
-      document.getElementById('blogWalkthroughModal').classList.add('active');
-      document.getElementById('blogWtBody').scrollTop = 0;
-    }
-
-    function buildBlogPanels(wt) {
-      const body = document.getElementById('blogWtBody');
-      body.innerHTML = '';
-      wt.content.forEach((panel, i) => {
-        const div = document.createElement('div');
-        div.className = `wt-panel ${i===0?'active':''}`;
-
-        if (panel.type === 'overview') {
-          div.innerHTML = `
-            <p class="wt-overview">${escHtml(panel.body).replace(/\n\n/g,'</p><p class="wt-overview">').replace(/\n/g,'<br>')}</p>
-            <div>
-              <div class="wt-code-label">Topics & Tools</div>
-              <div class="wt-tech-row">${panel.tech.map(t=>`<span class="wt-tech">${t}</span>`).join('')}</div>
-            </div>
-          `;
-        } else if (panel.type === 'steps') {
-          div.innerHTML = panel.steps.map((step, si) => `
-            <div class="wt-step" data-step="${i}-${si}">
-              <div class="wt-step-header" onclick="toggleStep(this)">
-                <span class="wt-step-num">${si+1}</span>
-                <span class="wt-step-title">${step.title}</span>
-                <span class="wt-step-chevron">▶</span>
-              </div>
-              <div class="wt-step-body">
-                ${step.desc ? `<p class="wt-step-desc">${step.desc}</p>` : ''}
-                ${step.code ? `<div class="wt-code">${step.code}</div>` : ''}
-              </div>
-            </div>
-          `).join('');
-        } else if (panel.type === 'notes') {
-          div.innerHTML = panel.items.map(item => `
-            <div class="wt-${item.type}">
-              <strong>${item.type==='warn'?'⚠ ':item.type==='tip'?'💡 ':'ℹ '}${item.title}</strong><br>
-              ${item.body}
-            </div>
-          `).join('');
-        }
-        body.appendChild(div);
-      });
-    }
-
-    function updateBlogTabState() {
-      const wt = blogCurrentPost.walkthrough;
-      document.querySelectorAll('#blogWtTabs .wt-tab').forEach((btn,i) =>
-        btn.classList.toggle('active', i===blogCurrentTab));
-      document.querySelectorAll('#blogWtBody .wt-panel').forEach((p,i) =>
-        p.classList.toggle('active', i===blogCurrentTab));
-      document.getElementById('blogWtCounter').textContent =
-        `Tab ${blogCurrentTab+1} of ${wt.tabs.length}`;
-      document.getElementById('blogWtPrev').disabled = blogCurrentTab === 0;
-      document.getElementById('blogWtNext').disabled = blogCurrentTab === wt.tabs.length - 1;
-    }
-
-    function switchBlogTab(idx) {
-      blogCurrentTab = Math.max(0, Math.min(idx, blogCurrentPost.walkthrough.tabs.length - 1));
-      updateBlogTabState();
-      document.getElementById('blogWtBody').scrollTop = 0;
-    }
-
-    document.getElementById('blogWtTabs').addEventListener('click', e => {
-      const btn = e.target.closest('.wt-tab');
-      if (btn) switchBlogTab(parseInt(btn.dataset.tab));
-    });
-    document.getElementById('blogWtPrev').addEventListener('click', () => switchBlogTab(blogCurrentTab - 1));
-    document.getElementById('blogWtNext').addEventListener('click', () => switchBlogTab(blogCurrentTab + 1));
-    document.getElementById('closeBlogWalkthrough').addEventListener('click', () => {
-      document.getElementById('blogWalkthroughModal').classList.remove('active');
-    });
-
-    // ====================================================
-    // EXISTING FUNCTIONALITY (unchanged)
-    // ====================================================
-    function playBeep() {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'square';
-      osc.frequency.value = 800;
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      gain.gain.setValueAtTime(0.001, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.1, ctx.currentTime + 0.01);
-      osc.start(ctx.currentTime);
-      setTimeout(() => {
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
-        osc.stop(ctx.currentTime + 0.06);
-      }, 60);
-    }
-
-    // Theme
-    document.querySelectorAll('.theme-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.documentElement.dataset.theme = btn.dataset.theme;
-        localStorage.setItem('theme', btn.dataset.theme);
-        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      document.documentElement.dataset.theme = savedTheme;
-      document.querySelectorAll('.theme-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.theme === savedTheme);
-      });
-    }
-
-    // Nav
-    const navLinks = document.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
-      link.addEventListener('click', e => {
-        e.preventDefault();
-        const el = document.getElementById(link.getAttribute('href').substring(1));
-        if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); navLinks.forEach(l => l.classList.remove('active')); link.classList.add('active'); }
-      });
-    });
-
-    // Scroll progress
-    window.addEventListener('scroll', () => {
-      const h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      document.getElementById('scrollProgress').style.width = (window.scrollY / h * 100) + '%';
-    });
-
-    // Intersection observer for nav
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          navLinks.forEach(l => { l.classList.remove('active'); if (l.getAttribute('href') === `#${e.target.id}`) l.classList.add('active'); });
-        }
-      });
-    }
-  ];
-
-    // Blog posts
-    
-
-    // ====================================================
-    // OPERATIONS DATA
-    // ====================================================
-    
-
-    // ====================================================
-    // RENDER OPERATIONS
-    // ====================================================
-    function renderOperations() {
-      const container = document.getElementById('operationsContainer');
-      OPERATIONS.forEach((op, idx) => {
-        const item = document.createElement('div');
-        item.className = 'timeline-item';
-        item.innerHTML = `
-          <div class="timeline-date">${op.date}</div>
-          <div class="timeline-title">${op.title}</div>
-          <div class="timeline-description">${op.description}</div>
-          <button class="op-walkthrough-btn" data-idx="${idx}">
-            <span>▶ View Walkthrough</span>
-            <span class="arrow">→</span>
-          </button>
-        `;
-        container.appendChild(item);
-      });
-
-      container.addEventListener('click', e => {
-        const btn = e.target.closest('.op-walkthrough-btn');
-        if (btn) openOpWalkthrough(parseInt(btn.dataset.idx));
-      });
-    }
-
-    // ====================================================
-    // OPERATION WALKTHROUGH MODAL
-    // ====================================================
-    let opCurrentTab = 0;
-    let opCurrentProject = null;
-
-    function openOpWalkthrough(idx) {
-      opCurrentProject = OPERATIONS[idx];
-      opCurrentTab = 0;
-      const wt = opCurrentProject.walkthrough;
-
-      document.getElementById('opWtTitle').textContent = opCurrentProject.title;
-
-      const tagsEl = document.getElementById('opWtTags');
-      tagsEl.innerHTML = opCurrentProject.tags.map(t => `<span class="tag">${t}</span>`).join('');
-
-      const tabsEl = document.getElementById('opWtTabs');
-      tabsEl.innerHTML = wt.tabs.map((name, i) =>
-        `<button class="wt-tab ${i===0?'active':''}" data-tab="${i}">${name}</button>`
-      ).join('');
-
-      buildOpPanels(wt);
-      updateOpTabState();
-      document.getElementById('opWalkthroughModal').classList.add('active');
-      document.getElementById('opWtBody').scrollTop = 0;
-    }
-
-    function buildOpPanels(wt) {
-      const body = document.getElementById('opWtBody');
-      body.innerHTML = '';
-
-      wt.content.forEach((panel, i) => {
-        const div = document.createElement('div');
-        div.className = `wt-panel ${i===0?'active':''}`;
-
-        if (panel.type === 'overview') {
-          div.innerHTML = `
-            <p class="wt-overview">${escHtml(panel.body).replace(/\n\n/g,'</p><p class="wt-overview">').replace(/\n/g,'<br>')}</p>
-            <div>
-              <div class="wt-code-label">Techniques & Tools</div>
-              <div class="wt-tech-row">${panel.tech.map(t=>`<span class="wt-tech">${t}</span>`).join('')}</div>
-            </div>
-          `;
-        } else if (panel.type === 'steps') {
-          div.innerHTML = panel.steps.map((step, si) => `
-            <div class="wt-step" data-step="${i}-${si}">
-              <div class="wt-step-header" onclick="toggleStep(this)">
-                <span class="wt-step-num">${si+1}</span>
-                <span class="wt-step-title">${step.title}</span>
-                <span class="wt-step-chevron">▶</span>
-              </div>
-              <div class="wt-step-body">
-                ${step.desc ? `<p class="wt-step-desc">${step.desc}</p>` : ''}
-                ${step.code ? `<div class="wt-code">${step.code}</div>` : ''}
-              </div>
-            </div>
-          `).join('');
-        } else if (panel.type === 'notes') {
-          div.innerHTML = panel.items.map(item => `
-            <div class="wt-${item.type}">
-              <strong>${item.type==='warn'?'⚠ ':item.type==='tip'?'💡 ':'ℹ '}${item.title}</strong><br>
-              ${item.body}
-            </div>
-          `).join('');
-        }
-
-        body.appendChild(div);
-      });
-    }
-
-    function updateOpTabState() {
-      const wt = opCurrentProject.walkthrough;
-      document.querySelectorAll('#opWtTabs .wt-tab').forEach((btn,i) =>
-        btn.classList.toggle('active', i===opCurrentTab));
-      document.querySelectorAll('#opWtBody .wt-panel').forEach((p,i) =>
-        p.classList.toggle('active', i===opCurrentTab));
-      document.getElementById('opWtCounter').textContent =
-        `Tab ${opCurrentTab+1} of ${wt.tabs.length}`;
-      document.getElementById('opWtPrev').disabled = opCurrentTab === 0;
-      document.getElementById('opWtNext').disabled = opCurrentTab === wt.tabs.length - 1;
-    }
-
-    function switchOpTab(idx) {
-      opCurrentTab = Math.max(0, Math.min(idx, opCurrentProject.walkthrough.tabs.length - 1));
-      updateOpTabState();
-      document.getElementById('opWtBody').scrollTop = 0;
-    }
-
-    document.getElementById('opWtTabs').addEventListener('click', e => {
-      const btn = e.target.closest('.wt-tab');
-      if (btn) switchOpTab(parseInt(btn.dataset.tab));
-    });
-
-    document.getElementById('opWtPrev').addEventListener('click', () => switchOpTab(opCurrentTab - 1));
-    document.getElementById('opWtNext').addEventListener('click', () => switchOpTab(opCurrentTab + 1));
-
-    document.getElementById('closeOpWalkthrough').addEventListener('click', () => {
-      document.getElementById('opWalkthroughModal').classList.remove('active');
-    });
-
-    // ====================================================
-    // RENDER PROJECTS
-    // ====================================================
-    function renderProjects() {
-      const container = document.getElementById('projectsContainer');
-      PROJECTS.forEach((project, idx) => {
-        const statusClass = project.status === 'active' ? '' : project.status;
-        const card = document.createElement('div');
-        card.className = 'project-card';
-        card.innerHTML = `
-          <h3>${project.title}</h3>
-          <div class="project-meta">
-            ${project.tags.map(t => `<span class="tag">${t}</span>`).join('')}
-          </div>
-          <div class="project-description">${project.description}</div>
-          <div class="project-status">
-            <span class="status-indicator ${statusClass}"></span>
-            ${project.status.charAt(0).toUpperCase() + project.status.slice(1).replace('-', ' ')}
-          </div>
-          <button class="project-walkthrough-btn" data-idx="${idx}">
-            <span>▶ View Walkthrough</span>
-            <span class="arrow">→</span>
-          </button>
-        `;
-        container.appendChild(card);
-      });
-
-      container.addEventListener('click', e => {
-        const btn = e.target.closest('.project-walkthrough-btn');
-        if (btn) openWalkthrough(parseInt(btn.dataset.idx));
-      });
-    }
-
-    // ====================================================
-    // WALKTHROUGH MODAL
-    // ====================================================
-    let currentTab = 0;
-    let currentProject = null;
-
-    function openWalkthrough(idx) {
-      currentProject = PROJECTS[idx];
-      currentTab = 0;
-      const wt = currentProject.walkthrough;
-
-      document.getElementById('wtTitle').textContent = currentProject.title;
-
-      // Tags
-      const tagsEl = document.getElementById('wtTags');
-      tagsEl.innerHTML = currentProject.tags.map(t => `<span class="tag">${t}</span>`).join('');
-
-      // Build tabs
-      const tabsEl = document.getElementById('wtTabs');
-      tabsEl.innerHTML = wt.tabs.map((name, i) =>
-        `<button class="wt-tab ${i===0?'active':''}" data-tab="${i}">${name}</button>`
-      ).join('');
-
-      // Build body panels
-      buildPanels(wt);
-
-      updateTabState();
-      document.getElementById('walkthroughModal').classList.add('active');
-      document.getElementById('wtBody').scrollTop = 0;
-    }
-
-    function buildPanels(wt) {
-      const body = document.getElementById('wtBody');
-      body.innerHTML = '';
-
-      wt.content.forEach((panel, i) => {
-        const div = document.createElement('div');
-        div.className = `wt-panel ${i===0?'active':''}`;
-
-        if (panel.type === 'overview') {
-          div.innerHTML = `
-            <p class="wt-overview">${escHtml(panel.body).replace(/\n\n/g, '</p><p class="wt-overview">').replace(/\n/g, '<br>')}</p>
-            <div>
-              <div class="wt-code-label">Tech Stack</div>
-              <div class="wt-tech-row">${panel.tech.map(t=>`<span class="wt-tech">${t}</span>`).join('')}</div>
-            </div>
-          `;
-        } else if (panel.type === 'steps') {
-          div.innerHTML = panel.steps.map((step, si) => `
-            <div class="wt-step" data-step="${i}-${si}">
-              <div class="wt-step-header" onclick="toggleStep(this)">
-                <span class="wt-step-num">${si+1}</span>
-                <span class="wt-step-title">${step.title}</span>
-                <span class="wt-step-chevron">▶</span>
-              </div>
-              <div class="wt-step-body">
-                ${step.desc ? `<p class="wt-step-desc">${step.desc}</p>` : ''}
-                ${step.code ? `<div class="wt-code">${step.code}</div>` : ''}
-              </div>
-            </div>
-          `).join('');
-        } else if (panel.type === 'notes') {
-          div.innerHTML = panel.items.map(item => `
-            <div class="wt-${item.type}">
-              <strong>${item.type === 'warn' ? '⚠ ' : item.type === 'tip' ? '💡 ' : 'ℹ '}${item.title}</strong><br>
-              ${item.body}
-            </div>
-          `).join('');
-        }
-
-        body.appendChild(div);
-      });
-    }
-
-    function toggleStep(header) {
-      const step = header.parentElement;
-      step.classList.toggle('open');
-    }
-
-    function escHtml(str) {
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
-    function switchTab(idx) {
-      const wt = currentProject.walkthrough;
-      currentTab = Math.max(0, Math.min(idx, wt.tabs.length - 1));
-      updateTabState();
-      document.getElementById('wtBody').scrollTop = 0;
-    }
-
-    function updateTabState() {
-      const wt = currentProject.walkthrough;
-      const tabBtns = document.querySelectorAll('.wt-tab');
-      const panels = document.querySelectorAll('.wt-panel');
-
-      tabBtns.forEach((btn, i) => btn.classList.toggle('active', i === currentTab));
-      panels.forEach((p, i) => p.classList.toggle('active', i === currentTab));
-
-      document.getElementById('wtCounter').textContent =
-        `Tab ${currentTab+1} of ${wt.tabs.length}`;
-      document.getElementById('wtPrev').disabled = currentTab === 0;
-      document.getElementById('wtNext').disabled = currentTab === wt.tabs.length - 1;
-    }
-
-    // Tab clicks
-    document.getElementById('wtTabs').addEventListener('click', e => {
-      const btn = e.target.closest('.wt-tab');
-      if (btn) switchTab(parseInt(btn.dataset.tab));
-    });
-
-    document.getElementById('wtPrev').addEventListener('click', () => switchTab(currentTab - 1));
-    document.getElementById('wtNext').addEventListener('click', () => switchTab(currentTab + 1));
-
-    document.getElementById('closeWalkthrough').addEventListener('click', () => {
-      document.getElementById('walkthroughModal').classList.remove('active');
-    });
-
-    // ====================================================
-    // RENDER BLOG
-    // ====================================================
-    function renderBlog() {
-      const container = document.getElementById('blogContainer');
-      BLOG_POSTS.forEach((post, idx) => {
-        const article = document.createElement('article');
-        article.className = 'blog-post';
-        article.innerHTML = `
-          <h3>${post.title}</h3>
-          <div class="blog-post-meta"><span>📅 ${post.date}</span><span>•</span><span>⏱️ ${post.readTime}</span></div>
-          <div class="blog-post-tags">${post.tags.map(t=>`<span class="tag">#${t}</span>`).join('')}</div>
-          <div class="blog-post-excerpt">${post.excerpt}</div>
-          <button class="op-walkthrough-btn blog-wt-btn" data-idx="${idx}" style="margin-top:12px;">
-            <span>▶ Read Full Post</span>
-            <span class="arrow">→</span>
-          </button>
-        `;
-        container.appendChild(article);
-      });
-
-      container.addEventListener('click', e => {
-        const btn = e.target.closest('.blog-wt-btn');
-        if (btn) { e.stopPropagation(); openBlogWalkthrough(parseInt(btn.dataset.idx)); }
-      });
-    }
-
-    // ====================================================
-    // BLOG WALKTHROUGH MODAL
-    // ====================================================
-    let blogCurrentTab = 0;
-    let blogCurrentPost = null;
-
-    function openBlogWalkthrough(idx) {
-      blogCurrentPost = BLOG_POSTS[idx];
-      blogCurrentTab = 0;
-      const wt = blogCurrentPost.walkthrough;
-
-      document.getElementById('blogWtTitle').textContent = blogCurrentPost.title;
-      document.getElementById('blogWtMeta').textContent =
-        `📅 ${blogCurrentPost.date}  •  ⏱️ ${blogCurrentPost.readTime}`;
-
-      const tagsEl = document.getElementById('blogWtTags');
-      tagsEl.innerHTML = blogCurrentPost.tags.map(t => `<span class="tag">#${t}</span>`).join('');
-
-      const tabsEl = document.getElementById('blogWtTabs');
-      tabsEl.innerHTML = wt.tabs.map((name, i) =>
-        `<button class="wt-tab ${i===0?'active':''}" data-tab="${i}">${name}</button>`
-      ).join('');
-
-      buildBlogPanels(wt);
-      updateBlogTabState();
-      document.getElementById('blogWalkthroughModal').classList.add('active');
-      document.getElementById('blogWtBody').scrollTop = 0;
-    }
-
-    function buildBlogPanels(wt) {
-      const body = document.getElementById('blogWtBody');
-      body.innerHTML = '';
-      wt.content.forEach((panel, i) => {
-        const div = document.createElement('div');
-        div.className = `wt-panel ${i===0?'active':''}`;
-
-        if (panel.type === 'overview') {
-          div.innerHTML = `
-            <p class="wt-overview">${escHtml(panel.body).replace(/\n\n/g,'</p><p class="wt-overview">').replace(/\n/g,'<br>')}</p>
-            <div>
-              <div class="wt-code-label">Topics & Tools</div>
-              <div class="wt-tech-row">${panel.tech.map(t=>`<span class="wt-tech">${t}</span>`).join('')}</div>
-            </div>
-          `;
-        } else if (panel.type === 'steps') {
-          div.innerHTML = panel.steps.map((step, si) => `
-            <div class="wt-step" data-step="${i}-${si}">
-              <div class="wt-step-header" onclick="toggleStep(this)">
-                <span class="wt-step-num">${si+1}</span>
-                <span class="wt-step-title">${step.title}</span>
-                <span class="wt-step-chevron">▶</span>
-              </div>
-              <div class="wt-step-body">
-                ${step.desc ? `<p class="wt-step-desc">${step.desc}</p>` : ''}
-                ${step.code ? `<div class="wt-code">${step.code}</div>` : ''}
-              </div>
-            </div>
-          `).join('');
-        } else if (panel.type === 'notes') {
-          div.innerHTML = panel.items.map(item => `
-            <div class="wt-${item.type}">
-              <strong>${item.type==='warn'?'⚠ ':item.type==='tip'?'💡 ':'ℹ '}${item.title}</strong><br>
-              ${item.body}
-            </div>
-          `).join('');
-        }
-        body.appendChild(div);
-      });
-    }
-
-    function updateBlogTabState() {
-      const wt = blogCurrentPost.walkthrough;
-      document.querySelectorAll('#blogWtTabs .wt-tab').forEach((btn,i) =>
-        btn.classList.toggle('active', i===blogCurrentTab));
-      document.querySelectorAll('#blogWtBody .wt-panel').forEach((p,i) =>
-        p.classList.toggle('active', i===blogCurrentTab));
-      document.getElementById('blogWtCounter').textContent =
-        `Tab ${blogCurrentTab+1} of ${wt.tabs.length}`;
-      document.getElementById('blogWtPrev').disabled = blogCurrentTab === 0;
-      document.getElementById('blogWtNext').disabled = blogCurrentTab === wt.tabs.length - 1;
-    }
-
-    function switchBlogTab(idx) {
-      blogCurrentTab = Math.max(0, Math.min(idx, blogCurrentPost.walkthrough.tabs.length - 1));
-      updateBlogTabState();
-      document.getElementById('blogWtBody').scrollTop = 0;
-    }
-
-    document.getElementById('blogWtTabs').addEventListener('click', e => {
-      const btn = e.target.closest('.wt-tab');
-      if (btn) switchBlogTab(parseInt(btn.dataset.tab));
-    });
-    document.getElementById('blogWtPrev').addEventListener('click', () => switchBlogTab(blogCurrentTab - 1));
-    document.getElementById('blogWtNext').addEventListener('click', () => switchBlogTab(blogCurrentTab + 1));
-    document.getElementById('closeBlogWalkthrough').addEventListener('click', () => {
-      document.getElementById('blogWalkthroughModal').classList.remove('active');
-    });
-
-    // ====================================================
-    // EXISTING FUNCTIONALITY (unchanged)
-    // ====================================================
-    function playBeep() {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'square';
-      osc.frequency.value = 800;
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      gain.gain.setValueAtTime(0.001, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.1, ctx.currentTime + 0.01);
-      osc.start(ctx.currentTime);
-      setTimeout(() => {
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
-        osc.stop(ctx.currentTime + 0.06);
-      }, 60);
-    }
-
-    // Theme
-    document.querySelectorAll('.theme-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.documentElement.dataset.theme = btn.dataset.theme;
-        localStorage.setItem('theme', btn.dataset.theme);
-        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      document.documentElement.dataset.theme = savedTheme;
-      document.querySelectorAll('.theme-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.theme === savedTheme);
-      });
-    }
-
-    // Nav
-    const navLinks = document.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
-      link.addEventListener('click', e => {
-        e.preventDefault();
-        const el = document.getElementById(link.getAttribute('href').substring(1));
-        if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); navLinks.forEach(l => l.classList.remove('active')); link.classList.add('active'); }
-      });
-    });
-
-    // Scroll progress
-    window.addEventListener('scroll', () => {
-      const h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      document.getElementById('scrollProgress').style.width = (window.scrollY / h * 100) + '%';
-    });
-
-    // Intersection observer for nav
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          navLinks.forEach(l => { l.classList.remove('active'); if (l.getAttribute('href') === `#${e.target.id}`) l.classList.add('active'); });
-        }
-      });
-    }, { rootMargin: '-20% 0px -70% 0px' });
-    document.querySelectorAll('.section').forEach(s => observer.observe(s));
-
-    // Small modals
-    document.getElementById('avatarBtn').addEventListener('click', () => document.getElementById('asciiModal').classList.add('active'));
-    document.getElementById('closeAscii').addEventListener('click', () => document.getElementById('asciiModal').classList.remove('active'));
-    document.getElementById('pgpKeyBtn').addEventListener('click', e => { e.preventDefault(); document.getElementById('pgpModal').classList.add('active'); });
-    document.getElementById('closePgp').addEventListener('click', () => document.getElementById('pgpModal').classList.remove('active'));
-
-    // Close modals on backdrop click
-    document.querySelectorAll('.modal').forEach(modal => {
-      modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
-    });
-
-    // Escape key closes modals
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); playBeep(); }
-    });
-
-    document.getElementById('terminalBeep').addEventListener('click', playBeep);
-
-    // ── CV DOWNLOAD ──────────────────────────────────────────
-    // Place your PDF next to this HTML file and set the name below.
-    // ─────────────────────────────────────────────────────────
+  <script>
+    // CV Download
     const CV_FILENAME = 'cv.pdf';
-
-    const cvBtn = document.getElementById('downloadCV');
-    cvBtn.addEventListener('click', () => {
+    document.getElementById('downloadCV').addEventListener('click', () => {
       const a = document.createElement('a');
       a.href = CV_FILENAME;
       a.download = CV_FILENAME;
-      a.style.display = 'none';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-
-      // Visual feedback
-      const orig = cvBtn.textContent;
-      cvBtn.textContent = '✓ Downloading...';
-      cvBtn.style.background = 'var(--success)';
-      cvBtn.style.borderColor = 'var(--success)';
-      setTimeout(() => {
-        cvBtn.textContent = orig;
-        cvBtn.style.background = '';
-        cvBtn.style.borderColor = '';
-      }, 2000);
     });
 
-    // Init
-    renderProjects();
-    renderOperations();
-    renderBlog();
+    // Smooth scroll
+    document.querySelectorAll('nav a').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const id = link.getAttribute('href').substring(1);
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        document.querySelectorAll('nav a').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      });
+    });
   </script>
 </body>
 </html>
