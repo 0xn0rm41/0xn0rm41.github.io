@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RE-02: Indirect Jumps & Obfuscation | n0rm41</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #161616;
+    --red: #cc0000;
+    --red-dim: #880000;
+    --red-glow: rgba(204,0,0,0.15);
+    --green: #00cc44;
+    --yellow: #ccaa00;
+    --blue: #5599ff;
+    --text: #d0d0d0;
+    --text-dim: #666;
+    --border: #1e1e1e;
+    --mono: 'JetBrains Mono', monospace;
+    --fira: 'Fira Code', monospace;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--fira);
+    font-size: 14px;
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 60px 24px; }
+
+  /* Header */
+  .header { border-bottom: 1px solid var(--border); padding-bottom: 40px; margin-bottom: 48px; }
+
+  .breadcrumb {
+    font-size: 11px; color: var(--text-dim); letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 20px;
+  }
+  .breadcrumb a { color: var(--text-dim); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--red); }
+  .breadcrumb span { color: var(--red); }
+
+  .title {
+    font-family: var(--mono); font-size: 28px; font-weight: 700;
+    color: #fff; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 12px;
+  }
+  .title .accent { color: var(--red); }
+
+  .subtitle { color: var(--text-dim); font-size: 13px; margin-top: 8px; }
+
+  .meta { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 20px; }
+
+  .tag {
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 3px 10px; border: 1px solid var(--border); color: var(--text-dim);
+    font-family: var(--mono);
+  }
+  .tag.red   { border-color: var(--red-dim); color: var(--red); }
+  .tag.green { border-color: #005522; color: var(--green); }
+  .tag.yellow{ border-color: #443300; color: var(--yellow); }
+  .tag.blue  { border-color: #223366; color: var(--blue); }
+
+  /* Section headers */
+  h2 {
+    font-family: var(--mono); font-size: 13px; font-weight: 500;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--red);
+    margin: 48px 0 20px; display: flex; align-items: center; gap: 12px;
+  }
+  h2::before { content: '//'; color: var(--red-dim); }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  h3 {
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    color: #fff; letter-spacing: 0.08em; text-transform: uppercase;
+    margin: 28px 0 12px;
+  }
+
+  p { color: var(--text); margin-bottom: 16px; font-size: 13.5px; }
+
+  /* Code blocks */
+  .code-block {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-left: 2px solid var(--red); padding: 20px 24px;
+    margin: 20px 0; overflow-x: auto; position: relative;
+  }
+  .code-block .label {
+    position: absolute; top: 0; right: 0; font-size: 9px;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim);
+    padding: 4px 8px; background: var(--bg3);
+    border-left: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+  }
+
+  pre {
+    font-family: var(--mono); font-size: 12.5px;
+    line-height: 1.7; color: #c8c8c8; white-space: pre;
+  }
+
+  .c-red    { color: var(--red); }
+  .c-green  { color: var(--green); }
+  .c-yellow { color: var(--yellow); }
+  .c-dim    { color: var(--text-dim); }
+  .c-white  { color: #fff; }
+  .c-blue   { color: var(--blue); }
+
+  code {
+    font-family: var(--mono); font-size: 12px; color: var(--red);
+    background: rgba(204,0,0,0.08); padding: 1px 6px;
+    border: 1px solid rgba(204,0,0,0.2);
+  }
+
+  /* Terminal */
+  .terminal {
+    background: #050505; border: 1px solid var(--border);
+    padding: 20px 24px; margin: 20px 0;
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.8;
+  }
+  .prompt::before { content: '$ '; color: var(--green); }
+  .output { color: #999; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 12.5px; }
+  th {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-dim);
+    text-align: left; padding: 8px 16px; border-bottom: 1px solid var(--border);
+  }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { font-family: var(--mono); color: var(--yellow); white-space: nowrap; }
+
+  /* Callouts */
+  .callout {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-left: 2px solid var(--yellow); padding: 16px 20px;
+    margin: 20px 0; font-size: 13px;
+  }
+  .callout.red   { border-left-color: var(--red); }
+  .callout.green { border-left-color: var(--green); }
+  .callout.blue  { border-left-color: var(--blue); }
+  .callout-title {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--yellow); margin-bottom: 8px;
+  }
+  .callout.red   .callout-title { color: var(--red); }
+  .callout.green .callout-title { color: var(--green); }
+  .callout.blue  .callout-title { color: var(--blue); }
+
+  /* Call graph diagram */
+  .graph {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 28px; margin: 20px 0; font-family: var(--mono); font-size: 12px;
+  }
+  .graph-title {
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 20px;
+  }
+  .graph-row { display: flex; align-items: center; gap: 12px; margin: 6px 0; }
+  .graph-node {
+    padding: 6px 14px; border: 1px solid var(--border); color: #fff;
+    white-space: nowrap;
+  }
+  .graph-node.root { border-color: var(--red-dim); color: var(--red); }
+  .graph-node.unknown { border-color: #333; color: var(--text-dim); border-style: dashed; }
+  .graph-node.found { border-color: #004422; color: var(--green); }
+  .graph-arrow { color: var(--text-dim); }
+  .graph-label { font-size: 10px; color: var(--text-dim); }
+
+  /* Constraint box */
+  .constraints {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 20px 24px; margin: 20px 0; font-family: var(--mono);
+  }
+  .constraint-row {
+    display: flex; align-items: baseline; gap: 16px;
+    padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12.5px;
+  }
+  .constraint-row:last-child { border-bottom: none; }
+  .constraint-idx { color: var(--text-dim); font-size: 10px; width: 60px; flex-shrink: 0; }
+  .constraint-expr { color: var(--yellow); }
+  .constraint-src { color: var(--text-dim); font-size: 11px; margin-left: auto; }
+
+  /* Learning grid */
+  .learning-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+  .learning-card { background: var(--bg2); border: 1px solid var(--border); padding: 16px 18px; }
+  .learning-card .num { font-family: var(--mono); font-size: 10px; color: var(--red); letter-spacing: 0.1em; margin-bottom: 8px; }
+  .learning-card p { font-size: 12.5px; color: var(--text); margin: 0; line-height: 1.6; }
+
+  /* Footer */
+  .footer {
+    margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px; color: var(--text-dim);
+  }
+  .footer .handle { color: var(--red); font-family: var(--mono); }
+  .footer a { color: var(--text-dim); text-decoration: none; font-family: var(--mono); font-size: 11px; }
+  .footer a:hover { color: var(--red); }
+
+  @media (max-width: 600px) {
+    .learning-grid { grid-template-columns: 1fr; }
+    .title { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="breadcrumb">
+      <a href="index.html">n0rm41</a> / <a href="index.html#writeups">writeups</a> / <span>RE-02</span>
+    </div>
+    <div class="title">Indirect Jumps <span class="accent">&amp; Obfuscation</span></div>
+    <p class="subtitle">
+      Recovering control flow from a function pointer dispatch table — static and dynamic analysis paths.
+    </p>
+    <div class="meta">
+      <div class="tag red">Reverse Engineering</div>
+      <div class="tag">x86 32-bit</div>
+      <div class="tag">IDA Pro 9.1</div>
+      <div class="tag">GDB + pwndbg</div>
+      <div class="tag yellow">Obfuscation</div>
+      <div class="tag green">Input Synthesised</div>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <h2>Overview</h2>
+  <p>
+    The target binary validates input through four separate check functions dispatched via a function pointer table.
+    The core challenge: the call inside the validation loop is <code>call eax</code> — an indirect jump —
+    which breaks IDA's static call graph and is the same technique used in real-world packers, loaders, and malware
+    to resist static analysis.
+  </p>
+  <p>
+    The goal was to recover all four constraints using both static and dynamic analysis paths,
+    then synthesise a valid input from scratch.
+  </p>
+
+  <!-- TRIAGE -->
+  <h2>Phase 1 — Triage</h2>
+
+  <div class="terminal">
+    <div class="prompt">file ./indirect</div>
+    <div class="output">indirect: ELF 32-bit LSB executable, Intel 80386, not stripped</div>
+    <br>
+    <div class="prompt">nm ./indirect | grep check</div>
+    <div class="output">080491a2 T check_a
+080491b4 T check_b
+080491cc T check_c
+080491e4 T check_d</div>
+    <br>
+    <div class="prompt">nm -D ./indirect</div>
+    <div class="output">         U printf@GLIBC_2.0
+         U strlen@GLIBC_2.0</div>
+  </div>
+
+  <p>
+    Triage reveals four named check functions and <code>strlen</code> in imports — a strong signal
+    that length validation is part of the scheme. No password in strings; the logic is distributed
+    across multiple functions rather than a single comparison.
+  </p>
+
+  <!-- INDIRECT CALL -->
+  <h2>Phase 2 — The Indirect Call</h2>
+
+  <p>
+    Inside <code>validate()</code>, IDA shows the function pointer array being constructed on the stack,
+    then dispatched through a loop:
+  </p>
+
+  <div class="code-block">
+    <div class="label">IDA — validate() dispatch table setup</div>
+    <pre><span class="c-dim">; Build function pointer array on stack</span>
+lea     edx, (<span class="c-green">check_a</span> - 804BFF4h)[eax]
+mov     [ebp+<span class="c-yellow">var_1C</span>], edx
+lea     edx, (<span class="c-green">check_b</span> - 804BFF4h)[eax]
+mov     [ebp+<span class="c-yellow">var_18</span>], edx
+lea     edx, (<span class="c-green">check_c</span> - 804BFF4h)[eax]
+mov     [ebp+<span class="c-yellow">var_14</span>], edx
+lea     eax, (<span class="c-green">check_d</span> - 804BFF4h)[eax]
+mov     [ebp+<span class="c-yellow">var_10</span>], eax</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="label">IDA — validate() loop body</div>
+    <pre><span class="c-dim">loc_8049263:</span>
+mov     eax, [ebp+<span class="c-yellow">var_C</span>]            <span class="c-dim">; loop counter i</span>
+mov     eax, [ebp+eax*4+<span class="c-yellow">var_1C</span>]    <span class="c-dim">; load checks[i]</span>
+sub     esp, 0Ch
+push    [ebp+<span class="c-yellow">arg_0</span>]               <span class="c-dim">; push input</span>
+<span class="c-red">call    eax</span>                        <span class="c-dim">; ← indirect — IDA cannot resolve statically</span>
+add     esp, 10h
+test    eax, eax
+jnz     short loc_8049280</pre>
+  </div>
+
+  <p>
+    The critical instruction is <code>call eax</code>. IDA cannot determine the destination at static analysis time
+    — the call graph for <code>validate()</code> shows no outgoing edges to the check functions.
+    In a stripped binary with runtime-computed addresses this would be a dead end for static analysis alone.
+  </p>
+
+  <!-- CALL GRAPH -->
+  <div class="graph">
+    <div class="graph-title">Call graph — static view vs reality</div>
+    <div class="graph-row">
+      <div class="graph-node root">validate()</div>
+      <div class="graph-arrow">──→</div>
+      <div class="graph-node unknown">call eax &nbsp;???</div>
+      <div class="graph-label">← what IDA sees (stripped binary)</div>
+    </div>
+    <div style="height:16px;"></div>
+    <div class="graph-row">
+      <div class="graph-node root">validate()</div>
+      <div class="graph-arrow">──→</div>
+      <div class="graph-node found">check_a</div>
+      <div class="graph-node found">check_b</div>
+      <div class="graph-node found">check_c</div>
+      <div class="graph-node found">check_d</div>
+    </div>
+    <div class="graph-label" style="margin-top:8px; padding-left:4px;">← reality (recovered via dispatch table + dynamic analysis)</div>
+  </div>
+
+  <!-- STATIC RECOVERY -->
+  <h2>Phase 3 — Static Recovery</h2>
+  <p>
+    Because this binary is not stripped, IDA labels the function pointers by name in the dispatch table setup.
+    Opening each check function directly reveals their constraints:
+  </p>
+
+  <div class="constraints">
+    <div class="constraint-row">
+      <div class="constraint-idx">check_a</div>
+      <div class="constraint-expr">s[0] == 'X'</div>
+      <div class="constraint-src">cmp al, 58h</div>
+    </div>
+    <div class="constraint-row">
+      <div class="constraint-idx">check_b</div>
+      <div class="constraint-expr">strlen(s) == 6</div>
+      <div class="constraint-src">call strlen / cmp eax, 6</div>
+    </div>
+    <div class="constraint-row">
+      <div class="constraint-idx">check_c</div>
+      <div class="constraint-expr">s[5] == '!'</div>
+      <div class="constraint-src">cmp al, 21h</div>
+    </div>
+    <div class="constraint-row">
+      <div class="constraint-idx">check_d</div>
+      <div class="constraint-expr">s[1] + s[2] == 0xde</div>
+      <div class="constraint-src">movsx / add / cmp eax, 0DEh</div>
+    </div>
+  </div>
+
+  <!-- DYNAMIC PATH -->
+  <h2>Phase 4 — Dynamic Recovery Path</h2>
+  <p>
+    In a stripped binary with runtime-computed function pointers, static recovery fails.
+    The correct approach is to break on <code>call eax</code> and read the destination directly:
+  </p>
+
+  <div class="code-block">
+    <div class="label">GDB + pwndbg</div>
+    <pre><span class="c-dim"># Break just before the indirect call fires</span>
+<span class="c-green">pwndbg></span> break *0x8049263
+<span class="c-green">pwndbg></span> run AAAAAA
+
+<span class="c-dim"># When breakpoint hits — read eax</span>
+<span class="c-green">pwndbg></span> print $eax
+$1 = 0x80491a2        <span class="c-dim">← destination address</span>
+
+<span class="c-dim"># Disassemble whatever eax points at</span>
+<span class="c-green">pwndbg></span> x/10i $eax
+   0x80491a2 &lt;check_a&gt;: push ebp
+   0x80491a3 &lt;check_a+1&gt;: mov ebp,esp
+   <span class="c-dim">...</span></pre>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-title">⚡ Key Principle</div>
+    <p style="margin:0; font-size:13px;">
+      The CPU doesn't lie. Whatever obfuscation was applied to compute the function pointer,
+      by the time <code>call eax</code> executes, <code>eax</code> holds the real address.
+      Dynamic analysis cuts through any level of pointer obfuscation instantly.
+    </p>
+  </div>
+
+  <!-- INPUT SYNTHESIS -->
+  <h2>Phase 5 — Input Synthesis</h2>
+  <p>
+    With all four constraints extracted, finding a valid pair for <code>s[1] + s[2] == 0xde</code>
+    and assembling the final input:
+  </p>
+
+  <div class="code-block">
+    <div class="label">Python — constraint solver</div>
+    <pre><span class="c-dim"># Find printable pair summing to 0xde</span>
+<span class="c-blue">for</span> a <span class="c-blue">in</span> range(<span class="c-green">0x20</span>, <span class="c-green">0x7f</span>):
+    b = <span class="c-green">0xde</span> - a
+    <span class="c-blue">if</span> <span class="c-green">0x20</span> <= b <= <span class="c-green">0x7e</span>:
+        print(<span class="c-red">f"s[1]=</span>{chr(a)}<span class="c-red"> s[2]=</span>{chr(b)}<span class="c-red"> sum=</span>{hex(a+b)}<span class="c-red">"</span>)
+        <span class="c-blue">break</span>
+
+<span class="c-dim"># Output: s[1]=` s[2]=~ sum=0xde</span>
+
+<span class="c-dim"># Assemble: X + s[1] + s[2] + [any] + [any] + !</span>
+key = <span class="c-red">"X`~aa!"</span>   <span class="c-dim"># s[3], s[4] unconstrained</span>
+print(key)</pre>
+  </div>
+
+  <div class="terminal">
+    <div class="prompt">./indirect 'X`~as!'</div>
+    <div class="output" style="color:var(--green);">[+] Valid.</div>
+  </div>
+
+  <!-- REAL WORLD -->
+  <h2>Real-World Relevance</h2>
+
+  <table>
+    <tr><th>Technique</th><th>Where You'll See It</th></tr>
+    <tr><td>Function pointer tables</td><td>C++ vtables, plugin architectures, packers (UPX, Themida)</td></tr>
+    <tr><td><code>call eax/ecx</code></td><td>Nearly all compiled C++ code, most malware loaders</td></tr>
+    <tr><td>Dispatch loop pattern</td><td>State machines, protocol parsers, shellcode stagers</td></tr>
+    <tr><td>Runtime-computed pointers</td><td>Anti-analysis in RATs, ransomware, implants</td></tr>
+  </table>
+
+  <div class="callout">
+    <div class="callout-title">Static vs Dynamic — Decision Rule</div>
+    <p style="margin:0; font-size:13px;">
+      Symbols intact → read the dispatch table statically, open each target directly in IDA.<br>
+      Stripped or runtime-computed → breakpoint on <code>call eax</code>, read <code>$eax</code>, disassemble destination.<br>
+      Packed → dump after unpacking (follow OEP), then apply static path.
+    </p>
+  </div>
+
+  <!-- LEARNINGS -->
+  <h2>What I Learned</h2>
+
+  <div class="learning-grid">
+    <div class="learning-card">
+      <div class="num">01 — call eax Breaks Static Analysis</div>
+      <p>Indirect calls via register prevent IDA from building a complete call graph. In stripped binaries this is a genuine dead end for static analysis — recognising it early saves time.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">02 — Dispatch Tables Are Recoverable</div>
+      <p>Even when the call is indirect, the table construction that precedes it is often static. Following the <code>lea + mov</code> setup instructions before the loop reveals every destination.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">03 — Dynamic Analysis Is the Fallback</div>
+      <p>A breakpoint on <code>call eax</code> with <code>print $eax</code> recovers any destination regardless of how it was computed. The CPU must resolve it — we just read the answer.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">04 — Constraints Can Be Heterogeneous</div>
+      <p>Real validators rarely apply one rule. Four different checks — length, character value, arithmetic sum, positional — combined into one dispatch loop. Each must be satisfied independently.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">05 — Opaque Predicates Die at -O1</div>
+      <p>Fake branches inserted for obfuscation are eliminated by the compiler when optimisation is enabled. Their presence (or absence) reveals the author's skill level and build configuration.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">06 — Unconstrained Positions Are Free</div>
+      <p>Positions with no check applied (<code>s[3]</code>, <code>s[4]</code> here) accept any value. Identifying which positions are free vs constrained is the first step in input synthesis.</p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="handle">n0rm41</div>
+    <div style="display:flex; gap:20px; align-items:center;">
+      <a href="rev1.html">← RE-01</a>
+      <span>RE-02 &nbsp;·&nbsp; IDA Pro 9.1 &nbsp;·&nbsp; x86 ELF</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
