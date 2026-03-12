@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RE-01: Password Validator Keygen | n0rm41</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #161616;
+    --red: #cc0000;
+    --red-dim: #880000;
+    --red-glow: rgba(204,0,0,0.15);
+    --green: #00cc44;
+    --yellow: #ccaa00;
+    --text: #d0d0d0;
+    --text-dim: #666;
+    --border: #1e1e1e;
+    --mono: 'JetBrains Mono', monospace;
+    --fira: 'Fira Code', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--fira);
+    font-size: 14px;
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 60px 24px;
+  }
+
+  /* Header */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 40px;
+    margin-bottom: 48px;
+  }
+
+  .breadcrumb {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .breadcrumb span { color: var(--red); }
+
+  .title {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  .title .accent { color: var(--red); }
+
+  .meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+
+  .tag {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  .tag.red { border-color: var(--red-dim); color: var(--red); }
+  .tag.green { border-color: #005522; color: var(--green); }
+
+  /* Sections */
+  h2 {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin: 48px 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  h2::before {
+    content: '//';
+    color: var(--red-dim);
+  }
+
+  h2::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  h3 {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: #fff;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 28px 0 12px;
+  }
+
+  p {
+    color: var(--text);
+    margin-bottom: 16px;
+    font-size: 13.5px;
+  }
+
+  /* Code blocks */
+  .code-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--red);
+    padding: 20px 24px;
+    margin: 20px 0;
+    overflow-x: auto;
+    position: relative;
+  }
+
+  .code-block .label {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 4px 8px;
+    background: var(--bg3);
+    border-left: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  pre {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #c8c8c8;
+    white-space: pre;
+  }
+
+  .c-red { color: var(--red); }
+  .c-green { color: var(--green); }
+  .c-yellow { color: var(--yellow); }
+  .c-dim { color: var(--text-dim); }
+  .c-white { color: #fff; }
+  .c-blue { color: #5599ff; }
+
+  /* Inline code */
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--red);
+    background: rgba(204,0,0,0.08);
+    padding: 1px 6px;
+    border: 1px solid rgba(204,0,0,0.2);
+  }
+
+  /* Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 12.5px;
+  }
+
+  th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-align: left;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  td:first-child {
+    font-family: var(--mono);
+    color: var(--yellow);
+    white-space: nowrap;
+  }
+
+  /* Callout boxes */
+  .callout {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--yellow);
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: 13px;
+  }
+
+  .callout.red { border-left-color: var(--red); }
+  .callout.green { border-left-color: var(--green); }
+
+  .callout-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 8px;
+  }
+
+  .callout.red .callout-title { color: var(--red); }
+  .callout.green .callout-title { color: var(--green); }
+
+  /* Terminal output */
+  .terminal {
+    background: #050505;
+    border: 1px solid var(--border);
+    padding: 20px 24px;
+    margin: 20px 0;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.8;
+  }
+
+  .prompt::before {
+    content: '$ ';
+    color: var(--green);
+  }
+
+  .output { color: #999; }
+
+  /* Key format diagram */
+  .key-diagram {
+    display: flex;
+    gap: 0;
+    margin: 24px 0;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+
+  .key-cell {
+    flex: 1;
+    text-align: center;
+  }
+
+  .key-char {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 10px 4px;
+    color: #fff;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .key-cell.sep .key-char {
+    background: var(--bg);
+    color: var(--red);
+    border-color: var(--red-dim);
+  }
+
+  .key-index {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  .key-type {
+    font-size: 9px;
+    color: var(--yellow);
+    letter-spacing: 0.05em;
+  }
+
+  /* Learnings */
+  .learning-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .learning-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 16px 18px;
+  }
+
+  .learning-card .num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--red);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .learning-card p {
+    font-size: 12.5px;
+    color: var(--text);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .footer .handle { color: var(--red); font-family: var(--mono); }
+
+  @media (max-width: 600px) {
+    .learning-grid { grid-template-columns: 1fr; }
+    .title { font-size: 20px; }
+    .key-diagram { font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="breadcrumb">n0rm41 / writeups / <span>RE-01</span></div>
+    <div class="title">Password Validator <span class="accent">Keygen</span></div>
+    <p style="color:var(--text-dim); font-size:13px; margin-top:8px;">
+      Static reverse engineering of a compiled x86 ELF binary — reconstructing validation logic and generating valid keys without source code.
+    </p>
+    <div class="meta">
+      <div class="tag red">Reverse Engineering</div>
+      <div class="tag">x86 32-bit</div>
+      <div class="tag">IDA Pro 9.1</div>
+      <div class="tag">Linux ELF</div>
+      <div class="tag green">Keygen Written</div>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <h2>Overview</h2>
+  <p>
+    Given a compiled x86 32-bit ELF binary with no source code, the goal was to reverse engineer the password validation logic and produce a working keygen — a program that generates an arbitrary number of valid keys independently.
+  </p>
+  <p>
+    This is a foundational reverse engineering task that mirrors real-world scenarios: cracking license checks, reversing authentication schemes, and understanding proprietary protocol validation — all common in malware analysis and vulnerability research.
+  </p>
+
+  <!-- TRIAGE -->
+  <h2>Phase 1 — Binary Triage</h2>
+  <p>
+    Before opening a disassembler, a 60-second terminal triage builds a mental picture of the target. Five commands, five answers.
+  </p>
+
+  <div class="terminal">
+    <div class="prompt">file ./validator</div>
+    <div class="output">validator: ELF 32-bit LSB executable, Intel 80386, dynamically linked</div>
+    <br>
+    <div class="prompt">nm ./validator | grep -E "validate|check|secret"</div>
+    <div class="output">0804920c T validate</div>
+    <br>
+    <div class="prompt">nm -D ./validator</div>
+    <div class="output">         U printf@GLIBC_2.0
+         U puts@GLIBC_2.0
+         U strlen@GLIBC_2.0
+         U strcmp@GLIBC_2.0</div>
+    <br>
+    <div class="prompt">strings ./validator | grep -E ".{4,}"</div>
+    <div class="output">Usage: %s &lt;key&gt;
+[+] Valid key!
+[-] Invalid key.</div>
+  </div>
+
+  <p>Key observations from triage alone — before touching IDA:</p>
+
+  <table>
+    <tr><th>Finding</th><th>Implication</th></tr>
+    <tr><td>32-bit ELF</td><td>x86 calling convention — arguments passed on stack, not registers</td></tr>
+    <tr><td>Not stripped</td><td>Symbol names intact — <code>validate</code>, <code>main</code> visible by name in IDA</td></tr>
+    <tr><td><code>strlen</code> imported</td><td>Likely a length check on input — fixed-length key format</td></tr>
+    <tr><td>No key in strings</td><td>Key is computed, not hardcoded — algorithm must be reversed</td></tr>
+  </table>
+
+  <!-- STATIC ANALYSIS -->
+  <h2>Phase 2 — Static Analysis in IDA</h2>
+
+  <h3>Stack Frame & Variables</h3>
+  <p>
+    Opening <code>validate()</code> in IDA, the stack frame immediately reveals three computed variables:
+  </p>
+
+  <div class="code-block">
+    <div class="label">IDA — stack frame</div>
+    <pre><span class="c-dim">validate proc near</span>
+<span class="c-yellow">i_5</span>= dword ptr -14h    <span class="c-dim">; → key[5] - '0'</span>
+<span class="c-yellow">i_2</span>= dword ptr -10h    <span class="c-dim">; → key[2] - '0'</span>
+<span class="c-yellow">i_0</span>= dword ptr -0Ch    <span class="c-dim">; → key[0] - 'A'</span>
+<span class="c-dim">input= dword ptr  8</span></pre>
+  </div>
+
+  <p>
+    IDA's auto-naming (<code>i_0</code>, <code>i_2</code>, <code>i_5</code>) directly encodes the key indices — a useful hint. No variable exists for <code>key[3]</code>, meaning it's used raw without arithmetic transformation.
+  </p>
+
+  <h3>Key Format Reconstruction</h3>
+  <p>
+    By tracing each <code>add eax, N</code> instruction (which selects <code>key[N]</code>) and examining what follows — subtraction constants and comparison values — the full key format was reconstructed:
+  </p>
+
+  <div class="key-diagram">
+    <div class="key-cell">
+      <div class="key-char">A</div>
+      <div class="key-index">key[0]</div>
+      <div class="key-type">letter</div>
+    </div>
+    <div class="key-cell sep">
+      <div class="key-char">-</div>
+      <div class="key-index">key[1]</div>
+      <div class="key-type">dash</div>
+    </div>
+    <div class="key-cell">
+      <div class="key-char">N</div>
+      <div class="key-index">key[2]</div>
+      <div class="key-type">digit</div>
+    </div>
+    <div class="key-cell">
+      <div class="key-char">X</div>
+      <div class="key-index">key[3]</div>
+      <div class="key-type">any</div>
+    </div>
+    <div class="key-cell sep">
+      <div class="key-char">-</div>
+      <div class="key-index">key[4]</div>
+      <div class="key-type">dash</div>
+    </div>
+    <div class="key-cell">
+      <div class="key-char">N</div>
+      <div class="key-index">key[5]</div>
+      <div class="key-type">digit</div>
+    </div>
+    <div class="key-cell">
+      <div class="key-char">X</div>
+      <div class="key-index">key[6]</div>
+      <div class="key-type">= key[3]</div>
+    </div>
+    <div class="key-cell">
+      <div class="key-char">B</div>
+      <div class="key-index">key[7]</div>
+      <div class="key-type">= key[0]+1</div>
+    </div>
+  </div>
+
+  <h3>Decoding Compiler Optimized Division</h3>
+  <p>
+    The most interesting RE challenge in this binary was recognizing <strong>compiler-optimized modulo</strong>. Modern compilers never emit a slow <code>div</code> instruction for modulo by a constant — instead they use a magic multiplier trick. Two instances appeared:
+  </p>
+
+  <div class="code-block">
+    <div class="label">IDA — modulo 7 check</div>
+    <pre><span class="c-dim">; (a * b) % 7 == 3</span>
+mov     eax, [ebp+<span class="c-yellow">i_0</span>]
+imul    eax, [ebp+<span class="c-yellow">i_2</span>]       <span class="c-dim">; eax = a * b</span>
+mov     ecx, eax
+mov     edx, <span class="c-red">92492493h</span>      <span class="c-dim">; ← magic constant for ÷7</span>
+imul    edx
+<span class="c-dim">; ... arithmetic normalization ...</span>
+cmp     eax, <span class="c-green">3</span>             <span class="c-dim">; remainder must be 3</span>
+jz      short loc_8049263</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="label">IDA — modulo 5 check</div>
+    <pre><span class="c-dim">; (b + c) % 5 == 1</span>
+lea     ecx, [edx+eax]        <span class="c-dim">; ecx = b + c</span>
+mov     edx, <span class="c-red">66666667h</span>      <span class="c-dim">; ← magic constant for ÷5</span>
+imul    edx
+<span class="c-dim">; ... arithmetic normalization ...</span>
+cmp     edx, <span class="c-green">1</span>             <span class="c-dim">; remainder must be 1</span>
+jz      short loc_8049295</pre>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">⚡ Pattern to Memorize</div>
+    Magic constant <code>92492493h</code> = compiler doing <code>% 7</code> &nbsp;|&nbsp; <code>66666667h</code> = compiler doing <code>% 5</code>. These appear constantly in real-world RE — license checks, hash functions, protocol parsers.
+  </div>
+
+  <h3>Complete Constraint Set</h3>
+  <p>Defining <code>a = key[0] - 'A'</code>, <code>b = key[2] - '0'</code>, <code>c = key[5] - '0'</code>:</p>
+
+  <table>
+    <tr><th>#</th><th>Constraint</th><th>Source</th></tr>
+    <tr><td>1</td><td><code>len(key) == 8</code></td><td><code>strlen</code> + <code>cmp eax, 8</code></td></tr>
+    <tr><td>2</td><td><code>key[1] == '-'</code></td><td><code>cmp al, 2Dh</code></td></tr>
+    <tr><td>3</td><td><code>key[4] == '-'</code></td><td><code>cmp al, 2Dh</code></td></tr>
+    <tr><td>4</td><td><code>(a * b) % 7 == 3</code></td><td>magic multiplier <code>92492493h</code></td></tr>
+    <tr><td>5</td><td><code>(b + c) % 5 == 1</code></td><td>magic multiplier <code>66666667h</code></td></tr>
+    <tr><td>6</td><td><code>key[6] == key[3]</code></td><td><code>cmp dl, al</code></td></tr>
+    <tr><td>7</td><td><code>key[7] == key[0] + 1</code></td><td><code>add eax, 1 / cmp edx, eax</code></td></tr>
+  </table>
+
+  <!-- KEYGEN -->
+  <h2>Phase 3 — Writing the Keygen</h2>
+  <p>
+    With all constraints mapped, a brute-force keygen over the constrained search space produces valid keys in milliseconds:
+  </p>
+
+  <div class="code-block">
+    <div class="label">Python — keygen</div>
+    <pre><span class="c-blue">from</span> pwn <span class="c-blue">import</span> *
+
+valid_keys = []
+
+<span class="c-blue">for</span> a <span class="c-blue">in</span> range(<span class="c-green">0</span>, <span class="c-green">26</span>):       <span class="c-dim"># key[0]: A–Z</span>
+    <span class="c-blue">for</span> b <span class="c-blue">in</span> range(<span class="c-green">0</span>, <span class="c-green">10</span>):    <span class="c-dim"># key[2]: 0–9</span>
+        <span class="c-blue">for</span> c <span class="c-blue">in</span> range(<span class="c-green">0</span>, <span class="c-green">10</span>): <span class="c-dim"># key[5]: 0–9</span>
+            <span class="c-blue">if</span> (a * b) % <span class="c-green">7</span> == <span class="c-green">3</span> <span class="c-blue">and</span> (b + c) % <span class="c-green">5</span> == <span class="c-green">1</span>:
+                k0 = chr(a + ord(<span class="c-red">'A'</span>))
+                k2 = chr(b + ord(<span class="c-red">'0'</span>))
+                k5 = chr(c + ord(<span class="c-red">'0'</span>))
+                k3 = <span class="c-red">'X'</span>          <span class="c-dim"># unconstrained position</span>
+                k6 = k3
+                k7 = chr(ord(k0) + <span class="c-green">1</span>)
+                key = <span class="c-red">f"</span>{k0}<span class="c-red">-</span>{k2}{k3}<span class="c-red">-</span>{k5}{k6}{k7}<span class="c-red">"</span>
+                valid_keys.append(key)
+
+<span class="c-blue">for</span> k <span class="c-blue">in</span> valid_keys[:<span class="c-green">10</span>]:
+    print(k)</pre>
+  </div>
+
+  <h3>Output & Verification</h3>
+
+  <div class="terminal">
+    <div class="prompt">python3 keygen.py</div>
+    <div class="output">B-3X-3XC
+B-3X-8XC
+C-5X-1XD
+C-5X-6XD
+D-1X-0XE
+D-1X-5XE
+D-8X-3XE
+D-8X-8XE
+E-6X-0XF
+E-6X-5XF</div>
+    <br>
+    <div class="prompt">./validator E-6X-5XF</div>
+    <div class="output" style="color: var(--green);">[+] Valid key!</div>
+  </div>
+
+  <!-- LEARNINGS -->
+  <h2>What I Learned</h2>
+
+  <div class="learning-grid">
+    <div class="learning-card">
+      <div class="num">01 — Triage First</div>
+      <p>Running <code>file</code>, <code>strings</code>, <code>nm</code>, and <code>readelf</code> before touching IDA builds a hypothesis in under 60 seconds. Architecture, strip status, and imported functions tell you what you're dealing with before reading a single instruction.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">02 — Reading Index Arithmetic</div>
+      <p>The pattern <code>add eax, N</code> followed by <code>movzx eax, byte ptr [eax]</code> is how compilers emit array indexing. Recognizing <code>N</code> as the array index lets you map disassembly back to source-level structure without symbols.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">03 — Compiler Magic Constants</div>
+      <p>Compilers replace <code>% N</code> with a multiply-and-shift sequence using a precomputed magic constant. Recognizing <code>92492493h</code> (÷7) and <code>66666667h</code> (÷5) lets you instantly decode modulo constraints without tracing the full arithmetic.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">04 — Subtraction Reveals Type</div>
+      <p><code>sub eax, 41h</code> means the code expects a letter (subtracting <code>'A'</code>). <code>sub eax, 30h</code> means digit (subtracting <code>'0'</code>). <code>cmp al, 2Dh</code> means literal dash. These patterns decode character type expectations at a glance.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">05 — Absence Is Information</div>
+      <p><code>key[3]</code> had no stack variable and no arithmetic — IDA didn't name it. The absence of a transform meant the position was unconstrained. Noticing what the code <em>doesn't</em> do is as important as what it does.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">06 — Model Then Brute</div>
+      <p>Reversing the math before writing any code is critical. The keygen isn't a random guesser — it only iterates over the constrained search space (<code>a</code>, <code>b</code>, <code>c</code>) and applies the exact mathematical conditions extracted from the binary. Modelling first, implementing second.</p>
+    </div>
+  </div>
+
+  <div class="callout green" style="margin-top:32px;">
+    <div class="callout-title">✓ Core Takeaway</div>
+    <p style="margin:0; font-size:13px;">Reverse engineering is pattern recognition. Every IDA session adds shapes to a mental library — compiler idioms, optimization patterns, character encoding tricks. This challenge built the foundation for reading real-world binaries: license checks, authentication routines, and custom protocol parsers all reduce to the same process.</p>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="handle">n0rm41</div>
+    <div>RE-01 &nbsp;·&nbsp; IDA Pro 9.1 &nbsp;·&nbsp; x86 ELF</div>
+  </div>
+
+</div>
+</body>
+</html>
