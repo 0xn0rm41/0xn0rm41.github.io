@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RE-03: PE Internals & Windows Malware Triage | n0rm41</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #161616;
+    --red: #cc0000;
+    --red-dim: #880000;
+    --red-glow: rgba(204,0,0,0.15);
+    --green: #00cc44;
+    --yellow: #ccaa00;
+    --blue: #5599ff;
+    --text: #d0d0d0;
+    --text-dim: #666;
+    --border: #1e1e1e;
+    --mono: 'JetBrains Mono', monospace;
+    --fira: 'Fira Code', monospace;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--fira);
+    font-size: 14px;
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 60px 24px; }
+
+  .header { border-bottom: 1px solid var(--border); padding-bottom: 40px; margin-bottom: 48px; }
+
+  .breadcrumb {
+    font-size: 11px; color: var(--text-dim); letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 20px;
+  }
+  .breadcrumb a { color: var(--text-dim); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--red); }
+  .breadcrumb span { color: var(--red); }
+
+  .title {
+    font-family: var(--mono); font-size: 28px; font-weight: 700;
+    color: #fff; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 12px;
+  }
+  .title .accent { color: var(--red); }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin-top: 8px; }
+  .meta { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 20px; }
+
+  .tag {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 3px 10px;
+    border: 1px solid var(--border); color: var(--text-dim);
+  }
+  .tag.red    { border-color: var(--red-dim);  color: var(--red);    }
+  .tag.green  { border-color: #005522;          color: var(--green);  }
+  .tag.yellow { border-color: #443300;          color: var(--yellow); }
+  .tag.blue   { border-color: #223366;          color: var(--blue);   }
+
+  h2 {
+    font-family: var(--mono); font-size: 13px; font-weight: 500;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--red);
+    margin: 48px 0 20px; display: flex; align-items: center; gap: 12px;
+  }
+  h2::before { content: '//'; color: var(--red-dim); }
+  h2::after  { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  h3 {
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    color: #fff; letter-spacing: 0.08em; text-transform: uppercase;
+    margin: 28px 0 12px;
+  }
+
+  p { color: var(--text); margin-bottom: 16px; font-size: 13.5px; }
+
+  .code-block {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-left: 2px solid var(--red); padding: 20px 24px;
+    margin: 20px 0; overflow-x: auto; position: relative;
+  }
+  .code-block .label {
+    position: absolute; top: 0; right: 0; font-size: 9px;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim);
+    padding: 4px 8px; background: var(--bg3); font-family: var(--mono);
+    border-left: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+
+  pre {
+    font-family: var(--mono); font-size: 12.5px;
+    line-height: 1.7; color: #c8c8c8; white-space: pre;
+  }
+
+  .c-red    { color: var(--red);      }
+  .c-green  { color: var(--green);    }
+  .c-yellow { color: var(--yellow);   }
+  .c-dim    { color: var(--text-dim); }
+  .c-white  { color: #fff;            }
+  .c-blue   { color: var(--blue);     }
+
+  code {
+    font-family: var(--mono); font-size: 12px; color: var(--red);
+    background: rgba(204,0,0,0.08); padding: 1px 6px;
+    border: 1px solid rgba(204,0,0,0.2);
+  }
+
+  .terminal {
+    background: #050505; border: 1px solid var(--border);
+    padding: 20px 24px; margin: 20px 0;
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.8;
+  }
+  .prompt::before { content: '> '; color: var(--blue); }
+  .output { color: #999; }
+
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 12.5px; }
+  th {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-dim);
+    text-align: left; padding: 8px 16px; border-bottom: 1px solid var(--border);
+  }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { font-family: var(--mono); color: var(--yellow); white-space: nowrap; }
+
+  .callout {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-left: 2px solid var(--yellow); padding: 16px 20px;
+    margin: 20px 0; font-size: 13px;
+  }
+  .callout.red   { border-left-color: var(--red);   }
+  .callout.green { border-left-color: var(--green);  }
+  .callout.blue  { border-left-color: var(--blue);   }
+  .callout-title {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--yellow); margin-bottom: 8px;
+  }
+  .callout.red   .callout-title { color: var(--red);   }
+  .callout.green .callout-title { color: var(--green);  }
+  .callout.blue  .callout-title { color: var(--blue);   }
+
+  /* PE structure diagram */
+  .pe-diagram {
+    background: var(--bg2); border: 1px solid var(--border);
+    margin: 20px 0; font-family: var(--mono); font-size: 12px;
+    overflow: hidden;
+  }
+  .pe-section {
+    padding: 12px 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 20px;
+  }
+  .pe-section:last-child { border-bottom: none; }
+  .pe-section.highlight { background: rgba(204,0,0,0.05); }
+  .pe-name { color: var(--yellow); width: 100px; flex-shrink: 0; }
+  .pe-desc { color: #888; font-size: 11.5px; flex: 1; }
+  .pe-note { font-size: 10px; color: var(--text-dim); }
+  .pe-note.red { color: var(--red); }
+  .pe-note.green { color: var(--green); }
+
+  /* Entropy bar */
+  .entropy-table { width: 100%; margin: 20px 0; }
+  .entropy-row {
+    display: flex; align-items: center; gap: 16px;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+    font-family: var(--mono); font-size: 12px;
+  }
+  .entropy-row:last-child { border-bottom: none; }
+  .entropy-name { width: 80px; color: var(--yellow); flex-shrink: 0; }
+  .entropy-bar-wrap { flex: 1; background: var(--bg3); height: 6px; }
+  .entropy-bar { height: 100%; background: var(--green); }
+  .entropy-bar.warn { background: var(--yellow); }
+  .entropy-bar.high { background: var(--red); }
+  .entropy-val { width: 36px; text-align: right; color: var(--text-dim); font-size: 11px; }
+
+  /* Xref workflow */
+  .xref-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 20px 24px; margin: 12px 0;
+  }
+  .xref-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px;
+  }
+  .xref-import { font-family: var(--mono); font-size: 13px; color: var(--red); }
+  .xref-count  { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: 0.1em; }
+  .xref-detail { font-size: 12.5px; color: #888; line-height: 1.7; }
+  .xref-verdict { margin-top: 10px; font-family: var(--mono); font-size: 11px; }
+  .xref-verdict.ok  { color: var(--green); }
+  .xref-verdict.bad { color: var(--red);   }
+
+  /* Learning grid */
+  .learning-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+  .learning-card { background: var(--bg2); border: 1px solid var(--border); padding: 16px 18px; }
+  .learning-card .num { font-family: var(--mono); font-size: 10px; color: var(--red); letter-spacing: 0.1em; margin-bottom: 8px; }
+  .learning-card p { font-size: 12.5px; color: var(--text); margin: 0; line-height: 1.6; }
+
+  .footer {
+    margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px; color: var(--text-dim); flex-wrap: wrap; gap: 12px;
+  }
+  .footer .handle { color: var(--red); font-family: var(--mono); }
+  .footer a { color: var(--text-dim); text-decoration: none; font-family: var(--mono); font-size: 11px; }
+  .footer a:hover { color: var(--red); }
+
+  @media (max-width: 600px) {
+    .learning-grid { grid-template-columns: 1fr; }
+    .title { font-size: 20px; }
+    .pe-section { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="breadcrumb">
+      <a href="index.html">n0rm41</a> / <a href="index.html#writeups">writeups</a> / <span>RE-03</span>
+    </div>
+    <div class="title">PE Internals &amp; <span class="accent">Windows Triage</span></div>
+    <p class="subtitle">
+      Full static triage of a real 32-bit Windows PE — PEStudio analysis, entropy mapping, and import xref pivoting in IDA.
+    </p>
+    <div class="meta">
+      <div class="tag red">Reverse Engineering</div>
+      <div class="tag">Windows PE</div>
+      <div class="tag">IDA Pro 9.1</div>
+      <div class="tag yellow">PEStudio</div>
+      <div class="tag">FlareVM</div>
+      <div class="tag green">Triage Complete</div>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <h2>Overview</h2>
+  <p>
+    The majority of real-world implants, RATs, and malware target Windows and ship as PE files.
+    Before a single instruction is disassembled, a structured static triage extracts identity,
+    capability, and anomaly information in under two minutes. This writeup documents
+    that full workflow applied to <code>putty.exe</code> (v0.82) — a real, complex,
+    non-trivial PE used as a known-good training target.
+  </p>
+  <p>
+    Environment: FlareVM (Windows 10 VM, snapshotted), PEStudio, IDA Pro 9.1.
+  </p>
+
+  <!-- PE FORMAT -->
+  <h2>The PE File Format</h2>
+  <p>
+    The sections that matter for triage, in order of analyst priority:
+  </p>
+
+  <div class="pe-diagram">
+    <div class="pe-section">
+      <div class="pe-name">DOS Header</div>
+      <div class="pe-desc">MZ magic bytes. Confirms it's a PE. Legacy stub jumps to PE header.</div>
+      <div class="pe-note">identity</div>
+    </div>
+    <div class="pe-section highlight">
+      <div class="pe-name">PE Header</div>
+      <div class="pe-desc">Architecture, compile timestamp, flags. Timestamp is often forged in malware.</div>
+      <div class="pe-note red">first check</div>
+    </div>
+    <div class="pe-section highlight">
+      <div class="pe-name">Import Table</div>
+      <div class="pe-desc">Every DLL and function the binary calls. Fastest capability fingerprint available.</div>
+      <div class="pe-note red">most valuable</div>
+    </div>
+    <div class="pe-section">
+      <div class="pe-name">Section Table</div>
+      <div class="pe-desc">.text .data .rdata .rsrc layout + entropy per section. High entropy = packed/encrypted.</div>
+      <div class="pe-note">entropy map</div>
+    </div>
+    <div class="pe-section">
+      <div class="pe-name">Export Table</div>
+      <div class="pe-desc">Functions the binary exposes. Present in DLLs, rarely in EXEs. Malware DLLs often export one function.</div>
+      <div class="pe-note">DLL focus</div>
+    </div>
+    <div class="pe-section">
+      <div class="pe-name">Resources</div>
+      <div class="pe-desc">Icons, strings, embedded files, version info. Forged or missing version info is suspicious.</div>
+      <div class="pe-note">verify identity</div>
+    </div>
+  </div>
+
+  <!-- PESTUDIO TRIAGE -->
+  <h2>Phase 1 — PEStudio Triage</h2>
+
+  <h3>Identity & Timestamp</h3>
+  <p>
+    The compile timestamp reads <code>Sat 01 Feb 2025 11:27:15</code> — consistent with PuTTY 0.82's
+    public release date. In malware analysis, timestamps are the first thing scrutinized.
+    Forged timestamps are a common anti-forensics technique: values of 1970-01-01, dates far in the future,
+    or timestamps that exactly match a legitimate binary's are all immediate red flags.
+  </p>
+
+  <div class="callout">
+    <div class="callout-title">⚡ Timestamp Forgery Patterns</div>
+    <p style="margin:0; font-size:13px;">
+      <code>1970-01-01</code> — zeroed timestamp, compiler flag or deliberate wipe &nbsp;·&nbsp;
+      <code>2037+</code> — future date, clearly fabricated &nbsp;·&nbsp;
+      Exact match to known binary — cloning legitimate metadata to evade detection
+    </p>
+  </div>
+
+  <h3>Entry Point</h3>
+  <p>
+    Entry point at <code>0x000A1086</code> falls within the <code>.text</code> section — correct and expected.
+    Code lives in <code>.text</code>. An entry point landing in <code>.data</code>, <code>.rsrc</code>,
+    or a strangely named section like <code>.UPX0</code> or <code>.pack</code> is a strong packer indicator —
+    the real code is hidden and the entry point points at a stub that unpacks it at runtime.
+  </p>
+
+  <h3>Entropy Map</h3>
+
+  <div class="entropy-table">
+    <div class="entropy-row">
+      <div class="entropy-name">.text</div>
+      <div class="entropy-bar-wrap"><div class="entropy-bar" style="width:75%"></div></div>
+      <div class="entropy-val">~6.0</div>
+    </div>
+    <div class="entropy-row">
+      <div class="entropy-name">.rdata</div>
+      <div class="entropy-bar-wrap"><div class="entropy-bar" style="width:55%"></div></div>
+      <div class="entropy-val">~4.4</div>
+    </div>
+    <div class="entropy-row">
+      <div class="entropy-name">.data</div>
+      <div class="entropy-bar-wrap"><div class="entropy-bar" style="width:40%"></div></div>
+      <div class="entropy-val">~3.2</div>
+    </div>
+    <div class="entropy-row">
+      <div class="entropy-name">.rsrc</div>
+      <div class="entropy-bar-wrap"><div class="entropy-bar warn" style="width:62%"></div></div>
+      <div class="entropy-val">~5.0</div>
+    </div>
+    <div class="entropy-row">
+      <div class="entropy-name">CHM help</div>
+      <div class="entropy-bar-wrap"><div class="entropy-bar high" style="width:99%"></div></div>
+      <div class="entropy-val">7.9</div>
+    </div>
+  </div>
+
+  <p>
+    The compiled HTML help resource reads 7.9 entropy — near-maximum. This is legitimately expected:
+    <code>.chm</code> files are compressed archives, and compressed data is statistically
+    indistinguishable from encrypted data to an entropy scanner.
+    The analyst decision is: <em>is this high entropy in a known compressed resource, or in executable code?</em>
+    Here it's the former — expected and benign.
+  </p>
+
+  <div class="callout red">
+    <div class="callout-title">⚠ Entropy Decision Rule</div>
+    <p style="margin:0; font-size:13px;">
+      High entropy in <code>.rsrc</code> or a named help resource → expected compression, note and move on.<br>
+      High entropy in <code>.text</code>, <code>.data</code>, or an unnamed section → likely packed or encrypted payload → unpack before continuing.
+    </p>
+  </div>
+
+  <h3>Suspicious Imports — Capability Fingerprint</h3>
+  <p>
+    The import table is the fastest behavioral signal before any disassembly. The following imports
+    would raise immediate flags in a malware context:
+  </p>
+
+  <table>
+    <tr><th>Import</th><th>Malware Use Case</th><th>In PuTTY</th></tr>
+    <tr>
+      <td>OpenProcess</td>
+      <td>Precursor to process injection — gain handle to target process</td>
+      <td>Security query (SID lookup)</td>
+    </tr>
+    <tr>
+      <td>ShellExecute</td>
+      <td>Launch arbitrary executables, open URLs, run payloads</td>
+      <td>About dialog — "Visit website" button</td>
+    </tr>
+    <tr>
+      <td>RegCreateKeyExA</td>
+      <td>Persistence via Run key, config storage, C2 beacon intervals</td>
+      <td>Settings storage</td>
+    </tr>
+    <tr>
+      <td>DeleteFileA</td>
+      <td>Self-deletion after execution — dropper cleanup</td>
+      <td>Temp file management</td>
+    </tr>
+    <tr>
+      <td>CreateRemoteThread</td>
+      <td>Classic process injection primitive</td>
+      <td>Not present — absence is itself a signal</td>
+    </tr>
+  </table>
+
+  <!-- IDA XREF -->
+  <h2>Phase 2 — IDA Import Xref Pivot</h2>
+  <p>
+    PEStudio identifies suspicious imports. IDA answers the follow-up question:
+    <em>where is each import called from, and what is the surrounding context?</em>
+    The xref pivot (<code>X</code> in IDA) is the core analysis loop.
+  </p>
+
+  <div class="code-block">
+    <div class="label">IDA — xref workflow</div>
+    <pre><span class="c-dim">Imports window → select suspicious function
+      ↓
+X  (xref) → list all callers
+      ↓
+Read caller context → interactive UI code or autonomous background code?
+      ↓
+N  → rename function to document intent
+      ↓
+Repeat for next import</span></pre>
+  </div>
+
+  <h3>Findings</h3>
+
+  <div class="xref-card">
+    <div class="xref-header">
+      <div class="xref-import">ShellExecute</div>
+      <div class="xref-count">1 XREF</div>
+    </div>
+    <div class="xref-detail">
+      Single caller: <code>DialogFunc</code>. Called from a dialog message handler —
+      consistent with a button click handler in a UI dialog. One call, interactive context,
+      no autonomous execution path.
+    </div>
+    <div class="xref-verdict ok">✓ Benign — About dialog "Visit website" button</div>
+  </div>
+
+  <div class="xref-card">
+    <div class="xref-header">
+      <div class="xref-import">RegCreateKeyExA</div>
+      <div class="xref-count">1 XREF</div>
+    </div>
+    <div class="xref-detail">
+      Single caller: <code>sub_439040</code> — a small function that opens or creates
+      a registry key, performs an operation, then closes the handle and frees resources.
+      Clean error handling via <code>GetLastError</code>. No chaining to persistence-related calls.
+      Renamed to <code>open_or_create_regkey</code>.
+    </div>
+    <div class="xref-verdict ok">✓ Benign — settings storage, no persistence indicators</div>
+  </div>
+
+  <div class="xref-card">
+    <div class="xref-header">
+      <div class="xref-import">OpenProcess</div>
+      <div class="xref-count">1 XREF</div>
+    </div>
+    <div class="xref-detail">
+      Single caller opens a process by ID, retrieves the SID (security identifier),
+      copies it, closes the handle, and frees memory. No <code>VirtualAllocEx</code>,
+      <code>WriteProcessMemory</code>, or <code>CreateRemoteThread</code> in the same
+      call chain — the three imports that together constitute a classic injection sequence.
+      Renamed to <code>get_process_sid</code>.
+    </div>
+    <div class="xref-verdict ok">✓ Benign — security context query, isolated from injection primitives</div>
+  </div>
+
+  <!-- MALWARE CONTRAST -->
+  <h2>Malware Contrast — What Bad Looks Like</h2>
+  <p>
+    The same workflow on a real implant produces a different picture. For reference:
+  </p>
+
+  <div class="code-block">
+    <div class="label">hypothetical malware xref output</div>
+    <pre><span class="c-yellow">OpenProcess</span>       3 xrefs
+  <span class="c-red">sub_401A20</span>   <span class="c-dim">← called after RegSetValueEx  (post-persistence)</span>
+  <span class="c-red">sub_403B10</span>   <span class="c-dim">← called from unpacked payload section</span>
+  <span class="c-red">sub_409F44</span>   <span class="c-dim">← called on timer callback    (autonomous)</span>
+
+<span class="c-yellow">VirtualAllocEx</span>    1 xref
+  <span class="c-red">sub_401A20</span>   <span class="c-dim">← same function as OpenProcess caller</span>
+
+<span class="c-yellow">WriteProcessMemory</span> 1 xref
+  <span class="c-red">sub_401A20</span>   <span class="c-dim">← same function — injection triad confirmed</span>
+
+<span class="c-yellow">CreateRemoteThread</span> 1 xref
+  <span class="c-red">sub_401A20</span>   <span class="c-dim">← rename: inject_shellcode</span></pre>
+  </div>
+
+  <p>
+    Multiple anonymous callers, autonomous execution paths (timer callbacks, not UI handlers),
+    and the classic injection triad clustering in the same function — all conclusive indicators.
+  </p>
+
+  <!-- NAMING -->
+  <h2>Function Naming Discipline</h2>
+  <p>
+    Renaming functions as analysis progresses is non-negotiable in long sessions.
+    The naming convention used throughout:
+  </p>
+
+  <table>
+    <tr><th>Pattern</th><th>Example</th><th>Rationale</th></tr>
+    <tr>
+      <td>verb_object</td>
+      <td><code>get_process_sid</code></td>
+      <td>Describes action and target — unambiguous after hours of analysis</td>
+    </tr>
+    <tr>
+      <td>intent over mechanism</td>
+      <td><code>establish_persistence</code> not <code>write_regkey</code></td>
+      <td>When intent is established, name the purpose not the implementation</td>
+    </tr>
+    <tr>
+      <td>snake_case lowercase</td>
+      <td><code>inject_shellcode</code></td>
+      <td>Matches how findings are written in analyst reports</td>
+    </tr>
+    <tr>
+      <td>never abbreviate</td>
+      <td><code>open_or_create_regkey</code> not <code>ocrk</code></td>
+      <td>Abbreviations become meaningless in 24 hours</td>
+    </tr>
+  </table>
+
+  <!-- LEARNINGS -->
+  <h2>What I Learned</h2>
+
+  <div class="learning-grid">
+    <div class="learning-card">
+      <div class="num">01 — Imports Are a Capability Map</div>
+      <p>The import table tells you what a binary can do before you read a single instruction. Clustering dangerous imports — <code>OpenProcess</code> + <code>VirtualAllocEx</code> + <code>WriteProcessMemory</code> — is a near-certain injection signal.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">02 — Entropy Requires Context</div>
+      <p>High entropy alone is not a finding. The same 7.9 reading means "compressed help file" in a legitimate binary and "encrypted payload" in malware. The section name and type determine which interpretation is correct.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">03 — Xref Context Is Everything</div>
+      <p>A dangerous import called once from a dialog handler is benign. The same import called three times from anonymous background functions is malicious. The number of xrefs and their calling context are the actual signal.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">04 — Timestamps Are Unreliable</div>
+      <p>PE compile timestamps can be set to any value by the compiler or a hex editor. They are a hint, not evidence. Plausibility check only — never anchor a conclusion on a timestamp alone.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">05 — Entry Point Location Reveals Packing</div>
+      <p>Legitimate code enters at <code>.text</code>. An entry point in <code>.data</code>, <code>.rsrc</code>, or an unnamed section means a packer stub is running first. The real code is hidden and must be unpacked before analysis.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">06 — Name As You Go</div>
+      <p>Renaming <code>sub_439040</code> to <code>open_or_create_regkey</code> the moment you understand it prevents re-reversing the same function later. Every analysis session builds a database of named functions — treat it as a living document.</p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="handle">n0rm41</div>
+    <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+      <a href="rev2.html">← RE-02</a>
+      <span>RE-03 &nbsp;·&nbsp; IDA Pro 9.1 &nbsp;·&nbsp; Windows PE &nbsp;·&nbsp; FlareVM</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
