@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RE-05: Anti-Analysis Bypass | n0rm41</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #161616;
+    --red: #cc0000;
+    --red-dim: #880000;
+    --green: #00cc44;
+    --yellow: #ccaa00;
+    --blue: #5599ff;
+    --text: #d0d0d0;
+    --text-dim: #666;
+    --border: #1e1e1e;
+    --mono: 'JetBrains Mono', monospace;
+    --fira: 'Fira Code', monospace;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--fira);
+    font-size: 14px;
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 60px 24px; }
+
+  .header { border-bottom: 1px solid var(--border); padding-bottom: 40px; margin-bottom: 48px; }
+
+  .breadcrumb {
+    font-size: 11px; color: var(--text-dim); letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 20px;
+  }
+  .breadcrumb a { color: var(--text-dim); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--red); }
+  .breadcrumb span { color: var(--red); }
+
+  .title {
+    font-family: var(--mono); font-size: 28px; font-weight: 700;
+    color: #fff; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 12px;
+  }
+  .title .accent { color: var(--red); }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin-top: 8px; }
+  .meta { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 20px; }
+
+  .tag {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 3px 10px;
+    border: 1px solid var(--border); color: var(--text-dim);
+  }
+  .tag.red    { border-color: var(--red-dim);  color: var(--red);    }
+  .tag.green  { border-color: #005522;          color: var(--green);  }
+  .tag.yellow { border-color: #443300;          color: var(--yellow); }
+  .tag.blue   { border-color: #223366;          color: var(--blue);   }
+
+  h2 {
+    font-family: var(--mono); font-size: 13px; font-weight: 500;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--red);
+    margin: 48px 0 20px; display: flex; align-items: center; gap: 12px;
+  }
+  h2::before { content: '//'; color: var(--red-dim); }
+  h2::after  { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  h3 {
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    color: #fff; letter-spacing: 0.08em; text-transform: uppercase;
+    margin: 28px 0 12px;
+  }
+
+  p { color: var(--text); margin-bottom: 16px; font-size: 13.5px; }
+
+  .code-block {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-left: 2px solid var(--red); padding: 20px 24px;
+    margin: 20px 0; overflow-x: auto; position: relative;
+  }
+  .code-block .label {
+    position: absolute; top: 0; right: 0; font-size: 9px;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim);
+    padding: 4px 8px; background: var(--bg3); font-family: var(--mono);
+    border-left: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+
+  pre {
+    font-family: var(--mono); font-size: 12.5px;
+    line-height: 1.7; color: #c8c8c8; white-space: pre;
+  }
+
+  .c-red    { color: var(--red);      }
+  .c-green  { color: var(--green);    }
+  .c-yellow { color: var(--yellow);   }
+  .c-dim    { color: var(--text-dim); }
+  .c-white  { color: #fff;            }
+  .c-blue   { color: var(--blue);     }
+
+  code {
+    font-family: var(--mono); font-size: 12px; color: var(--red);
+    background: rgba(204,0,0,0.08); padding: 1px 6px;
+    border: 1px solid rgba(204,0,0,0.2);
+  }
+
+  .terminal {
+    background: #050505; border: 1px solid var(--border);
+    padding: 20px 24px; margin: 20px 0;
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.8;
+  }
+  .prompt::before     { content: '$ ';        color: var(--green);  }
+  .prompt-gdb::before { content: 'pwndbg> ';  color: var(--yellow); }
+  .output      { color: #888; }
+  .output.good { color: var(--green); }
+  .output.bad  { color: var(--red);   }
+
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 12.5px; }
+  th {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-dim);
+    text-align: left; padding: 8px 16px; border-bottom: 1px solid var(--border);
+  }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { font-family: var(--mono); color: var(--yellow); white-space: nowrap; }
+
+  .callout {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-left: 2px solid var(--yellow); padding: 16px 20px;
+    margin: 20px 0; font-size: 13px;
+  }
+  .callout.red   { border-left-color: var(--red);   }
+  .callout.green { border-left-color: var(--green);  }
+  .callout.blue  { border-left-color: var(--blue);   }
+  .callout-title {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--yellow); margin-bottom: 8px;
+  }
+  .callout.red   .callout-title { color: var(--red);   }
+  .callout.green .callout-title { color: var(--green);  }
+  .callout.blue  .callout-title { color: var(--blue);   }
+
+  /* Check cards */
+  .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin: 20px 0; }
+  .check-card { background: var(--bg2); border: 1px solid var(--border); padding: 22px 24px; }
+  .check-title {
+    font-family: var(--mono); font-size: 13px; font-weight: 700;
+    color: var(--red); margin-bottom: 6px;
+  }
+  .check-subtitle {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-dim); margin-bottom: 14px;
+  }
+  .check-card p { font-size: 12.5px; color: #888; margin: 0; line-height: 1.7; }
+
+  /* Fingerprint block */
+  .fingerprint {
+    background: #050505; border: 1px solid var(--border);
+    border-left: 2px solid var(--yellow);
+    padding: 20px 24px; margin: 20px 0;
+    font-family: var(--mono); font-size: 12.5px; line-height: 2;
+  }
+  .fp-row { display: flex; align-items: baseline; gap: 16px; }
+  .fp-asm  { color: var(--yellow); min-width: 260px; }
+  .fp-meaning { color: var(--text-dim); font-size: 11px; }
+  .fp-action  { color: var(--green); font-size: 11px; }
+
+  /* Bypass steps */
+  .bypass-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 22px 26px; margin: 12px 0;
+  }
+  .bypass-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px;
+  }
+  .bypass-title { font-family: var(--mono); font-size: 13px; color: #fff; }
+  .bypass-badge {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 2px 8px;
+    border: 1px solid var(--green); color: var(--green);
+  }
+
+  /* General rule table */
+  .rule-table {
+    background: var(--bg2); border: 1px solid var(--border);
+    margin: 20px 0; overflow: hidden;
+  }
+  .rule-row {
+    display: grid; grid-template-columns: 200px 1fr 120px;
+    padding: 12px 20px; border-bottom: 1px solid var(--border);
+    font-size: 12.5px; align-items: center; gap: 16px;
+  }
+  .rule-row:last-child { border-bottom: none; }
+  .rule-row.header {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-dim);
+    background: var(--bg3);
+  }
+  .rule-check  { font-family: var(--mono); color: var(--yellow); }
+  .rule-asm    { color: #888; font-family: var(--mono); font-size: 11.5px; }
+  .rule-bypass { font-family: var(--mono); color: var(--green); font-size: 12px; }
+
+  /* Learning grid */
+  .learning-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+  .learning-card { background: var(--bg2); border: 1px solid var(--border); padding: 16px 18px; }
+  .learning-card .num { font-family: var(--mono); font-size: 10px; color: var(--red); letter-spacing: 0.1em; margin-bottom: 8px; }
+  .learning-card p { font-size: 12.5px; color: var(--text); margin: 0; line-height: 1.6; }
+
+  .footer {
+    margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px; color: var(--text-dim); flex-wrap: wrap; gap: 12px;
+  }
+  .footer .handle { color: var(--red); font-family: var(--mono); }
+  .footer a { color: var(--text-dim); text-decoration: none; font-family: var(--mono); font-size: 11px; }
+  .footer a:hover { color: var(--red); }
+
+  @media (max-width: 640px) {
+    .learning-grid { grid-template-columns: 1fr; }
+    .check-grid    { grid-template-columns: 1fr; }
+    .rule-row      { grid-template-columns: 1fr; }
+    .title         { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="breadcrumb">
+      <a href="index.html">n0rm41</a> / <a href="index.html#writeups">writeups</a> / <span>RE-05</span>
+    </div>
+    <div class="title">Anti-Analysis <span class="accent">Bypass</span></div>
+    <p class="subtitle">
+      Identifying and defeating ptrace anti-debug and timing checks — register-level bypass
+      without binary modification, reaching a gated payload from inside GDB.
+    </p>
+    <div class="meta">
+      <div class="tag red">Reverse Engineering</div>
+      <div class="tag yellow">Anti-Analysis</div>
+      <div class="tag">Anti-Debug</div>
+      <div class="tag">GDB + pwndbg</div>
+      <div class="tag">x86 32-bit</div>
+      <div class="tag green">Payload Reached</div>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <h2>Overview</h2>
+  <p>
+    Real malware actively resists analysis. Anti-debug and anti-sandbox checks are standard
+    in modern implants — detecting GDB, sandboxes, and automated analysis environments,
+    then exiting cleanly before exhibiting malicious behavior.
+    This writeup documents the identification and defeat of two common primitives:
+    a <code>ptrace</code>-based debugger check and a nanosecond timing threshold,
+    both bypassed via register manipulation in GDB without touching the binary on disk.
+  </p>
+
+  <!-- THE TWO CHECKS -->
+  <h2>The Two Anti-Analysis Primitives</h2>
+
+  <div class="check-grid">
+    <div class="check-card">
+      <div class="check-title">ptrace Anti-Debug</div>
+      <div class="check-subtitle">Debugger Detection</div>
+      <p>
+        A process calls <code>ptrace(PTRACE_TRACEME)</code> on itself.
+        If it succeeds (returns 0), no debugger is attached — the trace slot is free.
+        If it fails (returns -1), a debugger already claimed the slot.
+        Only one tracer can attach at a time — GDB's presence is betrayed by this collision.
+      </p>
+    </div>
+    <div class="check-card">
+      <div class="check-title">Timing Check</div>
+      <div class="check-subtitle">Sandbox / Debugger Detection</div>
+      <p>
+        A tight loop is timed between two <code>clock_gettime</code> calls.
+        Normal execution completes in microseconds.
+        Under GDB — even without breakpoints — ptrace interception overhead inflates
+        execution time by orders of magnitude, triggering the threshold and causing early exit.
+      </p>
+    </div>
+  </div>
+
+  <!-- OBSERVED BEHAVIOR -->
+  <h2>Phase 1 — Observed Behavior</h2>
+
+  <div class="terminal">
+    <div class="prompt">./antidebug</div>
+    <div class="output good">[+] Payload executing. Key: REDACTED</div>
+    <br>
+    <div class="prompt">gdb ./antidebug → run</div>
+    <div class="output bad">[-] Debugger detected.</div>
+  </div>
+
+  <p>
+    The binary behaves differently under GDB before a single breakpoint is set.
+    The <code>ptrace(PTRACE_TRACEME)</code> call fires at entry — GDB's
+    attachment is detected immediately, and the process exits before reaching any payload.
+  </p>
+
+  <!-- IDA FINGERPRINTS -->
+  <h2>Phase 2 — IDA Fingerprint Recognition</h2>
+
+  <h3>is_debugged()</h3>
+
+  <div class="code-block">
+    <div class="label">IDA — ptrace check</div>
+    <pre><span class="c-dim">; ptrace(PTRACE_TRACEME, 0, 0, 0)</span>
+push    0
+push    0
+push    0
+push    0                   <span class="c-dim">; PTRACE_TRACEME = 0</span>
+call    _ptrace
+add     esp, 10h
+
+<span class="c-red">cmp     eax, 0FFFFFFFFh</span>    <span class="c-dim">; ← -1 means call failed = debugger present</span>
+jnz     short clean         <span class="c-dim">; if eax != -1 → no debugger</span>
+<span class="c-yellow">; debugger detected path</span>
+mov     eax, 1
+jmp     short epilog</pre>
+  </div>
+
+  <h3>timing_check()</h3>
+
+  <div class="code-block">
+    <div class="label">IDA — timing threshold</div>
+    <pre><span class="c-dim">; clock_gettime(CLOCK_MONOTONIC, &t1)</span>
+call    _clock_gettime
+<span class="c-dim">; ... tight loop ...</span>
+<span class="c-dim">; clock_gettime(CLOCK_MONOTONIC, &t2)</span>
+call    _clock_gettime
+
+<span class="c-dim">; compute diff = (t2 - t1) in nanoseconds</span>
+<span class="c-dim">; ...</span>
+
+<span class="c-red">cmp     [ebp+var_10], 1DCD6500h</span>   <span class="c-dim">; ← 500,000,000 ns = 500ms threshold</span>
+jle     short timing_ok
+<span class="c-yellow">; analysis environment detected</span></pre>
+  </div>
+
+  <!-- FINGERPRINT SUMMARY -->
+  <div class="fingerprint">
+    <div style="font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:14px;">Pattern Library — Anti-Analysis Fingerprints</div>
+    <div class="fp-row">
+      <div class="fp-asm">cmp eax, 0FFFFFFFFh</div>
+      <div>
+        <div class="fp-meaning">after ptrace call → debugger check</div>
+        <div class="fp-action">bypass: set $eax = 0 before cmp</div>
+      </div>
+    </div>
+    <div class="fp-row">
+      <div class="fp-asm">cmp [...], 1DCD6500h</div>
+      <div>
+        <div class="fp-meaning">after clock_gettime → 500ms timing check</div>
+        <div class="fp-action">bypass: set $eax = 0 before cmp</div>
+      </div>
+    </div>
+    <div class="fp-row">
+      <div class="fp-asm">call IsDebuggerPresent</div>
+      <div>
+        <div class="fp-meaning">Windows API debugger check</div>
+        <div class="fp-action">bypass: set $eax = 0 after call</div>
+      </div>
+    </div>
+    <div class="fp-row">
+      <div class="fp-asm">cmp eax, 0Ah (getpid)</div>
+      <div>
+        <div class="fp-meaning">PID &lt; 10 sandbox evasion</div>
+        <div class="fp-action">bypass: set $eax = 1000 before cmp</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BYPASS -->
+  <h2>Phase 3 — GDB Register Bypass</h2>
+  <p>
+    Both checks are defeated without modifying the binary on disk.
+    The technique: break before the comparison fires, set the register to the
+    expected "clean" value, continue. The binary never knows it's being analyzed.
+  </p>
+
+  <div class="bypass-card">
+    <div class="bypass-header">
+      <div class="bypass-title">Bypass 1 — ptrace Check</div>
+      <div class="bypass-badge">Defeated</div>
+    </div>
+    <div class="terminal" style="margin:0;">
+      <div class="prompt-gdb">break is_debugged</div>
+      <div class="prompt-gdb">run</div>
+      <div class="output"><br>Breakpoint hit inside is_debugged</div>
+      <br>
+      <div class="prompt-gdb">finish</div>
+      <div class="output">ptrace returns — $eax = 0xffffffff (-1)</div>
+      <br>
+      <div class="prompt-gdb">set $eax = 0</div>
+      <div class="output">← force "not debugged" return value</div>
+      <br>
+      <div class="prompt-gdb">continue</div>
+      <div class="output good">ptrace check passed ✓</div>
+    </div>
+  </div>
+
+  <div class="bypass-card">
+    <div class="bypass-header">
+      <div class="bypass-title">Bypass 2 — Timing Check</div>
+      <div class="bypass-badge">Defeated</div>
+    </div>
+    <div class="terminal" style="margin:0;">
+      <div class="prompt-gdb">break timing_check</div>
+      <div class="prompt-gdb">continue</div>
+      <div class="output"><br>Breakpoint hit inside timing_check</div>
+      <br>
+      <div class="prompt-gdb">set $eax = 0</div>
+      <div class="output">← force "timing OK" return value</div>
+      <br>
+      <div class="prompt-gdb">finish</div>
+      <div class="prompt-gdb">continue</div>
+      <div class="output good">[+] Payload executing. Key: REDACTED</div>
+    </div>
+  </div>
+
+  <!-- GENERAL RULE -->
+  <h2>General Bypass Rule</h2>
+  <p>
+    Every anti-analysis check reduces to the same structure — a comparison followed by a
+    conditional branch. Owning the register before the comparison fires defeats any check,
+    regardless of how the value was computed.
+  </p>
+
+  <div class="rule-table">
+    <div class="rule-row header">
+      <div>Check</div>
+      <div>IDA Signature</div>
+      <div>GDB Bypass</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-check">ptrace anti-debug</div>
+      <div class="rule-asm">cmp eax, 0FFFFFFFFh</div>
+      <div class="rule-bypass">set $eax = 0</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-check">Timing threshold</div>
+      <div class="rule-asm">cmp [...], 1DCD6500h</div>
+      <div class="rule-bypass">set $eax = 0</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-check">PID sandbox check</div>
+      <div class="rule-asm">cmp eax, 0Ah</div>
+      <div class="rule-bypass">set $eax = 1000</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-check">IsDebuggerPresent</div>
+      <div class="rule-asm">test eax, eax (post call)</div>
+      <div class="rule-bypass">set $eax = 0</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-check">Sandbox file check</div>
+      <div class="rule-asm">test eax, eax (post stat)</div>
+      <div class="rule-bypass">set $eax = 1</div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-title">⚡ The Universal Principle</div>
+    <p style="margin:0; font-size:13px;">
+      Find the branch. Own the register. Every anti-analysis primitive —
+      no matter how the detection value is derived — must eventually
+      reduce to a comparison and a jump. Control what gets compared
+      and the check ceases to exist.
+    </p>
+  </div>
+
+  <!-- REAL WORLD -->
+  <h2>Real-World Variants</h2>
+
+  <table>
+    <tr><th>Technique</th><th>Mechanism</th><th>Where Seen</th></tr>
+    <tr>
+      <td>ptrace TRACEME</td>
+      <td>Self-trace slot collision with attached debugger</td>
+      <td>Linux malware, CTF crackmes, ELF implants</td>
+    </tr>
+    <tr>
+      <td>Timing delta</td>
+      <td>clock_gettime / RDTSC loop measurement</td>
+      <td>Packers, ransomware, sandbox evasion stubs</td>
+    </tr>
+    <tr>
+      <td>IsDebuggerPresent</td>
+      <td>Windows PEB flag check</td>
+      <td>Nearly all Windows malware</td>
+    </tr>
+    <tr>
+      <td>CheckRemoteDebuggerPresent</td>
+      <td>External debugger attach detection</td>
+      <td>Protected software, commercial packers</td>
+    </tr>
+    <tr>
+      <td>Heap flag check</td>
+      <td>Windows heap flags differ under debugger</td>
+      <td>Themida, VMProtect, advanced implants</td>
+    </tr>
+    <tr>
+      <td>CPUID / RDTSC</td>
+      <td>Virtualization and timing detection</td>
+      <td>VM-aware malware, sandbox evasion</td>
+    </tr>
+  </table>
+
+  <!-- LEARNINGS -->
+  <h2>What I Learned</h2>
+
+  <div class="learning-grid">
+    <div class="learning-card">
+      <div class="num">01 — ptrace Is a One-Slot Lock</div>
+      <p>Only one process can trace another at a time. <code>PTRACE_TRACEME</code> succeeds on a clean process and fails when GDB is already attached. This single syscall reliably distinguishes debug from normal execution.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">02 — Timing Checks Catch Passive Observation</div>
+      <p>Even without setting a single breakpoint, GDB's ptrace overhead inflates execution time enough to trigger a nanosecond-precision timing check. Passive debugging is not invisible — timing catches it.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">03 — Register Control Is the Master Key</div>
+      <p>Every check ends at a comparison and a jump. Breaking before the comparison and setting the register to the expected clean value defeats the check entirely — no binary patching, no recompilation required.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">04 — Recognize Constants Instantly</div>
+      <p><code>0FFFFFFFFh</code> after a ptrace call and <code>1DCD6500h</code> in a timing context are fingerprints. Building a mental library of these constants means identifying anti-analysis code in a stripped binary in seconds, not minutes.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">05 — Checks Layer in Real Malware</div>
+      <p>Production malware doesn't use one check — it chains them. ptrace → timing → PID → file existence → registry key. Each layer must be identified and defeated in sequence. The methodology is identical for each one.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">06 — Binary Patching Is the Alternative</div>
+      <p>When GDB session control is impractical (automated analysis, headless environments), the check can be NOP'd out with a hex editor or patched to always take the clean branch. Both approaches achieve the same result.</p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="handle">n0rm41</div>
+    <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+      <a href="rev4.html">← RE-04</a>
+      <span>RE-05 &nbsp;·&nbsp; GDB + pwndbg &nbsp;·&nbsp; Anti-Debug &nbsp;·&nbsp; x86 ELF</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
