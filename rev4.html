@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RE-04: Dynamic Analysis & Behavior Observation | n0rm41</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #161616;
+    --red: #cc0000;
+    --red-dim: #880000;
+    --green: #00cc44;
+    --yellow: #ccaa00;
+    --blue: #5599ff;
+    --text: #d0d0d0;
+    --text-dim: #666;
+    --border: #1e1e1e;
+    --mono: 'JetBrains Mono', monospace;
+    --fira: 'Fira Code', monospace;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--fira);
+    font-size: 14px;
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 60px 24px; }
+
+  .header { border-bottom: 1px solid var(--border); padding-bottom: 40px; margin-bottom: 48px; }
+
+  .breadcrumb {
+    font-size: 11px; color: var(--text-dim); letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 20px;
+  }
+  .breadcrumb a { color: var(--text-dim); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--red); }
+  .breadcrumb span { color: var(--red); }
+
+  .title {
+    font-family: var(--mono); font-size: 28px; font-weight: 700;
+    color: #fff; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 12px;
+  }
+  .title .accent { color: var(--red); }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin-top: 8px; }
+  .meta { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 20px; }
+
+  .tag {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 3px 10px;
+    border: 1px solid var(--border); color: var(--text-dim);
+  }
+  .tag.red    { border-color: var(--red-dim);  color: var(--red);    }
+  .tag.green  { border-color: #005522;          color: var(--green);  }
+  .tag.yellow { border-color: #443300;          color: var(--yellow); }
+  .tag.blue   { border-color: #223366;          color: var(--blue);   }
+
+  h2 {
+    font-family: var(--mono); font-size: 13px; font-weight: 500;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--red);
+    margin: 48px 0 20px; display: flex; align-items: center; gap: 12px;
+  }
+  h2::before { content: '//'; color: var(--red-dim); }
+  h2::after  { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  h3 {
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    color: #fff; letter-spacing: 0.08em; text-transform: uppercase;
+    margin: 28px 0 12px;
+  }
+
+  p { color: var(--text); margin-bottom: 16px; font-size: 13.5px; }
+
+  .code-block {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-left: 2px solid var(--red); padding: 20px 24px;
+    margin: 20px 0; overflow-x: auto; position: relative;
+  }
+  .code-block .label {
+    position: absolute; top: 0; right: 0; font-size: 9px;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim);
+    padding: 4px 8px; background: var(--bg3); font-family: var(--mono);
+    border-left: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+
+  pre {
+    font-family: var(--mono); font-size: 12.5px;
+    line-height: 1.7; color: #c8c8c8; white-space: pre;
+  }
+
+  .c-red    { color: var(--red);      }
+  .c-green  { color: var(--green);    }
+  .c-yellow { color: var(--yellow);   }
+  .c-dim    { color: var(--text-dim); }
+  .c-white  { color: #fff;            }
+  .c-blue   { color: var(--blue);     }
+
+  code {
+    font-family: var(--mono); font-size: 12px; color: var(--red);
+    background: rgba(204,0,0,0.08); padding: 1px 6px;
+    border: 1px solid rgba(204,0,0,0.2);
+  }
+
+  .terminal {
+    background: #050505; border: 1px solid var(--border);
+    padding: 20px 24px; margin: 20px 0;
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.8;
+  }
+  .prompt::before { content: '$ '; color: var(--green); }
+  .prompt-gdb::before { content: 'pwndbg> '; color: var(--yellow); }
+  .output { color: #888; }
+  .output.good { color: var(--green); }
+  .output.key  { color: var(--red);   }
+
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 12.5px; }
+  th {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-dim);
+    text-align: left; padding: 8px 16px; border-bottom: 1px solid var(--border);
+  }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { font-family: var(--mono); color: var(--yellow); white-space: nowrap; }
+
+  .callout {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-left: 2px solid var(--yellow); padding: 16px 20px;
+    margin: 20px 0; font-size: 13px;
+  }
+  .callout.red   { border-left-color: var(--red);   }
+  .callout.green { border-left-color: var(--green);  }
+  .callout.blue  { border-left-color: var(--blue);   }
+  .callout-title {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--yellow); margin-bottom: 8px;
+  }
+  .callout.red   .callout-title { color: var(--red);   }
+  .callout.green .callout-title { color: var(--green);  }
+  .callout.blue  .callout-title { color: var(--blue);   }
+
+  /* Tool comparison cards */
+  .tool-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin: 20px 0; }
+  .tool-card { background: var(--bg2); border: 1px solid var(--border); padding: 20px 22px; }
+  .tool-name {
+    font-family: var(--mono); font-size: 14px; font-weight: 700;
+    color: var(--red); margin-bottom: 8px;
+  }
+  .tool-tagline {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px;
+  }
+  .tool-card p { font-size: 12px; color: #888; margin: 0; line-height: 1.6; }
+
+  /* Register view highlight */
+  .reg-view {
+    background: #050505; border: 1px solid var(--border);
+    padding: 20px 24px; margin: 20px 0; font-family: var(--mono); font-size: 12px; line-height: 1.9;
+  }
+  .reg-name  { color: var(--yellow); display: inline-block; width: 40px; }
+  .reg-val   { color: #999; }
+  .reg-val.highlight { color: var(--green); font-weight: 700; }
+  .reg-arrow { color: var(--text-dim); }
+  .reg-str   { color: var(--red); }
+
+  /* Workflow diagram */
+  .workflow {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 24px; margin: 20px 0; font-family: var(--mono); font-size: 12px;
+  }
+  .wf-step {
+    display: flex; align-items: flex-start; gap: 16px; margin: 6px 0;
+  }
+  .wf-tool  { color: var(--yellow); width: 80px; flex-shrink: 0; }
+  .wf-arrow { color: var(--text-dim); margin: 0 4px; }
+  .wf-desc  { color: #888; flex: 1; }
+  .wf-div   { border-top: 1px solid var(--border); margin: 12px 0; }
+
+  /* Behavior findings */
+  .finding {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 18px 22px; margin: 10px 0;
+  }
+  .finding-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+  }
+  .finding-title { font-family: var(--mono); font-size: 12px; color: #fff; }
+  .finding-badge {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 2px 8px; border: 1px solid;
+  }
+  .finding-badge.malicious { border-color: var(--red-dim); color: var(--red); }
+  .finding-badge.evasion   { border-color: #443300; color: var(--yellow); }
+  .finding-badge.exfil     { border-color: #223366; color: var(--blue); }
+  .finding-detail { font-size: 12.5px; color: #888; line-height: 1.7; }
+
+  /* Learning grid */
+  .learning-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+  .learning-card { background: var(--bg2); border: 1px solid var(--border); padding: 16px 18px; }
+  .learning-card .num { font-family: var(--mono); font-size: 10px; color: var(--red); letter-spacing: 0.1em; margin-bottom: 8px; }
+  .learning-card p { font-size: 12.5px; color: var(--text); margin: 0; line-height: 1.6; }
+
+  .footer {
+    margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px; color: var(--text-dim); flex-wrap: wrap; gap: 12px;
+  }
+  .footer .handle { color: var(--red); font-family: var(--mono); }
+  .footer a { color: var(--text-dim); text-decoration: none; font-family: var(--mono); font-size: 11px; }
+  .footer a:hover { color: var(--red); }
+
+  @media (max-width: 640px) {
+    .learning-grid { grid-template-columns: 1fr; }
+    .tool-grid     { grid-template-columns: 1fr; }
+    .title         { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="breadcrumb">
+      <a href="index.html">n0rm41</a> / <a href="index.html#writeups">writeups</a> / <span>RE-04</span>
+    </div>
+    <div class="title">Dynamic Analysis &amp; <span class="accent">Behavior Observation</span></div>
+    <p class="subtitle">
+      Three-pass runtime analysis of a simulated malware dropper — strace, ltrace, and GDB register inspection to extract C2 config, sandbox evasion, and env-keyed unlock logic.
+    </p>
+    <div class="meta">
+      <div class="tag red">Reverse Engineering</div>
+      <div class="tag">Dynamic Analysis</div>
+      <div class="tag">GDB + pwndbg</div>
+      <div class="tag yellow">strace / ltrace</div>
+      <div class="tag">x86 32-bit</div>
+      <div class="tag green">Behavior Mapped</div>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <h2>Overview</h2>
+  <p>
+    Static analysis reveals what a binary <em>can</em> do. Dynamic analysis reveals what it
+    <em>actually does</em> at runtime — including behavior that no amount of disassembly reading
+    would expose quickly, such as the plaintext value of an obfuscated key recovered directly
+    from a register at the point of use.
+  </p>
+  <p>
+    The target binary simulates a realistic malware dropper: it performs sandbox evasion
+    via PID check, drops a C2 configuration file to disk, and gates its unlock path behind
+    an environment variable key. Three analysis passes — <code>ltrace</code>,
+    <code>strace</code>, and GDB — were used in sequence to map the complete behavior.
+  </p>
+
+  <!-- TOOLS -->
+  <h2>Tool Overview</h2>
+
+  <div class="tool-grid">
+    <div class="tool-card">
+      <div class="tool-name">ltrace</div>
+      <div class="tool-tagline">Library call interception</div>
+      <p>Intercepts every libc call with arguments and return values. Ideal for spotting file operations, string comparisons, environment reads, and crypto calls without touching a disassembler.</p>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">strace</div>
+      <div class="tool-tagline">Syscall interception</div>
+      <p>Intercepts every kernel syscall — file open/write, network, process creation, memory mapping. The ground truth of what a binary does to the OS, one level below ltrace.</p>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">GDB</div>
+      <div class="tool-tagline">Full runtime control</div>
+      <p>Breakpoints, register inspection, memory reads at arbitrary points. The final stage — zoom into a specific function, read return values directly off registers, bypass checks in real time.</p>
+    </div>
+  </div>
+
+  <!-- PASS 1 LTRACE -->
+  <h2>Pass 1 — ltrace: Library Call Snapshot</h2>
+
+  <div class="terminal">
+    <div class="prompt">ltrace ./behavior AAAA 2>&1 | head -30</div>
+    <br>
+    <div class="output">getpid()                                    = 12483</div>
+    <div class="output">fopen("/tmp/.hidden_cfg", "w")               = 0x...</div>
+    <div class="output">fputs("c2=192.168.1.1\nport=4444\n", 0x...)  = 28</div>
+    <div class="output">fclose(0x...)                                = 0</div>
+    <div class="output">chmod("/tmp/.hidden_cfg", 0600)              = 0</div>
+    <div class="output">getenv("UNLOCK_KEY")                         = <span style="color:var(--red)">nil</span></div>
+    <div class="output">puts("[-] Locked.")                          = 13</div>
+  </div>
+
+  <p>
+    The entire behavioral profile surfaces in a single ltrace pass — no disassembly required.
+    Three distinct behaviors are immediately visible: a PID-based sandbox check,
+    a file drop with C2 configuration, and an environment-variable-gated unlock path.
+    <code>getenv("UNLOCK_KEY") = nil</code> confirms the key wasn't set — the
+    <code>strcmp</code> never fires because <code>validate()</code> exits early on a NULL check.
+  </p>
+
+  <!-- PASS 2 STRACE -->
+  <h2>Pass 2 — strace: Syscall Layer</h2>
+
+  <div class="terminal">
+    <div class="prompt">strace ./behavior AAAA 2>&1 | grep -E "open|write|chmod|getpid"</div>
+    <br>
+    <div class="output">getpid()                                    = 12483</div>
+    <div class="output">openat(AT_FDCWD, "/tmp/.hidden_cfg", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 3</div>
+    <div class="output">write(3, "c2=192.168.1.1\nport=4444\n", 25)  = 25</div>
+    <div class="output output key">chmod("/tmp/.hidden_cfg", 0600)             = 0</div>
+  </div>
+
+  <p>
+    strace confirms the file write at syscall level and adds detail ltrace omits:
+    the file is opened with <code>O_CREAT|O_TRUNC</code> — created fresh each run,
+    overwriting any existing config. <code>chmod 0600</code> restricts access to
+    owner read/write only — deliberate operational security, preventing other
+    processes from reading the C2 configuration.
+  </p>
+
+  <div class="callout">
+    <div class="callout-title">⚡ chmod 0600 — Intentional OPSEC</div>
+    <p style="margin:0; font-size:13px;">
+      Legitimate software rarely chmods config files to 0600 immediately after writing.
+      In malware this is standard — the implant doesn't want other processes, log collectors,
+      or EDR agents reading its configuration off disk.
+    </p>
+  </div>
+
+  <!-- FINDINGS -->
+  <h2>Behavioral Findings</h2>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-title">Sandbox Evasion — PID Check</div>
+      <div class="finding-badge evasion">Evasion</div>
+    </div>
+    <div class="finding-detail">
+      <code>getpid()</code> is called at entry. If the returned PID is below 10,
+      the process exits immediately. Automated sandboxes sometimes assign very low PIDs
+      to isolated processes — this is a cheap heuristic to detect and exit before
+      behavioral analysis begins. Bypass: set <code>$eax = 1000</code> in GDB
+      after <code>getpid</code> returns, before the comparison fires.
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-title">C2 Config Drop — /tmp/.hidden_cfg</div>
+      <div class="finding-badge malicious">Malicious</div>
+    </div>
+    <div class="finding-detail">
+      Binary writes a plaintext configuration file on every execution containing
+      C2 address (<code>192.168.1.1</code>) and port (<code>4444</code>).
+      File is created at <code>/tmp/.hidden_cfg</code> — hidden by leading dot,
+      low-visibility location. Permissions set to <code>0600</code> immediately after write.
+      Classic dropper behavior: config written to disk for persistence across sessions.
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div class="finding-title">Environment-Keyed Unlock</div>
+      <div class="finding-badge exfil">Key Gating</div>
+    </div>
+    <div class="finding-detail">
+      <code>validate()</code> reads <code>UNLOCK_KEY</code> from the environment and compares
+      it to the user-supplied argument via <code>strcmp</code>. Key is not hardcoded in the binary —
+      passed at runtime via environment variable. This pattern appears in staged implants where
+      the operator supplies the activation key out-of-band, making static analysis of the binary
+      alone insufficient to activate the payload.
+    </div>
+  </div>
+
+  <!-- GDB PASS -->
+  <h2>Pass 3 — GDB: Register-Level Key Extraction</h2>
+  <p>
+    With <code>UNLOCK_KEY=secret</code> set, a breakpoint on <code>validate()</code>
+    captures the exact moment <code>getenv</code> returns. The plaintext key value
+    is visible directly in <code>$eax</code> — no decryption, no tracing of derivation logic required.
+  </p>
+
+  <div class="terminal">
+    <div class="prompt-gdb">set environment UNLOCK_KEY = secret</div>
+    <div class="prompt-gdb">break validate</div>
+    <div class="prompt-gdb">run secret</div>
+    <div class="output"><br>Breakpoint hit: 0x080492a8 in validate()</div>
+  </div>
+
+  <div class="reg-view">
+    <div style="color:var(--text-dim); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:12px;">REGISTERS at validate+33 (post getenv return)</div>
+    <div>
+      <span class="reg-name">EAX</span>
+      <span class="reg-val highlight">0xffffdfb9</span>
+      <span class="reg-arrow"> ◂— </span>
+      <span class="reg-str">'secret'</span>
+      <span style="color:var(--text-dim); font-size:10px; margin-left:12px;">← getenv return value, plaintext key</span>
+    </div>
+    <div>
+      <span class="reg-name">EBX</span>
+      <span class="reg-val">0x804bff4</span>
+      <span class="reg-arrow"> → </span>
+      <span style="color:#666;">_GLOBAL_OFFSET_TABLE_</span>
+    </div>
+    <div>
+      <span class="reg-name">ESP</span>
+      <span class="reg-val">0xffffce00</span>
+      <span class="reg-arrow"> → </span>
+      <span style="color:#666;">0x804a035 ◂— 'UNLOCK_KEY'</span>
+    </div>
+    <div>
+      <span class="reg-name">EIP</span>
+      <span class="reg-val">0x80492a8</span>
+      <span style="color:#666; font-size:11px; margin-left:8px;">(validate+33) — add esp, 0x10</span>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="label">IDA — post-getenv flow</div>
+    <pre>   0x80492a3 <span class="c-dim">&lt;validate+28&gt;</span>   call   <span class="c-yellow">getenv@plt</span>
+
+<span class="c-red"> ► 0x80492a8 <span class="c-dim">&lt;validate+33&gt;</span>   add    esp, 0x10</span>
+   0x80492ab <span class="c-dim">&lt;validate+36&gt;</span>   mov    dword ptr [ebp-0xc], eax   <span class="c-dim">; store key ptr</span>
+   0x80492ae <span class="c-dim">&lt;validate+39&gt;</span>   cmp    dword ptr [ebp-0xc], 0     <span class="c-dim">; NULL check</span>
+<span class="c-green"> ✔ 0x80492b2 <span class="c-dim">&lt;validate+43&gt;</span>   jne    validate+52               <span class="c-dim">; branch taken — key exists</span></span>
+     ↓
+   0x80492bb <span class="c-dim">&lt;validate+52&gt;</span>   push   dword ptr [ebp-0xc]          <span class="c-dim">; push key for strcmp</span></pre>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-title">⚡ The Core Dynamic Analysis Principle</div>
+    <p style="margin:0; font-size:13px;">
+      The CPU cannot execute obfuscated data — it must resolve everything to plaintext
+      before use. A breakpoint at the point of use always hands you the real value,
+      regardless of how many layers of XOR, RC4, or custom derivation preceded it.
+      <code>EAX = 'secret'</code> the instant <code>getenv</code> returns —
+      no static analysis of the key derivation was necessary.
+    </p>
+  </div>
+
+  <!-- WORKFLOW SUMMARY -->
+  <h2>Analysis Workflow</h2>
+
+  <div class="workflow">
+    <div class="wf-step">
+      <div class="wf-tool">ltrace</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-desc">Library call snapshot — file ops, env reads, string comparisons, instant behavioral profile</div>
+    </div>
+    <div class="wf-step">
+      <div class="wf-tool">strace</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-desc">Syscall layer — confirms OS-level actions, file permissions, network calls, process creation</div>
+    </div>
+    <div class="wf-div"></div>
+    <div class="wf-step">
+      <div class="wf-tool">GDB</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-desc">Break at point of use — read registers, bypass checks, extract plaintext from any obfuscation scheme</div>
+    </div>
+    <div class="wf-step">
+      <div class="wf-tool">rename</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-desc">Document every finding immediately — <code>sub_*</code> becomes <code>drop_c2_config</code>, <code>check_sandbox</code>, <code>validate_key</code></div>
+    </div>
+  </div>
+
+  <!-- LEARNINGS -->
+  <h2>What I Learned</h2>
+
+  <div class="learning-grid">
+    <div class="learning-card">
+      <div class="num">01 — ltrace Before IDA</div>
+      <p>A single ltrace pass surfaces file drops, env reads, string comparisons, and crypto calls in seconds. It answers "what does this binary do?" before a disassembler is opened — directing where to focus static analysis.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">02 — strace Is Ground Truth</div>
+      <p>strace operates one level below ltrace — at the syscall boundary. It cannot be fooled by library-level hooks or LD_PRELOAD tricks. For file, network, and process behavior it is the definitive record.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">03 — The CPU Resolves Everything</div>
+      <p>No matter how obfuscated the key derivation, environment read, or config decryption — the CPU must produce plaintext before use. A breakpoint at the right moment reads the answer directly from <code>$eax</code>.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">04 — Early Return Hides Calls</div>
+      <p><code>getenv = nil</code> caused <code>strcmp</code> to never appear in ltrace output. Understanding early-return patterns prevents false conclusions — absence of a call in trace output doesn't mean it doesn't exist in the binary.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">05 — PID Checks Are Cheap Evasion</div>
+      <p>Checking <code>getpid() &lt; 10</code> is a one-line sandbox evasion primitive. Real malware uses timing checks, CPUID, registry keys, and mouse movement detection — all variants of the same pattern: detect analysis environment, exit cleanly.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">06 — File Permissions Signal Intent</div>
+      <p><code>chmod 0600</code> immediately after writing a config file is not normal software behavior — it's deliberate operational security. Unusual permission changes on newly written files are a behavioral IOC in their own right.</p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="handle">n0rm41</div>
+    <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+      <a href="rev3.html">← RE-03</a>
+      <span>RE-04 &nbsp;·&nbsp; GDB + pwndbg &nbsp;·&nbsp; strace &nbsp;·&nbsp; ltrace &nbsp;·&nbsp; x86 ELF</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
