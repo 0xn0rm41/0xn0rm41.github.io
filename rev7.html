@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RE-07: Firmware & Embedded RE | n0rm41</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --bg2: #111111; --bg3: #161616;
+    --red: #cc0000; --red-dim: #880000;
+    --green: #00cc44; --yellow: #ccaa00; --blue: #5599ff;
+    --text: #d0d0d0; --text-dim: #666; --border: #1e1e1e;
+    --mono: 'JetBrains Mono', monospace; --fira: 'Fira Code', monospace;
+  }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--fira); font-size: 14px; line-height: 1.8; min-height: 100vh; }
+  body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); pointer-events: none; z-index: 100; }
+  .container { max-width: 860px; margin: 0 auto; padding: 60px 24px; }
+  .header { border-bottom: 1px solid var(--border); padding-bottom: 40px; margin-bottom: 48px; }
+  .breadcrumb { font-size: 11px; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; }
+  .breadcrumb a { color: var(--text-dim); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--red); }
+  .breadcrumb span { color: var(--red); }
+  .title { font-family: var(--mono); font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 12px; }
+  .title .accent { color: var(--red); }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin-top: 8px; }
+  .meta { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 20px; }
+  .tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border: 1px solid var(--border); color: var(--text-dim); }
+  .tag.red    { border-color: var(--red-dim);  color: var(--red);    }
+  .tag.green  { border-color: #005522;          color: var(--green);  }
+  .tag.yellow { border-color: #443300;          color: var(--yellow); }
+  .tag.blue   { border-color: #223366;          color: var(--blue);   }
+  h2 { font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--red); margin: 48px 0 20px; display: flex; align-items: center; gap: 12px; }
+  h2::before { content: '//'; color: var(--red-dim); }
+  h2::after  { content: ''; flex: 1; height: 1px; background: var(--border); }
+  h3 { font-family: var(--mono); font-size: 12px; font-weight: 500; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; margin: 28px 0 12px; }
+  p { color: var(--text); margin-bottom: 16px; font-size: 13.5px; }
+  .code-block { background: var(--bg2); border: 1px solid var(--border); border-left: 2px solid var(--red); padding: 20px 24px; margin: 20px 0; overflow-x: auto; position: relative; }
+  .code-block .label { position: absolute; top: 0; right: 0; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); padding: 4px 8px; background: var(--bg3); font-family: var(--mono); border-left: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  pre { font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: #c8c8c8; white-space: pre; }
+  .c-red { color: var(--red); } .c-green { color: var(--green); } .c-yellow { color: var(--yellow); } .c-dim { color: var(--text-dim); } .c-blue { color: var(--blue); }
+  code { font-family: var(--mono); font-size: 12px; color: var(--red); background: rgba(204,0,0,0.08); padding: 1px 6px; border: 1px solid rgba(204,0,0,0.2); }
+  .terminal { background: #050505; border: 1px solid var(--border); padding: 20px 24px; margin: 20px 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.8; }
+  .prompt::before { content: '$ '; color: var(--green); }
+  .output { color: #888; }
+  .output.bad  { color: var(--red);    }
+  .output.good { color: var(--green);  }
+  .output.warn { color: var(--yellow); }
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 12.5px; }
+  th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); text-align: left; padding: 8px 16px; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { font-family: var(--mono); color: var(--yellow); white-space: nowrap; }
+  .callout { background: var(--bg2); border: 1px solid var(--border); border-left: 2px solid var(--yellow); padding: 16px 20px; margin: 20px 0; font-size: 13px; }
+  .callout.red   { border-left-color: var(--red);   }
+  .callout.green { border-left-color: var(--green);  }
+  .callout.blue  { border-left-color: var(--blue);   }
+  .callout-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--yellow); margin-bottom: 8px; }
+  .callout.red   .callout-title { color: var(--red);   }
+  .callout.green .callout-title { color: var(--green);  }
+  .callout.blue  .callout-title { color: var(--blue);   }
+
+  /* Firmware layout diagram */
+  .fw-layout { background: var(--bg2); border: 1px solid var(--border); margin: 20px 0; overflow: hidden; font-family: var(--mono); }
+  .fw-section { display: flex; align-items: center; gap: 20px; padding: 12px 24px; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .fw-section:last-child { border-bottom: none; }
+  .fw-section.active { background: rgba(204,0,0,0.04); }
+  .fw-offset { color: var(--text-dim); width: 80px; flex-shrink: 0; font-size: 11px; }
+  .fw-name   { color: var(--yellow); width: 140px; flex-shrink: 0; }
+  .fw-desc   { color: #777; flex: 1; font-size: 11.5px; }
+  .fw-flag   { font-size: 10px; color: var(--red); }
+  .fw-flag.ok { color: var(--green); }
+
+  /* Finding cards */
+  .finding { background: var(--bg2); border: 1px solid var(--border); padding: 20px 24px; margin: 12px 0; }
+  .finding-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px; }
+  .finding-title { font-family: var(--mono); font-size: 13px; color: #fff; }
+  .finding-path  { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .finding-badge { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
+  .finding-badge.crit { border-color: var(--red-dim); color: var(--red); }
+  .finding-badge.high { border-color: #443300;        color: var(--yellow); }
+  .finding-badge.med  { border-color: #223366;        color: var(--blue); }
+  .finding-detail { font-size: 12.5px; color: #888; line-height: 1.75; }
+  .finding-detail code { font-size: 11px; }
+
+  /* Workflow */
+  .workflow { background: var(--bg2); border: 1px solid var(--border); padding: 24px; margin: 20px 0; font-family: var(--mono); font-size: 12px; }
+  .wf-step { display: flex; align-items: flex-start; gap: 16px; padding: 6px 0; }
+  .wf-tool { color: var(--yellow); width: 100px; flex-shrink: 0; }
+  .wf-arrow { color: var(--text-dim); }
+  .wf-desc { color: #888; flex: 1; }
+  .wf-div { border-top: 1px solid var(--border); margin: 10px 0; }
+
+  /* Learning grid */
+  .learning-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+  .learning-card { background: var(--bg2); border: 1px solid var(--border); padding: 16px 18px; }
+  .learning-card .num { font-family: var(--mono); font-size: 10px; color: var(--red); letter-spacing: 0.1em; margin-bottom: 8px; }
+  .learning-card p { font-size: 12.5px; color: var(--text); margin: 0; line-height: 1.6; }
+
+  .footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-dim); flex-wrap: wrap; gap: 12px; }
+  .footer .handle { color: var(--red); font-family: var(--mono); }
+  .footer a { color: var(--text-dim); text-decoration: none; font-family: var(--mono); font-size: 11px; }
+  .footer a:hover { color: var(--red); }
+
+  @media (max-width: 640px) {
+    .learning-grid { grid-template-columns: 1fr; }
+    .fw-section { flex-wrap: wrap; }
+    .title { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="breadcrumb">
+      <a href="index.html">n0rm41</a> / <a href="index.html#writeups">writeups</a> / <span>RE-07</span>
+    </div>
+    <div class="title">Firmware &amp; <span class="accent">Embedded RE</span></div>
+    <p class="subtitle">
+      Extracting and triaging embedded Linux firmware — binwalk analysis, SquashFS extraction,
+      and credential discovery including shared SSH keys and hardcoded Basic Auth.
+    </p>
+    <div class="meta">
+      <div class="tag red">Reverse Engineering</div>
+      <div class="tag yellow">Firmware</div>
+      <div class="tag">binwalk</div>
+      <div class="tag">SquashFS</div>
+      <div class="tag">Embedded Linux</div>
+      <div class="tag green">4 Findings</div>
+    </div>
+  </div>
+
+  <h2>Overview</h2>
+  <p>
+    Embedded devices — routers, cameras, IoT — run stripped-down Linux on MIPS or ARM
+    and routinely ship with hardcoded credentials, shared private keys, and backdoor
+    accounts baked into the firmware image. Extracting and auditing firmware is a
+    standard methodology in IC hardware analysis, product security research, and CVE discovery.
+  </p>
+  <p>
+    Target: a simulated TP-Link style firmware image with realistic structure —
+    vendor header followed by a gzip-compressed SquashFS filesystem.
+    The complete triage workflow was executed from raw binary to credential extraction
+    using <code>binwalk</code>, <code>dd</code>, and <code>unsquashfs</code>.
+  </p>
+
+  <h2>Firmware Structure</h2>
+  <p>
+    Real router firmware follows a predictable layout. <code>binwalk</code> identifies
+    each region by magic byte signatures:
+  </p>
+
+  <div class="fw-layout">
+    <div class="fw-section">
+      <div class="fw-offset">0x00</div>
+      <div class="fw-name">Vendor Header</div>
+      <div class="fw-desc">Device model, firmware version, CRC checksum. 64 bytes in this sample.</div>
+      <div class="fw-flag ok">skip</div>
+    </div>
+    <div class="fw-section active">
+      <div class="fw-offset">0x40</div>
+      <div class="fw-name">SquashFS 4.0</div>
+      <div class="fw-desc">Root filesystem. gzip compressed, little-endian. Contains /etc /bin /usr.</div>
+      <div class="fw-flag">extract</div>
+    </div>
+    <div class="fw-section">
+      <div class="fw-offset">varies</div>
+      <div class="fw-name">uBoot (real fw)</div>
+      <div class="fw-desc">Bootloader region present in real firmware before the kernel image.</div>
+      <div class="fw-flag ok">note</div>
+    </div>
+    <div class="fw-section">
+      <div class="fw-offset">varies</div>
+      <div class="fw-name">Kernel (real fw)</div>
+      <div class="fw-desc">Compressed Linux kernel image between bootloader and filesystem in real devices.</div>
+      <div class="fw-flag ok">note</div>
+    </div>
+  </div>
+
+  <h2>Phase 1 — binwalk Identification</h2>
+
+  <div class="terminal">
+    <div class="prompt">binwalk firmware.bin</div>
+    <br>
+    <div class="output">DECIMAL    HEXADECIMAL    DESCRIPTION</div>
+    <div class="output">──────────────────────────────────────────────────────────────</div>
+    <div class="output warn">64         0x40           SquashFS filesystem, little endian,</div>
+    <div class="output warn">                          version 4.0, compression: gzip,</div>
+    <div class="output warn">                          inode count: 13, block size: 131072,</div>
+    <div class="output warn">                          image size: 734 bytes</div>
+  </div>
+
+  <p>
+    Three immediate findings from binwalk output alone — before a single byte is extracted:
+    the filesystem type (SquashFS 4.0), the compression algorithm (gzip), and the
+    byte order (little-endian — MIPS-LE or ARM-LE device). The offset <code>0x40</code>
+    tells us exactly where to cut with <code>dd</code>.
+  </p>
+
+  <div class="callout">
+    <div class="callout-title">⚡ Little-Endian vs Big-Endian</div>
+    <p style="margin:0; font-size:13px;">
+      TP-Link's older MIPS devices are big-endian. Newer designs and most ARM devices
+      are little-endian. Endianness determines which IDA processor module to select
+      when opening extracted binaries — wrong endian = unreadable disassembly.
+    </p>
+  </div>
+
+  <h2>Phase 2 — Extraction</h2>
+  <p>
+    binwalk's <code>sasquatch</code> extractor was unavailable. Manual extraction
+    using known offset — a more reliable approach for non-standard firmware layouts:
+  </p>
+
+  <div class="code-block">
+    <div class="label">extraction</div>
+    <pre><span class="c-dim"># Skip vendor header (64 bytes = 0x40), extract raw SquashFS</span>
+dd if=firmware.bin of=rootfs_raw.sqfs bs=1 skip=64
+
+<span class="c-dim"># Extract filesystem</span>
+unsquashfs rootfs_raw.sqfs
+
+<span class="c-dim"># Result: squashfs-root/ containing full device filesystem</span></pre>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-title">Manual Extraction — When binwalk Fails</div>
+    <p style="margin:0; font-size:13px;">
+      When automatic extraction fails, the offset from <code>binwalk</code> output
+      is all that's needed. <code>dd skip=N</code> cuts the blob at any byte boundary.
+      This works on any firmware regardless of vendor header format.
+    </p>
+  </div>
+
+  <h2>Phase 3 — Credential Triage</h2>
+  <p>
+    Four commands covering the standard firmware credential hunt. In real firmware
+    this grep pass has found live CVEs in minutes.
+  </p>
+
+  <div class="code-block">
+    <div class="label">credential hunt commands</div>
+    <pre><span class="c-dim"># Passwd files</span>
+find . -name "passwd" 2>/dev/null
+
+<span class="c-dim"># Base64 tokens</span>
+grep -r "==" . 2>/dev/null | grep -v Binary
+
+<span class="c-dim"># Hardcoded passwords in binaries</span>
+grep -r "password" . 2>/dev/null | grep -v Binary
+
+<span class="c-dim"># Basic Auth headers</span>
+grep -r "Basic" . 2>/dev/null | grep -v Binary
+
+<span class="c-dim"># Private keys</span>
+find . -name "*rsa*" -o -name "*dropbear*" -o -name "*.key" 2>/dev/null</pre>
+  </div>
+
+  <h2>Findings</h2>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div>
+        <div class="finding-title">Cleartext Credential in passwd</div>
+        <div class="finding-path">/etc/passwd</div>
+      </div>
+      <div class="finding-badge crit">Critical</div>
+    </div>
+    <div class="finding-detail">
+      <p style="margin:0 0 10px;">Two accounts discovered:</p>
+      <pre style="font-family:var(--mono); font-size:12px; color:#c8c8c8; line-height:1.7;">root:<span style="color:var(--yellow)">$1$abc123$hashvalue</span>:0:0:root:/root:/bin/sh   <span style="color:var(--text-dim)">← MD5-crypt, crackable</span>
+admin:<span style="color:var(--red)">admin</span>:1000:1000::/home/admin:/bin/sh        <span style="color:var(--text-dim)">← cleartext, no hashing</span></pre>
+      The <code>admin:admin</code> entry stores a cleartext password directly in the passwd file —
+      no shadow file, no hashing. The <code>$1$</code> prefix on root indicates MD5-crypt,
+      trivially crackable offline with hashcat and a standard wordlist.
+      Both accounts survive factory reset as they are baked into the firmware image.
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div>
+        <div class="finding-title">Shared SSH Private Key</div>
+        <div class="finding-path">/etc/dropbear_rsa_host_key</div>
+      </div>
+      <div class="finding-badge crit">Critical</div>
+    </div>
+    <div class="finding-detail">
+      A private RSA host key is embedded in the firmware image. Every device
+      flashed with this firmware version shares the identical private key.
+      An attacker who extracts this key from one physical device can impersonate
+      the SSH server of every other device running this firmware globally —
+      trivially defeating host verification. This exact vulnerability class
+      has produced real CVEs across multiple vendors including Juniper, Cisco, and numerous
+      consumer router manufacturers.
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div>
+        <div class="finding-title">Hardcoded Admin Password in Web Server Binary</div>
+        <div class="finding-path">/usr/bin/httpd</div>
+      </div>
+      <div class="finding-badge crit">Critical</div>
+    </div>
+    <div class="finding-detail">
+      <code>password=tplink123</code> found as a plaintext string in the httpd binary.
+      Hardcoded credentials in the web admin binary bypass any password change
+      made through the UI — the backdoor credential persists regardless of user configuration.
+      Extracted via <code>grep -r "password"</code> without disassembly.
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <div>
+        <div class="finding-title">Hardcoded Basic Auth Header</div>
+        <div class="finding-path">/usr/bin/httpd</div>
+      </div>
+      <div class="finding-badge high">High</div>
+    </div>
+    <div class="finding-detail">
+      <code>Authorization: Basic YWRtaW46YWRtaW4=</code> found embedded in the httpd binary.
+      Base64 decode confirms: <code>admin:admin</code> — the same credential present in passwd,
+      hardcoded a second time as a pre-built HTTP Basic Auth header.
+      This suggests the binary is designed to make outbound authenticated requests
+      using a fixed credential — potentially to a management server or C2.
+    </div>
+  </div>
+
+  <h2>Extraction Workflow Summary</h2>
+
+  <div class="workflow">
+    <div class="wf-step">
+      <div class="wf-tool">binwalk</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-desc">identify filesystem type, compression, offset, endianness — before extracting anything</div>
+    </div>
+    <div class="wf-step">
+      <div class="wf-tool">dd + unsquashfs</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-desc">skip vendor header at known offset, extract SquashFS to full directory tree</div>
+    </div>
+    <div class="wf-div"></div>
+    <div class="wf-step">
+      <div class="wf-tool">find passwd</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-desc">locate all account databases — cleartext passwords, weak hashes</div>
+    </div>
+    <div class="wf-step">
+      <div class="wf-tool">find *key*</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-desc">locate embedded private keys — SSH host keys, TLS certificates</div>
+    </div>
+    <div class="wf-step">
+      <div class="wf-tool">grep password</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-desc">hunt hardcoded credentials in binaries and config files</div>
+    </div>
+    <div class="wf-step">
+      <div class="wf-tool">grep Basic / ==</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-desc">decode base64 tokens — Basic Auth headers, embedded API keys</div>
+    </div>
+    <div class="wf-div"></div>
+    <div class="wf-step">
+      <div class="wf-tool">IDA / Ghidra</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-desc">disassemble extracted MIPS/ARM binaries for deeper behavioral analysis</div>
+    </div>
+  </div>
+
+  <h2>Real-World CVE Methodology</h2>
+  <table>
+    <tr><th>Finding Type</th><th>Real CVE Class</th><th>Impact</th></tr>
+    <tr>
+      <td>Shared SSH host key</td>
+      <td>CVE-2015-7255 (TP-Link), CVE-2015-7256</td>
+      <td>Full SSH impersonation across all affected devices globally</td>
+    </tr>
+    <tr>
+      <td>Hardcoded credentials</td>
+      <td>CVE-2018-17008, CVE-2019-16920</td>
+      <td>Unauthenticated admin access, persistent post factory-reset</td>
+    </tr>
+    <tr>
+      <td>Cleartext passwd</td>
+      <td>CWE-256: Unprotected Credentials</td>
+      <td>Offline cracking with no rate limiting</td>
+    </tr>
+    <tr>
+      <td>Embedded API tokens</td>
+      <td>CWE-798: Hard-coded Credentials</td>
+      <td>Cloud service access, C2 authentication bypass</td>
+    </tr>
+  </table>
+
+  <h2>What I Learned</h2>
+  <div class="learning-grid">
+    <div class="learning-card">
+      <div class="num">01 — binwalk Offset Is All You Need</div>
+      <p>When automatic extraction fails, the decimal offset in binwalk output is enough. <code>dd skip=N</code> cuts any firmware blob at any boundary — no special tooling required.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">02 — Shared Keys Are a Global Vulnerability</div>
+      <p>A private key embedded in firmware affects every device on that firmware version simultaneously. One physical device extraction compromises the entire deployed fleet — no network access required for the key theft.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">03 — Factory Reset Doesn't Clear Firmware Credentials</div>
+      <p>Credentials baked into the firmware image survive factory reset — they're not stored in user-writable flash. Any backdoor in /etc/passwd or a binary persists across resets by design.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">04 — grep Before Disassembly</div>
+      <p>Four critical findings surfaced from grep alone — no disassembly, no dynamic analysis. String search is always the first pass on extracted firmware. Disassembly is the follow-up for findings that need context.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">05 — Base64 Is Not Encryption</div>
+      <p><code>YWRtaW46YWRtaW4=</code> looks opaque in a binary but is trivially decoded. Base64 encoding provides zero confidentiality — it's encoding, not encryption. Any credential stored in base64 is effectively cleartext.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">06 — Endianness Determines Disassembler Config</div>
+      <p>Little-endian SquashFS means a little-endian CPU — MIPS-LE or ARM-LE. Loading a big-endian MIPS binary into IDA as little-endian produces unreadable disassembly. binwalk's endian flag is the first thing to check before opening IDA on extracted binaries.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="handle">n0rm41</div>
+    <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+      <a href="rev6.html">← RE-06</a>
+      <span>RE-07 &nbsp;·&nbsp; binwalk &nbsp;·&nbsp; SquashFS &nbsp;·&nbsp; Embedded Linux</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
