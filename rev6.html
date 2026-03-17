@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RE-06: Recognizing Common Algorithms | n0rm41</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --bg2: #111111; --bg3: #161616;
+    --red: #cc0000; --red-dim: #880000;
+    --green: #00cc44; --yellow: #ccaa00; --blue: #5599ff;
+    --text: #d0d0d0; --text-dim: #666; --border: #1e1e1e;
+    --mono: 'JetBrains Mono', monospace; --fira: 'Fira Code', monospace;
+  }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--fira); font-size: 14px; line-height: 1.8; min-height: 100vh; }
+  body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); pointer-events: none; z-index: 100; }
+  .container { max-width: 860px; margin: 0 auto; padding: 60px 24px; }
+  .header { border-bottom: 1px solid var(--border); padding-bottom: 40px; margin-bottom: 48px; }
+  .breadcrumb { font-size: 11px; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; }
+  .breadcrumb a { color: var(--text-dim); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--red); }
+  .breadcrumb span { color: var(--red); }
+  .title { font-family: var(--mono); font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 12px; }
+  .title .accent { color: var(--red); }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin-top: 8px; }
+  .meta { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 20px; }
+  .tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border: 1px solid var(--border); color: var(--text-dim); }
+  .tag.red    { border-color: var(--red-dim);  color: var(--red);    }
+  .tag.green  { border-color: #005522;          color: var(--green);  }
+  .tag.yellow { border-color: #443300;          color: var(--yellow); }
+  .tag.blue   { border-color: #223366;          color: var(--blue);   }
+  h2 { font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--red); margin: 48px 0 20px; display: flex; align-items: center; gap: 12px; }
+  h2::before { content: '//'; color: var(--red-dim); }
+  h2::after  { content: ''; flex: 1; height: 1px; background: var(--border); }
+  h3 { font-family: var(--mono); font-size: 12px; font-weight: 500; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; margin: 28px 0 12px; }
+  p { color: var(--text); margin-bottom: 16px; font-size: 13.5px; }
+  .code-block { background: var(--bg2); border: 1px solid var(--border); border-left: 2px solid var(--red); padding: 20px 24px; margin: 20px 0; overflow-x: auto; position: relative; }
+  .code-block .label { position: absolute; top: 0; right: 0; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); padding: 4px 8px; background: var(--bg3); font-family: var(--mono); border-left: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  pre { font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: #c8c8c8; white-space: pre; }
+  .c-red { color: var(--red); } .c-green { color: var(--green); } .c-yellow { color: var(--yellow); } .c-dim { color: var(--text-dim); }
+  code { font-family: var(--mono); font-size: 12px; color: var(--red); background: rgba(204,0,0,0.08); padding: 1px 6px; border: 1px solid rgba(204,0,0,0.2); }
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 12.5px; }
+  th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); text-align: left; padding: 8px 16px; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { font-family: var(--mono); color: var(--yellow); white-space: nowrap; }
+  .callout { background: var(--bg2); border: 1px solid var(--border); border-left: 2px solid var(--yellow); padding: 16px 20px; margin: 20px 0; font-size: 13px; }
+  .callout.blue { border-left-color: var(--blue); }
+  .callout-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--yellow); margin-bottom: 8px; }
+  .callout.blue .callout-title { color: var(--blue); }
+
+  /* Algorithm cards */
+  .algo-card { background: var(--bg2); border: 1px solid var(--border); margin: 16px 0; overflow: hidden; }
+  .algo-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--bg3); }
+  .algo-name { font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--red); }
+  .algo-full { font-family: var(--mono); font-size: 11px; color: var(--text-dim); letter-spacing: 0.06em; }
+  .algo-body { padding: 20px 24px; }
+  .fp { display: flex; align-items: baseline; gap: 14px; font-family: var(--mono); font-size: 12px; margin: 7px 0; }
+  .fp-const { color: var(--yellow); min-width: 140px; }
+  .fp-label { color: #777; font-size: 11.5px; }
+  .algo-usage { font-size: 12.5px; color: #888; line-height: 1.7; margin-top: 14px; }
+
+  /* Pattern library */
+  .pattern-lib { background: #050505; border: 1px solid var(--border); padding: 24px; margin: 20px 0; font-family: var(--mono); }
+  .pattern-lib-title { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .pattern-row { display: grid; grid-template-columns: 160px 1fr 120px; padding: 9px 0; border-bottom: 1px solid #111; align-items: baseline; gap: 16px; font-size: 12px; }
+  .pattern-row:last-child { border-bottom: none; }
+  .pattern-const { color: var(--yellow); }
+  .pattern-algo  { color: #888; }
+  .pattern-module { color: var(--text-dim); font-size: 10px; }
+  .pattern-row.new .pattern-const { color: var(--green); }
+  .pattern-row.new .pattern-algo  { color: var(--text);  }
+
+  /* Learning grid */
+  .learning-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+  .learning-card { background: var(--bg2); border: 1px solid var(--border); padding: 16px 18px; }
+  .learning-card .num { font-family: var(--mono); font-size: 10px; color: var(--red); letter-spacing: 0.1em; margin-bottom: 8px; }
+  .learning-card p { font-size: 12.5px; color: var(--text); margin: 0; line-height: 1.6; }
+
+  .footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-dim); flex-wrap: wrap; gap: 12px; }
+  .footer .handle { color: var(--red); font-family: var(--mono); }
+  .footer a { color: var(--text-dim); text-decoration: none; font-family: var(--mono); font-size: 11px; }
+  .footer a:hover { color: var(--red); }
+
+  @media (max-width: 640px) {
+    .learning-grid { grid-template-columns: 1fr; }
+    .pattern-row { grid-template-columns: 1fr; gap: 2px; }
+    .algo-header { flex-direction: column; gap: 4px; align-items: flex-start; }
+    .title { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="breadcrumb">
+      <a href="index.html">n0rm41</a> / <a href="index.html#writeups">writeups</a> / <span>RE-06</span>
+    </div>
+    <div class="title">Recognizing <span class="accent">Common Algorithms</span></div>
+    <p class="subtitle">Identifying CRC32, RC4, and FNV-1a from raw disassembly — no source code, no runtime, no search engine.</p>
+    <div class="meta">
+      <div class="tag red">Reverse Engineering</div>
+      <div class="tag">Algorithm Recognition</div>
+      <div class="tag">IDA Pro 9.1</div>
+      <div class="tag yellow">Crypto / Hash</div>
+      <div class="tag">x86 32-bit</div>
+      <div class="tag green">3/3 Identified</div>
+    </div>
+  </div>
+
+  <h2>Overview</h2>
+  <p>
+    Malware encrypts C2 traffic, hashes API names, and checksums payloads using standard algorithms
+    embedded directly in the binary. An analyst who recognizes the disassembly signature of CRC32,
+    RC4, or FNV-1a instantly moves an order of magnitude faster than one who reverses every
+    instruction from scratch.
+  </p>
+  <p>
+    Three anonymous functions — <code>algo_a</code>, <code>algo_b</code>, <code>algo_c</code> —
+    were identified purely from their disassembly structure and magic constants,
+    without source code, runtime execution, or external references.
+  </p>
+
+  <h2>Recognition Methodology</h2>
+  <table>
+    <tr><th>Signal</th><th>What to Look For</th><th>Example</th></tr>
+    <tr><td>Magic constants</td><td>Hardcoded hex values unique to one algorithm</td><td><code>0xEDB88320</code> → CRC32</td></tr>
+    <tr><td>Loop structure</td><td>Iteration count, nesting depth, operations per pass</td><td>256-iteration S-box init → RC4</td></tr>
+    <tr><td>Operation sequence</td><td>Specific order of XOR, multiply, rotate, shift</td><td>XOR then IMUL → FNV-1a</td></tr>
+  </table>
+
+  <h2>algo_a — Identified: CRC32</h2>
+  <div class="algo-card">
+    <div class="algo-header">
+      <div class="algo-name">CRC32</div>
+      <div class="algo-full">Cyclic Redundancy Check — 32-bit</div>
+    </div>
+    <div class="algo-body">
+      <div class="fp"><div class="fp-const">0xFFFFFFFF</div><div class="fp-label">initial value and final XOR mask — CRC32 standard init/finalize</div></div>
+      <div class="fp"><div class="fp-const">0xEDB88320</div><div class="fp-label">reversed CRC32 polynomial — the single strongest fingerprint</div></div>
+      <div class="fp"><div class="fp-const">8 inner iters</div><div class="fp-label">one bit processed per iteration — bit-by-bit CRC implementation</div></div>
+      <div class="algo-usage">Used in malware for payload integrity checks, config verification, and string hashing for obfuscated API resolution. <code>0xEDB88320</code> is the most recognizable constant in binary analysis — confirmed on sight.</div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="label">IDA — CRC32 inner loop</div>
+    <pre><span class="c-dim">; outer: one byte per iteration</span>
+movzx   edx, byte ptr [esi]
+xor     eax, edx              <span class="c-dim">; crc ^= data[i]</span>
+mov     ecx, 8                <span class="c-dim">; 8 inner iterations — one per bit</span>
+
+<span class="c-dim">loc_inner:</span>
+mov     edx, eax
+shr     edx, 1
+<span class="c-red">xor     edx, 0EDB88320h</span>       <span class="c-dim">; ← CRC32 polynomial fingerprint</span>
+mov     ebx, eax
+shr     ebx, 1
+test    al, 1
+mov     eax, edx
+cmovz   eax, ebx              <span class="c-dim">; conditional XOR poly or just shift</span>
+sub     ecx, 1
+jnz     short loc_inner</pre>
+  </div>
+
+  <h2>algo_b — Identified: RC4 KSA</h2>
+  <div class="algo-card">
+    <div class="algo-header">
+      <div class="algo-name">RC4 KSA</div>
+      <div class="algo-full">Rivest Cipher 4 — Key Scheduling Algorithm</div>
+    </div>
+    <div class="algo-body">
+      <div class="fp"><div class="fp-const">256 iterations</div><div class="fp-label">first loop — S[i] = i for all 256 entries</div></div>
+      <div class="fp"><div class="fp-const">cmp eax, 100h</div><div class="fp-label">boundary check — 0x100 = 256, the S-box size</div></div>
+      <div class="fp"><div class="fp-const">swap pattern</div><div class="fp-label">second loop — key-dependent byte swaps across S-box</div></div>
+      <div class="algo-usage">RC4 is the most common stream cipher in malware — C2 traffic encryption, payload decryption, config obfuscation. Finding the KSA means the encryption key is the argument — read it from the register at the call site in GDB.</div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="label">IDA — RC4 KSA</div>
+    <pre><span class="c-dim">; Loop 1 — S-box init</span>
+mov     [ebp+eax+0], al       <span class="c-dim">; S[i] = i</span>
+add     eax, 1
+<span class="c-red">cmp     eax, 100h</span>            <span class="c-dim">; ← 256 iterations</span>
+jnz     short loc_init
+
+<span class="c-dim">; Loop 2 — key-dependent swap</span>
+movzx   ecx, byte ptr [ebp+ebx+0]
+<span class="c-dim">; ... j = (j + S[i] + key[i % keylen]) % 256 ...</span>
+movzx   edx, byte ptr [eax]
+mov     [ebp+ebx+0], dl       <span class="c-dim">; S[i] = S[j]  ← swap</span>
+mov     [eax], cl             <span class="c-dim">; S[j] = tmp   ← swap</span>
+add     ebx, 1
+<span class="c-red">cmp     ebx, 100h</span>            <span class="c-dim">; ← 256 iterations again</span>
+jnz     short loc_ksa</pre>
+  </div>
+
+  <h2>algo_c — Identified: FNV-1a</h2>
+  <div class="algo-card">
+    <div class="algo-header">
+      <div class="algo-name">FNV-1a</div>
+      <div class="algo-full">Fowler–Noll–Vo Hash — 32-bit variant 1a</div>
+    </div>
+    <div class="algo-body">
+      <div class="fp"><div class="fp-const">0x01000193</div><div class="fp-label">FNV prime — the definitive constant for this algorithm</div></div>
+      <div class="fp"><div class="fp-const">0x811c9dc5</div><div class="fp-label">FNV offset basis — initial hash value</div></div>
+      <div class="fp"><div class="fp-const">XOR then IMUL</div><div class="fp-label">FNV-1a operation order — XOR first, multiply second</div></div>
+      <div class="algo-usage">FNV-1a is dominant in malware for obfuscated API resolution — instead of storing <code>"CreateThread"</code> as a detectable string, malware stores its FNV-1a hash and compares against hashed export names at runtime. Seeing <code>imul eax, 1000193h</code> near PE export table traversal is a near-certain indicator of this technique.</div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="label">IDA — FNV-1a loop body</div>
+    <pre><span class="c-dim">; two instructions — complete inner loop</span>
+<span class="c-red">xor     eax, ecx</span>             <span class="c-dim">; h ^= byte         ← XOR first (FNV-1a)</span>
+<span class="c-red">imul    eax, 1000193h</span>        <span class="c-dim">; h *= FNV_PRIME     ← multiply second</span>
+
+<span class="c-dim">; FNV-1 = multiply then XOR — FNV-1a = XOR then multiply</span></pre>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">⚡ FNV-1 vs FNV-1a</div>
+    <p style="margin:0; font-size:13px;">Same constant, opposite operation order. XOR-then-multiply = FNV-1a. Multiply-then-XOR = FNV-1. Malware almost universally uses FNV-1a for better avalanche properties.</p>
+  </div>
+
+  <h2>Cumulative Pattern Library</h2>
+  <div class="pattern-lib">
+    <div class="pattern-lib-title">Constant → Algorithm / Meaning → Module</div>
+    <div class="pattern-row new"><div class="pattern-const">EDB88320h</div><div class="pattern-algo">CRC32 polynomial — payload checksum, string hash</div><div class="pattern-module">RE-06</div></div>
+    <div class="pattern-row new"><div class="pattern-const">01000193h</div><div class="pattern-algo">FNV-1a prime — API name hashing, string obfuscation</div><div class="pattern-module">RE-06</div></div>
+    <div class="pattern-row new"><div class="pattern-const">811c9dc5h</div><div class="pattern-algo">FNV-1a offset basis — initial hash seed</div><div class="pattern-module">RE-06</div></div>
+    <div class="pattern-row new"><div class="pattern-const">cmp x, 100h</div><div class="pattern-algo">RC4 KSA — 256-byte S-box loop boundary</div><div class="pattern-module">RE-06</div></div>
+    <div class="pattern-row"><div class="pattern-const">1DCD6500h</div><div class="pattern-algo">500ms timing threshold — anti-debug check</div><div class="pattern-module">RE-05</div></div>
+    <div class="pattern-row"><div class="pattern-const">0FFFFFFFFh</div><div class="pattern-algo">ptrace return value — debugger present</div><div class="pattern-module">RE-05</div></div>
+    <div class="pattern-row"><div class="pattern-const">92492493h</div><div class="pattern-algo">compiler % 7 magic multiplier</div><div class="pattern-module">RE-01</div></div>
+    <div class="pattern-row"><div class="pattern-const">66666667h</div><div class="pattern-algo">compiler % 5 magic multiplier</div><div class="pattern-module">RE-01</div></div>
+  </div>
+
+  <h2>Real-World Malware Usage</h2>
+  <table>
+    <tr><th>Algorithm</th><th>Malware Use Case</th><th>Where to Look</th></tr>
+    <tr><td>CRC32</td><td>Payload integrity, config checksums, dropper verification</td><td>Functions called before executing downloaded data</td></tr>
+    <tr><td>RC4</td><td>C2 traffic encryption, config decryption, string obfuscation</td><td>Functions near network send/recv or file read operations</td></tr>
+    <tr><td>FNV-1a</td><td>Obfuscated API resolution — hash export names at runtime</td><td>Functions walking the PE export table (PEB traversal)</td></tr>
+    <tr><td>XOR single-byte</td><td>Simple string/config obfuscation</td><td>Short loops with one XOR instruction</td></tr>
+    <tr><td>MD5 / SHA1</td><td>C2 authentication, beacon fingerprinting</td><td>MD5: <code>67452301h</code> &nbsp; SHA1: <code>5A827999h</code></td></tr>
+  </table>
+
+  <h2>What I Learned</h2>
+  <div class="learning-grid">
+    <div class="learning-card">
+      <div class="num">01 — Constants Are Signatures</div>
+      <p><code>0xEDB88320</code> appears in exactly one algorithm. A single constant match is sufficient for identification — no surrounding context required once the library is built.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">02 — Loop Bounds Identify Structures</div>
+      <p><code>cmp eax, 100h</code> in two consecutive loops with swaps in the second is RC4 KSA. The 256-byte S-box size is architectural — it cannot be anything else.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">03 — Operation Order Distinguishes Variants</div>
+      <p>FNV-1 and FNV-1a share the same constant but differ in operation order. XOR-then-multiply is FNV-1a. Two instructions, opposite order — different algorithm.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">04 — RC4 KSA Exposes the Key</div>
+      <p>The KSA is always followed by the PRGA encryption loop. Finding the KSA means the encryption key is an argument to this function — readable directly from the register at the call site in GDB.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">05 — FNV-1a Signals API Obfuscation</div>
+      <p>When FNV-1a appears near PE export table traversal, the binary resolves API names by hash at runtime. The hashed names are recoverable by hashing all known Windows API names offline.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">06 — The Library Compounds</div>
+      <p>Eight constants recognized across six modules. After twenty real samples the library covers most common algorithms and anti-analysis primitives. Speed comes from accumulated recognition, not faster reading.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="handle">n0rm41</div>
+    <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+      <a href="rev5.html">← RE-05</a>
+      <span>RE-06 &nbsp;·&nbsp; IDA Pro 9.1 &nbsp;·&nbsp; CRC32 &nbsp;·&nbsp; RC4 &nbsp;·&nbsp; FNV-1a</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
