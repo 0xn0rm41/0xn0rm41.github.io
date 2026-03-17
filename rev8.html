@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RE-08: Capstone — Full Malware Analysis | n0rm41</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --bg2: #111111; --bg3: #161616;
+    --red: #cc0000; --red-dim: #880000;
+    --green: #00cc44; --yellow: #ccaa00; --blue: #5599ff;
+    --text: #d0d0d0; --text-dim: #666; --border: #1e1e1e;
+    --mono: 'JetBrains Mono', monospace; --fira: 'Fira Code', monospace;
+  }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--fira); font-size: 14px; line-height: 1.8; min-height: 100vh; }
+  body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); pointer-events: none; z-index: 100; }
+  .container { max-width: 860px; margin: 0 auto; padding: 60px 24px; }
+  .header { border-bottom: 1px solid var(--border); padding-bottom: 40px; margin-bottom: 48px; }
+  .breadcrumb { font-size: 11px; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; }
+  .breadcrumb a { color: var(--text-dim); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--red); }
+  .breadcrumb span { color: var(--red); }
+  .title { font-family: var(--mono); font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 12px; }
+  .title .accent { color: var(--red); }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin-top: 8px; }
+  .meta { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 20px; }
+  .tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border: 1px solid var(--border); color: var(--text-dim); }
+  .tag.red    { border-color: var(--red-dim);  color: var(--red);    }
+  .tag.green  { border-color: #005522;          color: var(--green);  }
+  .tag.yellow { border-color: #443300;          color: var(--yellow); }
+  .tag.blue   { border-color: #223366;          color: var(--blue);   }
+  h2 { font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--red); margin: 48px 0 20px; display: flex; align-items: center; gap: 12px; }
+  h2::before { content: '//'; color: var(--red-dim); }
+  h2::after  { content: ''; flex: 1; height: 1px; background: var(--border); }
+  h3 { font-family: var(--mono); font-size: 12px; font-weight: 500; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; margin: 28px 0 12px; }
+  p { color: var(--text); margin-bottom: 16px; font-size: 13.5px; }
+  .code-block { background: var(--bg2); border: 1px solid var(--border); border-left: 2px solid var(--red); padding: 20px 24px; margin: 20px 0; overflow-x: auto; position: relative; }
+  .code-block .label { position: absolute; top: 0; right: 0; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); padding: 4px 8px; background: var(--bg3); font-family: var(--mono); border-left: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  pre { font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: #c8c8c8; white-space: pre; }
+  .c-red { color: var(--red); } .c-green { color: var(--green); } .c-yellow { color: var(--yellow); } .c-dim { color: var(--text-dim); } .c-blue { color: var(--blue); }
+  code { font-family: var(--mono); font-size: 12px; color: var(--red); background: rgba(204,0,0,0.08); padding: 1px 6px; border: 1px solid rgba(204,0,0,0.2); }
+  .terminal { background: #050505; border: 1px solid var(--border); padding: 20px 24px; margin: 20px 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.8; }
+  .prompt::before     { content: '$ ';       color: var(--green);  }
+  .prompt-gdb::before { content: 'pwndbg> '; color: var(--yellow); }
+  .output      { color: #888; }
+  .output.bad  { color: var(--red);    }
+  .output.good { color: var(--green);  }
+  .output.warn { color: var(--yellow); }
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 12.5px; }
+  th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); text-align: left; padding: 8px 16px; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { font-family: var(--mono); color: var(--yellow); white-space: nowrap; }
+  .callout { background: var(--bg2); border: 1px solid var(--border); border-left: 2px solid var(--yellow); padding: 16px 20px; margin: 20px 0; font-size: 13px; }
+  .callout.red   { border-left-color: var(--red);   }
+  .callout.green { border-left-color: var(--green);  }
+  .callout.blue  { border-left-color: var(--blue);   }
+  .callout-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--yellow); margin-bottom: 8px; }
+  .callout.red   .callout-title { color: var(--red);   }
+  .callout.green .callout-title { color: var(--green);  }
+  .callout.blue  .callout-title { color: var(--blue);   }
+
+  /* Intel report box */
+  .intel-report {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-top: 2px solid var(--red); margin: 20px 0; overflow: hidden;
+  }
+  .intel-header {
+    background: var(--bg3); padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .intel-header-title { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--red); }
+  .intel-header-meta  { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+  .intel-body { padding: 24px; }
+  .intel-row { display: grid; grid-template-columns: 180px 1fr; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+  .intel-row:last-child { border-bottom: none; }
+  .intel-label { font-family: var(--mono); color: var(--text-dim); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding-top: 2px; }
+  .intel-value { color: var(--text); line-height: 1.7; }
+  .intel-value.red    { color: var(--red);    }
+  .intel-value.yellow { color: var(--yellow); }
+  .intel-value.green  { color: var(--green);  }
+
+  /* Function map */
+  .fn-map { background: var(--bg2); border: 1px solid var(--border); margin: 20px 0; overflow: hidden; }
+  .fn-row { display: grid; grid-template-columns: 100px 160px 1fr 120px; gap: 16px; padding: 10px 20px; border-bottom: 1px solid var(--border); font-size: 12px; align-items: center; }
+  .fn-row:last-child { border-bottom: none; }
+  .fn-row.header { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); background: var(--bg3); }
+  .fn-addr { font-family: var(--mono); color: var(--text-dim); font-size: 11px; }
+  .fn-name { font-family: var(--mono); color: var(--yellow); }
+  .fn-desc { color: #888; }
+  .fn-algo { font-family: var(--mono); font-size: 10px; color: var(--blue); }
+
+  /* Execution flow */
+  .exec-flow { background: var(--bg2); border: 1px solid var(--border); padding: 24px; margin: 20px 0; font-family: var(--mono); font-size: 12px; }
+  .ef-step { display: flex; gap: 16px; margin: 4px 0; align-items: flex-start; }
+  .ef-num  { color: var(--red); width: 24px; flex-shrink: 0; }
+  .ef-desc { color: #888; }
+  .ef-desc span { color: var(--yellow); }
+  .ef-div  { border-top: 1px solid var(--border); margin: 12px 0; }
+
+  /* Learning grid */
+  .learning-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+  .learning-card { background: var(--bg2); border: 1px solid var(--border); padding: 16px 18px; }
+  .learning-card .num { font-family: var(--mono); font-size: 10px; color: var(--red); letter-spacing: 0.1em; margin-bottom: 8px; }
+  .learning-card p { font-size: 12.5px; color: var(--text); margin: 0; line-height: 1.6; }
+
+  /* Curriculum complete banner */
+  .complete-banner {
+    background: rgba(0,204,68,0.04); border: 1px solid #004422;
+    padding: 28px 32px; margin: 40px 0; text-align: center;
+  }
+  .complete-banner .title-sm { font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--green); margin-bottom: 12px; }
+  .complete-banner p { color: #888; font-size: 13px; margin: 0; }
+
+  .footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-dim); flex-wrap: wrap; gap: 12px; }
+  .footer .handle { color: var(--red); font-family: var(--mono); }
+  .footer a { color: var(--text-dim); text-decoration: none; font-family: var(--mono); font-size: 11px; }
+  .footer a:hover { color: var(--red); }
+
+  @media (max-width: 640px) {
+    .learning-grid { grid-template-columns: 1fr; }
+    .fn-row { grid-template-columns: 1fr 1fr; }
+    .intel-row { grid-template-columns: 1fr; gap: 4px; }
+    .title { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="breadcrumb">
+      <a href="index.html">n0rm41</a> / <a href="index.html#writeups">writeups</a> / <span>RE-08</span>
+    </div>
+    <div class="title">Capstone — <span class="accent">Full Malware Analysis</span></div>
+    <p class="subtitle">
+      End-to-end analysis of an unknown binary — triage, anti-debug bypass, static analysis,
+      algorithm identification, C2 config extraction, and intelligence report.
+    </p>
+    <div class="meta">
+      <div class="tag red">Reverse Engineering</div>
+      <div class="tag yellow">Capstone</div>
+      <div class="tag">IDA Pro 9.1</div>
+      <div class="tag">GDB + pwndbg</div>
+      <div class="tag">x86 32-bit</div>
+      <div class="tag green">Full Report</div>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <h2>Overview</h2>
+  <p>
+    This capstone applies every technique from the preceding seven modules to a single
+    unknown binary — with no prior knowledge of its contents. The workflow mirrors
+    a real analyst handoff: a file arrives, the analyst determines what it is,
+    what it does, and produces an actionable intelligence report.
+  </p>
+  <p>
+    The sample is a 32-bit ELF implant incorporating anti-debug evasion, XOR-obfuscated
+    C2 configuration, a file drop routine, and a gated payload protected by both
+    a CRC32 integrity check and an FNV-1a capability verification.
+  </p>
+
+  <!-- STAGE 1 — TRIAGE -->
+  <h2>Stage 1 — Triage</h2>
+
+  <div class="terminal">
+    <div class="prompt">file ./sample</div>
+    <div class="output">ELF 32-bit LSB executable, Intel i386, dynamically linked, not stripped</div>
+    <br>
+    <div class="prompt">nm ./sample | grep -v "^  " | awk '{print $3}' | grep -v "^$"</div>
+    <div class="output warn">crc32, crc32_byte, debugger_check, drop_config</div>
+    <div class="output warn">enc_host, enc_key, enc_port, fnv1a</div>
+    <div class="output warn">payload, run_payload, xor_buf</div>
+    <br>
+    <div class="prompt">strings ./sample | grep -E "tmp|host|port|auth|Error"</div>
+    <div class="output">/tmp/.cache_cfg</div>
+    <div class="output">host=%s</div>
+    <div class="output">port=%s</div>
+    <div class="output">auth=%s</div>
+    <div class="output bad">[-] Error initializing.</div>
+    <br>
+    <div class="prompt">ltrace ./sample 2>&1</div>
+    <div class="output">ptrace(0, 0, 0, 0) = 0xffffffff</div>
+    <div class="output bad">fwrite("[-] Error initializing.", ...) = 24</div>
+    <div class="output">+++ exited (status 1) +++</div>
+  </div>
+
+  <p>
+    Triage surfaces the complete picture before IDA is opened.
+    Symbol names survive (not stripped) — every internal function is named.
+    Three encrypted data blobs are visible: <code>enc_host</code>, <code>enc_port</code>, <code>enc_key</code>.
+    A config drop path <code>/tmp/.cache_cfg</code> confirms C2 beacon behavior.
+    <code>ltrace</code> shows the binary exits immediately under observation —
+    <code>ptrace</code> anti-debug fires on entry.
+  </p>
+
+  <!-- STAGE 2 — ANTI-DEBUG -->
+  <h2>Stage 2 — Anti-Debug Bypass</h2>
+
+  <div class="terminal">
+    <div class="prompt-gdb">break debugger_check</div>
+    <div class="prompt-gdb">run</div>
+    <div class="output"><br>Breakpoint hit inside debugger_check</div>
+    <div class="output">ptrace(PTRACE_TRACEME) → $eax = 0xffffffff  ← debugger detected</div>
+    <br>
+    <div class="prompt-gdb">finish</div>
+    <div class="prompt-gdb">set $eax = 0</div>
+    <div class="output">← force "not debugged" return value</div>
+    <div class="prompt-gdb">continue</div>
+    <div class="output good">binary continues past anti-debug gate ✓</div>
+  </div>
+
+  <p>
+    Standard <code>ptrace(PTRACE_TRACEME)</code> anti-debug — identical to the technique
+    isolated in RE-05. GDB's attachment claims the trace slot, causing
+    <code>ptrace</code> to return <code>-1</code>. Forcing <code>$eax = 0</code>
+    before the comparison fires defeats the check without binary modification.
+  </p>
+
+  <!-- STAGE 3 — STATIC ANALYSIS -->
+  <h2>Stage 3 — Static Analysis</h2>
+
+  <h3>Function Map</h3>
+
+  <div class="fn-map">
+    <div class="fn-row header">
+      <div>Address</div>
+      <div>Name</div>
+      <div>Purpose</div>
+      <div>Algorithm</div>
+    </div>
+    <div class="fn-row">
+      <div class="fn-addr">080491b6</div>
+      <div class="fn-name">xor_buf</div>
+      <div class="fn-desc">XOR decode — applies single-byte key to buffer in-place</div>
+      <div class="fn-algo">XOR</div>
+    </div>
+    <div class="fn-row">
+      <div class="fn-addr">080491fd</div>
+      <div class="fn-name">fnv1a</div>
+      <div class="fn-desc">FNV-1a hash — capability gate verification</div>
+      <div class="fn-algo">FNV-1a</div>
+    </div>
+    <div class="fn-row">
+      <div class="fn-addr">08049243</div>
+      <div class="fn-name">crc32_byte</div>
+      <div class="fn-desc">Per-byte CRC32 computation with polynomial 0xEDB88320</div>
+      <div class="fn-algo">CRC32</div>
+    </div>
+    <div class="fn-row">
+      <div class="fn-addr">08049291</div>
+      <div class="fn-name">crc32</div>
+      <div class="fn-desc">Full buffer CRC32 — payload integrity verification</div>
+      <div class="fn-algo">CRC32</div>
+    </div>
+    <div class="fn-row">
+      <div class="fn-addr">080492e1</div>
+      <div class="fn-name">debugger_check</div>
+      <div class="fn-desc">ptrace(PTRACE_TRACEME) anti-debug — exits if debugger present</div>
+      <div class="fn-algo">ptrace</div>
+    </div>
+    <div class="fn-row">
+      <div class="fn-addr">08049312</div>
+      <div class="fn-name">drop_config</div>
+      <div class="fn-desc">Writes decoded C2 config to /tmp/.cache_cfg</div>
+      <div class="fn-algo">fopen/fprintf</div>
+    </div>
+    <div class="fn-row">
+      <div class="fn-addr">0804937a</div>
+      <div class="fn-name">run_payload</div>
+      <div class="fn-desc">Dual-gated payload executor — CRC32 + FNV-1a checks before execution</div>
+      <div class="fn-algo">CRC32 + FNV-1a</div>
+    </div>
+  </div>
+
+  <h3>Dual Execution Gates in run_payload</h3>
+  <p>
+    The payload is protected by two sequential verification checks before execution.
+    Both must pass — failure at either gate silently returns without output:
+  </p>
+
+  <div class="code-block">
+    <div class="label">IDA — run_payload gates</div>
+    <pre><span class="c-dim">; Gate 1 — CRC32 integrity check</span>
+call    crc32                       <span class="c-dim">; crc32(buf, len)</span>
+<span class="c-red">cmp     eax, 0DEADBEEFh</span>           <span class="c-dim">; expected hash — tamper detection</span>
+jnz     short return_silent         <span class="c-dim">; payload modified → abort</span>
+
+<span class="c-dim">; Gate 2 — FNV-1a capability check</span>
+push    offset aExecute_payload     <span class="c-dim">; "execute_payload"</span>
+call    fnv1a
+<span class="c-red">cmp     eax, 0B1866B27h</span>           <span class="c-dim">; expected hash of capability string</span>
+jnz     short return_silent         <span class="c-dim">; capability not present → abort</span>
+
+<span class="c-dim">; both gates passed — execute</span>
+call    puts</pre>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">⚡ Dual-Gate Pattern in Real Malware</div>
+    <p style="margin:0; font-size:13px;">
+      CRC32 integrity gates prevent execution of modified payloads — common in
+      loaders that download and execute second-stage shellcode.
+      FNV-1a capability checks gate functionality behind hash-verified strings —
+      the same pattern used for obfuscated API resolution (RE-06).
+      Both gates together make automated sandbox detonation harder.
+    </p>
+  </div>
+
+  <h3>C2 Config Encoding</h3>
+  <p>
+    Three encrypted blobs in the data segment — <code>enc_host</code>, <code>enc_port</code>,
+    <code>enc_key</code> — decoded by <code>xor_buf</code> with key <code>0x42</code>
+    immediately before being written to disk. The XOR key is visible in <code>main()</code>
+    as an immediate operand to the <code>xor_buf</code> call.
+  </p>
+
+  <div class="code-block">
+    <div class="label">IDA — config decode sequence in main()</div>
+    <pre><span class="c-dim">; copy enc_host → stack buffer</span>
+lea     eax, [ebp+host]
+push    eax
+call    memcpy
+
+<span class="c-dim">; decode: xor_buf(host, 16, 0x42)</span>
+push    <span class="c-red">42h</span>                    <span class="c-dim">; ← XOR key visible as immediate</span>
+push    10h                    <span class="c-dim">; length = 16</span>
+lea     eax, [ebp+host]
+push    eax
+call    xor_buf
+
+<span class="c-dim">; same pattern for port (key=0x42) and key (key=0x42)</span>
+<span class="c-dim">; then: drop_config(host, port, key) → /tmp/.cache_cfg</span></pre>
+  </div>
+
+  <div class="callout blue">
+    <div class="callout-title">Secondary Encoding Layer</div>
+    <p style="margin:0; font-size:13px;">
+      XOR decoding produced non-printable output for the C2 values —
+      indicating a secondary encoding layer applied before the XOR obfuscation.
+      This is a real-world finding: reporting "encoding layer unresolved,
+      secondary key required" is the correct analytical conclusion.
+      The next step would be dynamic extraction — let the binary decode fully,
+      then read <code>/tmp/.cache_cfg</code> directly after execution.
+    </p>
+  </div>
+
+  <!-- STAGE 4 — EXECUTION FLOW -->
+  <h2>Stage 4 — Execution Flow</h2>
+
+  <div class="exec-flow">
+    <div class="ef-step"><div class="ef-num">01</div><div class="ef-desc"><span>debugger_check()</span> — ptrace(PTRACE_TRACEME). Exit on failure.</div></div>
+    <div class="ef-step"><div class="ef-num">02</div><div class="ef-desc">Decode <span>enc_host</span>, <span>enc_port</span>, <span>enc_key</span> via XOR key 0x42.</div></div>
+    <div class="ef-step"><div class="ef-num">03</div><div class="ef-desc"><span>drop_config()</span> — write decoded values to <span>/tmp/.cache_cfg</span>.</div></div>
+    <div class="ef-step"><div class="ef-num">04</div><div class="ef-desc">Decode <span>payload[]</span> via XOR key 0x22.</div></div>
+    <div class="ef-div"></div>
+    <div class="ef-step"><div class="ef-num">05</div><div class="ef-desc"><span>run_payload()</span> gate 1 — <span>crc32(payload) == 0xDEADBEEF</span>. Abort on mismatch.</div></div>
+    <div class="ef-step"><div class="ef-num">06</div><div class="ef-desc"><span>run_payload()</span> gate 2 — <span>fnv1a("execute_payload") == 0xb1866b27</span>. Abort on mismatch.</div></div>
+    <div class="ef-step"><div class="ef-num">07</div><div class="ef-desc">Both gates pass → <span>puts(payload)</span> — payload executed.</div></div>
+  </div>
+
+  <!-- INTELLIGENCE REPORT -->
+  <h2>Intelligence Report</h2>
+
+  <div class="intel-report">
+    <div class="intel-header">
+      <div class="intel-header-title">Malware Analysis Report</div>
+      <div class="intel-header-meta">sample · ELF 32-bit · n0rm41</div>
+    </div>
+    <div class="intel-body">
+      <div class="intel-row">
+        <div class="intel-label">Classification</div>
+        <div class="intel-value red">Implant / Dropper — C2 beacon with payload executor</div>
+      </div>
+      <div class="intel-row">
+        <div class="intel-label">Architecture</div>
+        <div class="intel-value">ELF 32-bit, Intel i386, little-endian, dynamically linked</div>
+      </div>
+      <div class="intel-row">
+        <div class="intel-label">Anti-Analysis</div>
+        <div class="intel-value yellow">ptrace(PTRACE_TRACEME) debugger detection — exits before any malicious activity if debugger attached</div>
+      </div>
+      <div class="intel-row">
+        <div class="intel-label">C2 Config</div>
+        <div class="intel-value">XOR-obfuscated host, port, and auth key written to <code>/tmp/.cache_cfg</code> on execution. Secondary encoding layer present — static XOR decode produced non-printable output. Dynamic extraction required for full resolution.</div>
+      </div>
+      <div class="intel-row">
+        <div class="intel-label">Config Drop Path</div>
+        <div class="intel-value red">/tmp/.cache_cfg</div>
+      </div>
+      <div class="intel-row">
+        <div class="intel-label">Algorithms Identified</div>
+        <div class="intel-value">
+          XOR (key 0x42) — C2 config obfuscation<br>
+          XOR (key 0x22) — payload obfuscation<br>
+          CRC32 (poly 0xEDB88320) — payload integrity gate<br>
+          FNV-1a (prime 0x01000193) — capability verification gate
+        </div>
+      </div>
+      <div class="intel-row">
+        <div class="intel-label">Execution Gates</div>
+        <div class="intel-value yellow">
+          Gate 1: crc32(payload) must equal 0xDEADBEEF<br>
+          Gate 2: fnv1a("execute_payload") must equal 0xb1866b27<br>
+          Both must pass — silent abort on failure
+        </div>
+      </div>
+      <div class="intel-row">
+        <div class="intel-label">Payload</div>
+        <div class="intel-value">XOR-encoded buffer (key 0x22), 35 bytes. Executed via puts() after dual gate verification. Secondary encoding layer prevents static decode — dynamic extraction recommended.</div>
+      </div>
+      <div class="intel-row">
+        <div class="intel-label">Persistence</div>
+        <div class="intel-value green">None observed — no registry writes, cron entries, or startup hooks identified in this sample.</div>
+      </div>
+      <div class="intel-row">
+        <div class="intel-label">Recommended Actions</div>
+        <div class="intel-value">
+          1. Monitor/block writes to <code>/tmp/.cache_cfg</code><br>
+          2. Dynamic extraction of C2 config — allow execution in isolated VM, capture written file<br>
+          3. Hunt for secondary XOR key via GDB breakpoint at <code>drop_config</code> entry<br>
+          4. Correlate C2 infrastructure against threat intel feeds once decoded
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CURRICULUM COMPLETE -->
+  <div class="complete-banner">
+    <div class="title-sm">✓ RE Curriculum Complete — Modules 1–8</div>
+    <p>Triage → Obfuscation → PE Internals → Dynamic Analysis → Anti-Debug → Algorithm Recognition → Firmware → Capstone</p>
+  </div>
+
+  <!-- WHAT I LEARNED -->
+  <h2>What I Learned</h2>
+
+  <div class="learning-grid">
+    <div class="learning-card">
+      <div class="num">01 — Triage First, Always</div>
+      <p>Every module started with the same 60-second terminal pass. By the time IDA opened, the binary's purpose, algorithms, and data layout were already partially mapped. Triage is not optional — it directs every subsequent decision.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">02 — Garbled Output Is a Finding</div>
+      <p>XOR decoding produced non-printable output — not analyst error, but evidence of a secondary encoding layer. "Encoding unresolved, secondary key required" is a valid analytical conclusion that drives the next step: dynamic extraction.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">03 — Pattern Library Pays Off</div>
+      <p><code>0xEDB88320</code> and <code>0x01000193</code> were identified instantly — no analysis needed. The cumulative pattern library built across eight modules turned hours of potential analysis into seconds of recognition.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">04 — Dual Gates Increase Analyst Friction</div>
+      <p>Two independent verification checks before payload execution make automated sandbox detonation harder — both gates must be satisfied simultaneously. Finding and understanding both is required before behavioral analysis can proceed.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">05 — Dynamic Follows Static</div>
+      <p>Static analysis mapped the complete structure and identified every algorithm. Dynamic analysis is the follow-up for values static analysis cannot resolve — in this case, the secondary-encoded C2 config that XOR alone didn't fully decode.</p>
+    </div>
+    <div class="learning-card">
+      <div class="num">06 — The Report Is the Deliverable</div>
+      <p>Technical findings without analytical conclusions have no operational value. The intelligence report — classification, C2 infrastructure, recommended actions — is what analysts are hired to produce. The RE is the means; the report is the product.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="handle">n0rm41</div>
+    <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+      <a href="rev7.html">← RE-07</a>
+      <span>RE-08 &nbsp;·&nbsp; Capstone &nbsp;·&nbsp; IDA Pro 9.1 &nbsp;·&nbsp; GDB + pwndbg</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
