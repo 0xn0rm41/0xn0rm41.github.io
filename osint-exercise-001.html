@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSINT-001 // Geolocation Analysis — n0rm41</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0a0a0a;
+    --bg2:       #0f0f0f;
+    --bg3:       #141414;
+    --red:       #cc0000;
+    --red-dim:   #7a0000;
+    --red-glow:  rgba(204,0,0,0.18);
+    --red-faint: rgba(204,0,0,0.06);
+    --text:      #c8c8c8;
+    --text-dim:  #5a5a5a;
+    --text-bright: #e8e8e8;
+    --mono:      'JetBrains Mono', monospace;
+    --border:    rgba(204,0,0,0.2);
+    --border-dim: rgba(255,255,255,0.04);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.75;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.07) 2px,
+      rgba(0,0,0,0.07) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* noise grain */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0.5;
+  }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 48px;
+  }
+
+  .nav-brand {
+    color: var(--red);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--red); }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 4rem 2rem 8rem;
+  }
+
+  /* ── BREADCRUMB ── */
+  .breadcrumb {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .breadcrumb a { color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
+  .breadcrumb a:hover { color: var(--red); }
+  .breadcrumb .sep { color: var(--red-dim); }
+
+  /* ── HERO ── */
+  .report-header {
+    margin-bottom: 3.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-dim);
+  }
+
+  .report-tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+    border: 1px solid var(--red-dim);
+    padding: 2px 10px;
+    margin-bottom: 1.2rem;
+    background: var(--red-faint);
+  }
+
+  h1 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+
+  h1 .accent { color: var(--red); }
+
+  .report-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 1.2rem;
+  }
+
+  .meta-item {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .meta-item span {
+    color: var(--text);
+    margin-left: 4px;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    margin-bottom: 2.8rem;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .section:nth-child(1) { animation-delay: 0.05s; }
+  .section:nth-child(2) { animation-delay: 0.10s; }
+  .section:nth-child(3) { animation-delay: 0.15s; }
+  .section:nth-child(4) { animation-delay: 0.20s; }
+  .section:nth-child(5) { animation-delay: 0.25s; }
+  .section:nth-child(6) { animation-delay: 0.30s; }
+  .section:nth-child(7) { animation-delay: 0.35s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .section-num {
+    font-size: 10px;
+    color: var(--red);
+    letter-spacing: 0.15em;
+    min-width: 32px;
+  }
+
+  h2 {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-bright);
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+
+  .section-body {
+    padding-left: 40px;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.8;
+  }
+
+  /* ── OBSERVATION LIST ── */
+  .obs-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .obs-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+  }
+
+  .obs-list li::before {
+    content: '▸';
+    color: var(--red);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── ANCHOR GRID ── */
+  .anchor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.8rem;
+    margin-top: 0.4rem;
+  }
+
+  .anchor-card {
+    background: var(--bg3);
+    border: 1px solid var(--border-dim);
+    border-left: 2px solid var(--red-dim);
+    padding: 0.7rem 1rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .anchor-card:hover {
+    border-left-color: var(--red);
+    background: var(--red-faint);
+  }
+
+  .anchor-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 2px;
+  }
+
+  .anchor-value {
+    font-size: 12px;
+    color: var(--text);
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--bg3);
+    border: 1px solid var(--border-dim);
+    border-left: 2px solid var(--red);
+    padding: 1rem 1.2rem;
+    margin: 0.8rem 0;
+    overflow-x: auto;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .code-block .comment { color: var(--text-dim); }
+  .code-block .key { color: var(--red); }
+  .code-block .val { color: #7ec8a0; }
+
+  /* ── TOOL BADGES ── */
+  .tool-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.6rem 0;
+  }
+
+  .tool-badge {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border: 1px solid var(--border);
+    color: var(--red);
+    background: var(--red-faint);
+  }
+
+  /* ── METHODOLOGY STEPS ── */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    counter-reset: step;
+  }
+
+  .step {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    counter-increment: step;
+  }
+
+  .step-num {
+    font-size: 10px;
+    color: var(--red-dim);
+    min-width: 24px;
+    padding-top: 2px;
+    font-weight: 700;
+  }
+
+  /* ── CONFIRMATION BLOCK ── */
+  .confirm-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    margin-top: 0.6rem;
+  }
+
+  .confirm-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 12px;
+  }
+
+  .confirm-item::before {
+    content: '✓';
+    color: var(--red);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  /* ── COORDINATES ── */
+  .coordinates {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 0.8rem 1.4rem;
+    margin-top: 1rem;
+    font-size: 14px;
+    color: var(--text-bright);
+    letter-spacing: 0.06em;
+    box-shadow: 0 0 20px var(--red-glow);
+  }
+
+  .coordinates .coord-label {
+    font-size: 10px;
+    color: var(--red);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-right: 0.3rem;
+  }
+
+  /* ── CONFIDENCE BADGE ── */
+  .confidence {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--red);
+    background: var(--red-faint);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--red);
+  }
+
+  .confidence-bar {
+    display: flex;
+    gap: 3px;
+  }
+
+  .bar-seg {
+    width: 16px;
+    height: 8px;
+    background: var(--red);
+  }
+
+  .bar-seg.empty {
+    background: var(--red-dim);
+    opacity: 0.3;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border-dim);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  footer a { color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
+  footer a:hover { color: var(--red); }
+
+  @media (max-width: 600px) {
+    .confirm-grid { grid-template-columns: 1fr; }
+    .report-meta { gap: 0.8rem; }
+    .section-body { padding-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="nav-brand" href="index.html">n0rm41</a>
+  <ul class="nav-links">
+    <li><a href="index.html#skills">Skills</a></li>
+    <li><a href="index.html#projects">Projects</a></li>
+    <li><a href="index.html#blog">Blog</a></li>
+  </ul>
+</header>
+
+<main>
+
+  <div class="breadcrumb">
+    <a href="index.html">~</a>
+    <span class="sep">/</span>
+    <a href="index.html#blog">blog</a>
+    <span class="sep">/</span>
+    <span>osint-exercise-001</span>
+  </div>
+
+  <div class="report-header">
+    <div class="report-tag">OSINT // Geolocation</div>
+    <h1>Exercise 001 — <span class="accent">Kiffa, Mauritania</span></h1>
+    <p style="color:var(--text-dim); font-size:12px; margin-top:0.6rem;">
+      Geolocation analysis of an open-source image using anchor point methodology,
+      historical satellite imagery, and solar shadow verification.
+    </p>
+    <div class="report-meta">
+      <div class="meta-item">ANALYST <span>n0rm41</span></div>
+      <div class="meta-item">DATE <span>03/04/2026</span></div>
+      <div class="meta-item">SOURCE <span>gralhix.com/osint-exercise-001</span></div>
+      <div class="meta-item">STATUS <span style="color:var(--red)">RESOLVED</span></div>
+    </div>
+  </div>
+
+  <!-- 1. INITIAL OBSERVATION -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Initial Observation</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="section-body">
+      <p style="margin-bottom:0.9rem;">
+        The image depicts a sparsely developed urban area in a semi-arid environment.
+        No road signs, readable text, or distinct landmarks are immediately visible.
+        The following elements were catalogued from the raw image:
+      </p>
+      <ul class="obs-list">
+        <li>A building bearing Arabic script, consistent with a mosque or Islamic institution</li>
+        <li>Several individuals wearing traditional Islamic clothing</li>
+        <li>Three low-density housing structures of simple construction</li>
+        <li>A paved road with a visible curve — anomalous for the environment</li>
+        <li>A localised green area, atypical for a desert-adjacent setting</li>
+        <li>No readable signage, vehicle plates, or distinctive infrastructure</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 2. HYPOTHESIS FORMATION -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Hypothesis Formation</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="section-body">
+      <p>
+        The initial geographic hypothesis — <strong style="color:var(--text-bright)">Kiffa, Mauritania</strong> — was derived from convergence of four independent signals:
+      </p>
+      <br>
+      <ul class="obs-list">
+        <li>Arabic script is consistent with Mauritania's official language and script</li>
+        <li>Traditional clothing aligns with West African Islamic cultural norms</li>
+        <li>Semi-arid environment with minimal vegetation matches Kiffa's climate profile</li>
+        <li>Low-density, simple urban layout is characteristic of secondary Mauritanian cities</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 3. ANCHOR POINTS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Anchor Points Identified</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="section-body">
+      <div class="anchor-grid">
+        <div class="anchor-card">
+          <div class="anchor-label">Cultural</div>
+          <div class="anchor-value">Arabic script → Islamic / NW African context</div>
+        </div>
+        <div class="anchor-card">
+          <div class="anchor-label">Cultural</div>
+          <div class="anchor-value">Traditional clothing → regional confirmation</div>
+        </div>
+        <div class="anchor-card">
+          <div class="anchor-label">Geographic</div>
+          <div class="anchor-value">Green area + paved road → strong location filter</div>
+        </div>
+        <div class="anchor-card">
+          <div class="anchor-label">Temporal</div>
+          <div class="anchor-value">Timestamp 20/03/2013 13:45 → shadow analysis viable</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. SEARCH METHODOLOGY -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Search Methodology</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="section-body">
+      <div class="tool-list">
+        <span class="tool-badge">Google Earth Pro</span>
+        <span class="tool-badge">SunCalc</span>
+        <span class="tool-badge">Historical Imagery</span>
+      </div>
+      <br>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">01</span>
+          <span>Opened Google Earth Pro and loaded historical imagery for 2013 over Kiffa, Mauritania</span>
+        </div>
+        <div class="step">
+          <span class="step-num">02</span>
+          <span>Filtered visible area by two constraints: presence of vegetation and presence of paved roads — both rare in the region</span>
+        </div>
+        <div class="step">
+          <span class="step-num">03</span>
+          <span>Narrowed the search zone to a small subset of the city matching both environmental constraints</span>
+        </div>
+        <div class="step">
+          <span class="step-num">04</span>
+          <span>Cross-referenced road curvature and building layout against satellite imagery</span>
+        </div>
+        <div class="step">
+          <span class="step-num">05</span>
+          <span>Ran shadow verification using SunCalc at the candidate coordinates and timestamp</span>
+        </div>
+      </div>
+
+      <div class="code-block" style="margin-top:1.2rem;">
+        <span class="comment">// SunCalc shadow verification</span><br>
+        <span class="key">coordinates </span><span class="val">16°36'33.75"N  11°23'52.17"W</span><br>
+        <span class="key">date        </span><span class="val">20/03/2013</span><br>
+        <span class="key">time        </span><span class="val">13:45 local</span><br>
+        <span class="key">sun azimuth </span><span class="val">~245° (WSW)</span><br>
+        <span class="key">shadow dir  </span><span class="val">~065° (ENE)</span><br>
+        <span class="key">match       </span><span class="val">CONFIRMED — consistent with image shadows</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. CONFIRMATION -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Confirmation</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="section-body">
+      <p style="margin-bottom:0.9rem;">Location confirmed in Google Earth Pro via multi-element geometric match:</p>
+      <div class="confirm-grid">
+        <div class="confirm-item">Identical road curvature</div>
+        <div class="confirm-item">Matching building layout</div>
+        <div class="confirm-item">Mosque-consistent structure</div>
+        <div class="confirm-item">Green area in relative position</div>
+        <div class="confirm-item">Shadow orientation verified</div>
+        <div class="confirm-item">Environmental consistency</div>
+      </div>
+      <div class="coordinates">
+        <span><span class="coord-label">LAT</span>16°36'33.75"N</span>
+        <span style="color:var(--red-dim)">|</span>
+        <span><span class="coord-label">LON</span>11°23'52.17"W</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. CONFIDENCE ASSESSMENT -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Confidence Assessment</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="section-body">
+      <div class="confidence">
+        <div class="confidence-bar">
+          <div class="bar-seg"></div>
+          <div class="bar-seg"></div>
+          <div class="bar-seg"></div>
+          <div class="bar-seg"></div>
+          <div class="bar-seg empty"></div>
+        </div>
+        HIGH CONFIDENCE
+      </div>
+      <br><br>
+      <ul class="obs-list">
+        <li><strong style="color:var(--text-bright)">Geometric</strong> — road curvature and structure layout match satellite imagery</li>
+        <li><strong style="color:var(--text-bright)">Environmental</strong> — rare vegetation and paved road narrow location significantly</li>
+        <li><strong style="color:var(--text-bright)">Cultural</strong> — language and clothing consistent with region</li>
+        <li><strong style="color:var(--text-bright)">Temporal</strong> — shadow direction verified quantitatively via SunCalc (azimuth ~245°)</li>
+      </ul>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <span>n0rm41 // osint-exercise-001</span>
+  <a href="index.html">← back to portfolio</a>
+</footer>
+
+</body>
+</html>
