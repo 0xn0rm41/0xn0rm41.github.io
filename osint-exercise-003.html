@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSINT-003 // Geolocation Analysis — n0rm41</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:          #0a0a0a;
+    --bg2:         #0f0f0f;
+    --bg3:         #141414;
+    --red:         #cc0000;
+    --red-dim:     #7a0000;
+    --red-glow:    rgba(204,0,0,0.18);
+    --red-faint:   rgba(204,0,0,0.06);
+    --text:        #c8c8c8;
+    --text-dim:    #5a5a5a;
+    --text-bright: #e8e8e8;
+    --mono:        'JetBrains Mono', monospace;
+    --border:      rgba(204,0,0,0.2);
+    --border-dim:  rgba(255,255,255,0.04);
+    --green:       #4a9e6a;
+    --green-faint: rgba(74,158,106,0.06);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.75;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9998; opacity: 0.5;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    position: sticky; top: 0;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 48px;
+  }
+
+  .nav-brand { color: var(--red); font-weight: 700; font-size: 14px; letter-spacing: 0.1em; text-decoration: none; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--red); }
+
+  main { max-width: 860px; margin: 0 auto; padding: 4rem 2rem 8rem; }
+
+  .breadcrumb {
+    font-size: 11px; color: var(--text-dim); letter-spacing: 0.1em;
+    margin-bottom: 3rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .breadcrumb a { color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
+  .breadcrumb a:hover { color: var(--red); }
+  .breadcrumb .sep { color: var(--red-dim); }
+
+  .report-header { margin-bottom: 3.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-dim); }
+
+  .report-tag {
+    display: inline-block; font-size: 10px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--red); border: 1px solid var(--red-dim);
+    padding: 2px 10px; margin-bottom: 1.2rem; background: var(--red-faint);
+  }
+
+  h1 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; color: var(--text-bright); letter-spacing: -0.01em; line-height: 1.2; margin-bottom: 1rem; }
+  h1 .accent { color: var(--red); }
+
+  .report-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 1.2rem; }
+  .meta-item { font-size: 11px; color: var(--text-dim); letter-spacing: 0.08em; }
+  .meta-item span { color: var(--text); margin-left: 4px; }
+
+  /* TASK BRIEF */
+  .task-brief {
+    background: var(--bg3);
+    border: 1px solid var(--border-dim);
+    border-left: 2px solid var(--red-dim);
+    padding: 1rem 1.2rem;
+    margin-top: 1.2rem;
+    font-size: 12px;
+    color: var(--text-dim);
+    font-style: italic;
+    line-height: 1.7;
+  }
+  .task-brief .brief-label {
+    font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--red-dim); margin-bottom: 6px; font-style: normal;
+  }
+
+  .section { margin-bottom: 2.8rem; animation: fadeUp 0.5s ease both; }
+  .section:nth-child(1) { animation-delay: 0.05s; }
+  .section:nth-child(2) { animation-delay: 0.10s; }
+  .section:nth-child(3) { animation-delay: 0.15s; }
+  .section:nth-child(4) { animation-delay: 0.20s; }
+  .section:nth-child(5) { animation-delay: 0.25s; }
+  .section:nth-child(6) { animation-delay: 0.30s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.2rem; }
+  .section-num { font-size: 10px; color: var(--red); letter-spacing: 0.15em; min-width: 32px; }
+  h2 { font-size: 11px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-bright); }
+  .section-line { flex: 1; height: 1px; background: linear-gradient(to right, var(--border), transparent); }
+  .section-body { padding-left: 40px; color: var(--text); font-size: 13px; line-height: 1.8; }
+
+  .obs-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+  .obs-list li { display: flex; align-items: flex-start; gap: 0.7rem; }
+  .obs-list li::before { content: '▸'; color: var(--red); flex-shrink: 0; margin-top: 1px; }
+
+  /* SUBJECTS TABLE */
+  .subjects {
+    background: var(--bg3);
+    border: 1px solid var(--border-dim);
+    padding: 0.8rem 1.2rem;
+    margin: 0.8rem 0;
+  }
+  .subjects-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--red); margin-bottom: 8px; }
+  .subject-row { display: flex; gap: 1rem; align-items: baseline; padding: 3px 0; border-bottom: 1px solid var(--border-dim); font-size: 12px; }
+  .subject-row:last-child { border-bottom: none; }
+  .subject-role { color: var(--text-dim); min-width: 200px; }
+  .subject-name { color: var(--text-bright); }
+
+  /* DATE CALLOUT */
+  .date-callout {
+    display: inline-flex; align-items: center; gap: 0.8rem;
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    background: var(--red-faint);
+    font-size: 12px; margin: 0.8rem 0;
+  }
+  .date-callout .dc-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--red); }
+  .date-callout .dc-val { color: var(--text-bright); }
+  .date-callout .dc-src { font-size: 10px; color: var(--text-dim); }
+
+  .anchor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.8rem; margin-top: 0.4rem; }
+  .anchor-card { background: var(--bg3); border: 1px solid var(--border-dim); border-left: 2px solid var(--red-dim); padding: 0.7rem 1rem; transition: border-color 0.2s, background 0.2s; }
+  .anchor-card:hover { border-left-color: var(--red); background: var(--red-faint); }
+  .anchor-card.strong { border-left-color: var(--red); }
+  .anchor-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); margin-bottom: 2px; }
+  .anchor-value { font-size: 12px; color: var(--text); }
+
+  .tool-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.6rem 0; }
+  .tool-badge { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border: 1px solid var(--border); color: var(--red); background: var(--red-faint); }
+
+  /* DORK BLOCK */
+  .dork-block {
+    background: var(--bg3);
+    border: 1px solid var(--border-dim);
+    border-left: 2px solid var(--red);
+    padding: 0.8rem 1.2rem;
+    margin: 0.8rem 0;
+    font-size: 12px;
+  }
+  .dork-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--red); margin-bottom: 6px; }
+  .dork-query { color: #7ec8a0; letter-spacing: 0.03em; }
+  .dork-result { color: var(--text-dim); font-size: 11px; margin-top: 6px; }
+  .dork-result span { color: var(--text); }
+
+  .steps { display: flex; flex-direction: column; gap: 0.6rem; }
+  .step { display: flex; gap: 1rem; align-items: flex-start; }
+  .step-num { font-size: 10px; color: var(--red-dim); min-width: 24px; padding-top: 2px; font-weight: 700; }
+
+  .confirm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-top: 0.6rem; }
+  .confirm-item { display: flex; align-items: center; gap: 0.5rem; font-size: 12px; }
+  .confirm-item::before { content: '✓'; color: var(--red); font-size: 11px; font-weight: 700; }
+
+  /* SOURCE QUOTE */
+  .source-quote {
+    background: var(--bg3);
+    border: 1px solid var(--border-dim);
+    border-left: 2px solid var(--green);
+    padding: 0.8rem 1.2rem;
+    margin: 1rem 0;
+    font-size: 12px;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+  .source-quote .sq-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--green); margin-bottom: 6px; font-style: normal; }
+  .source-quote .sq-attribution { margin-top: 8px; font-size: 11px; font-style: normal; color: var(--text-dim); }
+  .source-quote .sq-attribution span { color: var(--text); }
+
+  /* FINDINGS */
+  .findings {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 1.2rem 1.4rem;
+    margin-top: 1.2rem;
+    box-shadow: 0 0 24px var(--red-glow);
+  }
+  .findings-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--red); margin-bottom: 0.8rem; }
+  .finding-row { display: flex; gap: 1rem; align-items: baseline; padding: 4px 0; border-bottom: 1px solid var(--border-dim); }
+  .finding-row:last-child { border-bottom: none; }
+  .finding-key { font-size: 11px; color: var(--text-dim); min-width: 160px; letter-spacing: 0.08em; }
+  .finding-val { font-size: 13px; color: var(--text-bright); }
+
+  /* COORDINATES */
+  .coordinates {
+    display: inline-flex; align-items: center; gap: 1rem;
+    background: var(--bg3); border: 1px solid var(--border);
+    padding: 0.8rem 1.4rem; margin-top: 1rem;
+    font-size: 14px; color: var(--text-bright); letter-spacing: 0.06em;
+    box-shadow: 0 0 20px var(--red-glow);
+  }
+  .coord-label { font-size: 10px; color: var(--red); letter-spacing: 0.15em; text-transform: uppercase; margin-right: 0.3rem; }
+
+  .confidence { display: inline-flex; align-items: center; gap: 0.8rem; margin-top: 1rem; padding: 0.5rem 1rem; border: 1px solid var(--red); background: var(--red-faint); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); }
+  .confidence-bar { display: flex; gap: 3px; }
+  .bar-seg { width: 16px; height: 8px; background: var(--red); }
+  .bar-seg.empty { background: var(--red-dim); opacity: 0.3; }
+
+  /* SOURCES */
+  .sources-list { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.6rem; }
+  .source-item { display: flex; gap: 0.7rem; align-items: flex-start; font-size: 12px; }
+  .source-item::before { content: '⬡'; color: var(--red-dim); flex-shrink: 0; }
+
+  footer { border-top: 1px solid var(--border-dim); padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: var(--text-dim); letter-spacing: 0.1em; }
+  footer a { color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
+  footer a:hover { color: var(--red); }
+
+  @media (max-width: 600px) {
+    .confirm-grid { grid-template-columns: 1fr; }
+    .report-meta { gap: 0.8rem; }
+    .section-body { padding-left: 0; }
+    .subject-role { min-width: 140px; }
+    .finding-key { min-width: 120px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="nav-brand" href="index.html">n0rm41</a>
+  <ul class="nav-links">
+    <li><a href="index.html#skills">Skills</a></li>
+    <li><a href="index.html#projects">Projects</a></li>
+    <li><a href="index.html#blog">Blog</a></li>
+  </ul>
+</header>
+
+<main>
+
+  <div class="breadcrumb">
+    <a href="index.html">~</a>
+    <span class="sep">/</span>
+    <a href="index.html#blog">blog</a>
+    <span class="sep">/</span>
+    <span>osint-exercise-003</span>
+  </div>
+
+  <div class="report-header">
+    <div class="report-tag">OSINT // Geolocation + Event Reconstruction</div>
+    <h1>Exercise 003 — <span class="accent">Ankara, Turkey</span></h1>
+    <p style="color:var(--text-dim); font-size:12px; margin-top:0.6rem;">
+      Identification of a diplomatic meeting location via architectural analysis,
+      Google dorking, and open-source event documentation corroboration.
+    </p>
+    <div class="report-meta">
+      <div class="meta-item">ANALYST <span>n0rm41</span></div>
+      <div class="meta-item">DATE <span>04/04/2026</span></div>
+      <div class="meta-item">SOURCE <span>gralhix.com/osint-exercise-003</span></div>
+      <div class="meta-item">STATUS <span style="color:var(--red)">RESOLVED</span></div>
+    </div>
+
+    <div class="task-brief">
+      <div class="brief-label">// Task Brief</div>
+      In April 2017, Mohamed Abdullahi Farmaajo, the then president of Somalia, visited Turkey.
+      A news agency published a photograph showing him shaking hands with Recep Tayyip Erdoğan.
+      The article did not disclose where the photo was taken.
+      Objective: identify the name and coordinates of the location.
+    </div>
+  </div>
+
+  <!-- 01 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Initial Observation</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="section-body">
+      <p style="margin-bottom:0.9rem;">
+        The image depicts two individuals shaking hands in front of an ornate door,
+        in what is clearly a formal diplomatic setting. No readable signage is visible.
+        The following elements were catalogued:
+      </p>
+
+      <div class="date-callout">
+        <span class="dc-label">Date visible in image</span>
+        <span class="dc-val">April 27, 2017</span>
+        <span class="dc-src">— visible at top of image frame</span>
+      </div>
+
+      <div class="subjects" style="margin-top:0.8rem;">
+        <div class="subjects-label">// Identified Subjects</div>
+        <div class="subject-row">
+          <span class="subject-role">President of Somalia</span>
+          <span class="subject-name">Mohamed Abdullahi Farmaajo</span>
+        </div>
+        <div class="subject-row">
+          <span class="subject-role">President of Turkey (host)</span>
+          <span class="subject-name">Recep Tayyip Erdoğan</span>
+        </div>
+      </div>
+
+      <ul class="obs-list" style="margin-top:0.9rem;">
+        <li>Ornate door with golden circular decorative pattern and red central element</li>
+        <li>Somali and Turkish flags visible in frame — bilateral diplomatic context confirmed</li>
+        <li>Formal attire consistent with a head-of-state meeting</li>
+        <li>No street-level context, road signs, or external architectural elements visible</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 02 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Hypothesis Formation</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="section-body">
+      <p>
+        The initial hypothesis — <strong style="color:var(--text-bright)">T.C. Cumhurbaşkanlığı Külliyesi, Ankara</strong> (Turkish Presidential Complex) — was formed on the following reasoning chain:
+      </p>
+      <br>
+      <ul class="obs-list">
+        <li>Both subjects are heads of state → meeting almost certainly at an official presidential venue</li>
+        <li>Host country is Turkey → location is within Turkish territory</li>
+        <li>The most prominent presidential venue in Turkey is the Presidential Complex in Ankara</li>
+        <li>The ornate door's decorative pattern — golden circular motifs and a red central element — is architecturally consistent with the Complex's interior ceremonial spaces</li>
+        <li>Presence of both national flags on equal standing → formal bilateral reception protocol</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 03 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Anchor Points Identified</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="section-body">
+      <div class="anchor-grid">
+        <div class="anchor-card strong">
+          <div class="anchor-label">Primary — Flags</div>
+          <div class="anchor-value">Somali + Turkish flags → bilateral diplomatic event in Turkey</div>
+        </div>
+        <div class="anchor-card strong">
+          <div class="anchor-label">Primary — Temporal</div>
+          <div class="anchor-value">Date visible in frame: April 27, 2017 → enables event-based search</div>
+        </div>
+        <div class="anchor-card">
+          <div class="anchor-label">Architectural</div>
+          <div class="anchor-value">Golden circular door pattern + red central element → presidential complex interior</div>
+        </div>
+        <div class="anchor-card">
+          <div class="anchor-label">Protocol</div>
+          <div class="anchor-value">Formal attire + symmetric flag placement → head-of-state reception</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Search Methodology</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="section-body">
+      <div class="tool-list">
+        <span class="tool-badge">Google Dorking</span>
+        <span class="tool-badge">Google Maps</span>
+        <span class="tool-badge">Google Earth Pro</span>
+        <span class="tool-badge">3D Imagery</span>
+      </div>
+      <br>
+
+      <div class="dork-block">
+        <div class="dork-label">// Dork Query — Event Reconstruction</div>
+        <div class="dork-query">"Farmaajo" "Erdogan" "April 2017" "Turkey" site:twitter.com OR site:allafrica.com</div>
+        <div class="dork-result">Result: <span>Single confirmed location — T.C. Cumhurbaşkanlığı Külliyesi, Ankara</span></div>
+      </div>
+
+      <br>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">01</span>
+          <span>Applied Google dork combining subject names, date, and country to surface event documentation from news archives and social media</span>
+        </div>
+        <div class="step">
+          <span class="step-num">02</span>
+          <span>Dork returned a single candidate location — the Presidential Complex (T.C. Cumhurbaşkanlığı Külliyesi), Yenimahalle, Ankara</span>
+        </div>
+        <div class="step">
+          <span class="step-num">03</span>
+          <span>Queried the complex on Google Maps to confirm geographic position and surrounding layout</span>
+        </div>
+        <div class="step">
+          <span class="step-num">04</span>
+          <span>Loaded Google Earth Pro with 3D building imagery — cross-referenced visible door patterns, symmetry, and architectural details against image frame</span>
+        </div>
+        <div class="step">
+          <span class="step-num">05</span>
+          <span>Located the specific ceremonial entrance consistent with the door's decorative pattern — confirmed geometric and stylistic match</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Confirmation</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="section-body">
+      <div class="confirm-grid">
+        <div class="confirm-item">Building architecture matches 3D imagery</div>
+        <div class="confirm-item">Door pattern and symmetry confirmed</div>
+        <div class="confirm-item">Event documented by multiple open sources</div>
+        <div class="confirm-item">Flag protocol consistent with venue</div>
+      </div>
+
+      <div class="source-quote">
+        <div class="sq-label">// Corroborating Source</div>
+        "The visit included a meeting at the Presidential Complex (also known as the Ankara Presidential Palace) and a visit to the Turkish Parliament to meet Speaker Ismail Kahraman."
+        <div class="sq-attribution">
+          Sources: <span>CGTN Africa, AllAfrica</span> — citing the official Somali Presidential Account
+        </div>
+      </div>
+
+      <div class="findings">
+        <div class="findings-label">// Tasked Findings</div>
+        <div class="finding-row">
+          <span class="finding-key">Location name</span>
+          <span class="finding-val">T.C. Cumhurbaşkanlığı Külliyesi</span>
+        </div>
+        <div class="finding-row">
+          <span class="finding-key">Common name</span>
+          <span class="finding-val">Ankara Presidential Palace / Presidential Complex</span>
+        </div>
+        <div class="finding-row">
+          <span class="finding-key">District</span>
+          <span class="finding-val">Yenimahalle, Ankara, Turkey</span>
+        </div>
+      </div>
+
+      <div class="coordinates">
+        <span><span class="coord-label">LAT</span>39.9304509°N</span>
+        <span style="color:var(--red-dim)">|</span>
+        <span><span class="coord-label">LON</span>32.7977136°E</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Confidence Assessment</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="section-body">
+      <div class="confidence">
+        <div class="confidence-bar">
+          <div class="bar-seg"></div>
+          <div class="bar-seg"></div>
+          <div class="bar-seg"></div>
+          <div class="bar-seg"></div>
+          <div class="bar-seg"></div>
+        </div>
+        MAXIMUM CONFIDENCE
+      </div>
+      <br><br>
+      <ul class="obs-list">
+        <li><strong style="color:var(--text-bright)">Event-based</strong> — diplomatic visit documented independently by CGTN Africa and AllAfrica, corroborated by official Somali presidential social media</li>
+        <li><strong style="color:var(--text-bright)">Architectural</strong> — door pattern, symmetry, and ceremonial space layout confirmed via Google Earth Pro 3D imagery</li>
+        <li><strong style="color:var(--text-bright)">Protocol</strong> — bilateral flag placement and formal reception setting consistent with a head-of-state meeting at a presidential complex</li>
+        <li><strong style="color:var(--text-bright)">Temporal</strong> — date visible in image frame (April 27, 2017) enabled precise event-based search, narrowing location to a single candidate</li>
+      </ul>
+
+      <br>
+      <div style="font-size:11px; color:var(--text-dim); margin-top:0.4rem;">
+        Sources:
+        <div class="sources-list" style="margin-top:0.4rem;">
+          <div class="source-item">CGTN Africa — coverage of Farmaajo state visit to Turkey, April 2017</div>
+          <div class="source-item">AllAfrica — diplomatic reporting citing official Somali presidential account</div>
+          <div class="source-item">@PresidencyVilla (official Somali presidential Twitter/X account)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <span>n0rm41 // osint-exercise-003</span>
+  <a href="index.html">← back to portfolio</a>
+</footer>
+
+</body>
+</html>
