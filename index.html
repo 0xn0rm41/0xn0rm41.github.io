@@ -16,6 +16,7 @@
     --green:    #00cc44;
     --yellow:   #ccaa00;
     --blue:     #5599ff;
+    --purple:   #9966cc;
     --text:     #d0d0d0;
     --text-dim: #555;
     --border:   #1a1a1a;
@@ -24,7 +25,6 @@
   }
 
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
   html { scroll-behavior: smooth; }
 
   body {
@@ -37,23 +37,18 @@
     cursor: default;
   }
 
-  /* Scanlines */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
     background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.04) 2px,
-      rgba(0,0,0,0.04) 4px
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px
     );
     pointer-events: none;
     z-index: 999;
   }
 
-  /* Noise */
   body::after {
     content: '';
     position: fixed;
@@ -64,446 +59,345 @@
     z-index: 998;
   }
 
-  /* ─── LAYOUT ─── */
-  .page { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+  .page { max-width: 960px; margin: 0 auto; padding: 0 24px; }
 
-  /* ─── NAV ─── */
+  /* NAV */
   nav {
-    position: sticky;
-    top: 0;
-    z-index: 90;
-    background: rgba(10,10,10,0.92);
-    backdrop-filter: blur(8px);
+    position: sticky; top: 0; z-index: 90;
+    background: rgba(10,10,10,0.94);
+    backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border);
   }
-
   .nav-inner {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 48px;
+    max-width: 960px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center;
+    justify-content: space-between; height: 48px;
   }
-
   .nav-logo {
-    font-family: var(--mono);
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--red);
-    letter-spacing: -0.01em;
-    text-decoration: none;
+    font-family: var(--mono); font-size: 14px;
+    font-weight: 700; color: var(--red);
+    letter-spacing: -0.01em; text-decoration: none;
   }
-
   .nav-logo span { color: var(--text-dim); font-weight: 300; }
-
-  .nav-links {
-    display: flex;
-    gap: 28px;
-    list-style: none;
-  }
-
+  .nav-links { display: flex; gap: 24px; list-style: none; }
   .nav-links a {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    text-decoration: none;
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-dim); text-decoration: none;
     transition: color 0.15s;
   }
-
   .nav-links a:hover { color: var(--red); }
 
-  /* ─── HERO ─── */
+  /* HERO */
   .hero {
     padding: 100px 0 80px;
     border-bottom: 1px solid var(--border);
+    position: relative;
   }
-
   .hero-eyebrow {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px;
   }
-
-  .hero-eyebrow::before {
-    content: '';
-    width: 32px;
-    height: 1px;
-    background: var(--red);
-  }
-
+  .hero-eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--red); }
   .hero-name {
     font-family: var(--mono);
     font-size: clamp(36px, 6vw, 64px);
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: -0.03em;
-    line-height: 1.05;
+    font-weight: 700; color: #fff;
+    letter-spacing: -0.03em; line-height: 1.05;
     margin-bottom: 8px;
   }
-
   .hero-name .red { color: var(--red); }
-
   .hero-tagline {
     font-family: var(--mono);
-    font-size: clamp(13px, 2vw, 16px);
-    color: var(--text-dim);
-    font-weight: 300;
-    letter-spacing: 0.02em;
-    margin-bottom: 32px;
+    font-size: clamp(13px, 2vw, 15px);
+    color: var(--text-dim); font-weight: 300;
+    letter-spacing: 0.02em; margin-bottom: 32px;
   }
-
   .hero-tagline .accent { color: var(--yellow); }
-
+  .hero-tagline .accent2 { color: var(--blue); }
   .hero-desc {
-    max-width: 560px;
-    font-size: 13.5px;
-    color: #999;
-    line-height: 1.9;
-    margin-bottom: 40px;
+    max-width: 580px; font-size: 13.5px;
+    color: #999; line-height: 1.9; margin-bottom: 40px;
   }
-
-  .hero-actions {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
+  .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
   .btn {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 10px 22px;
-    text-decoration: none;
-    transition: all 0.15s;
-    cursor: pointer;
-    border: none;
-    display: inline-block;
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 10px 22px; text-decoration: none;
+    transition: all 0.15s; cursor: pointer;
+    border: none; display: inline-block;
   }
-
-  .btn-primary {
-    background: var(--red);
-    color: #fff;
-  }
-
+  .btn-primary { background: var(--red); color: #fff; }
   .btn-primary:hover { background: #aa0000; }
-
   .btn-outline {
-    background: transparent;
-    color: var(--text-dim);
+    background: transparent; color: var(--text-dim);
     border: 1px solid var(--border);
   }
-
   .btn-outline:hover { border-color: var(--red); color: var(--red); }
 
-  /* ─── SECTION HEADERS ─── */
+  /* STAT BAR */
+  .stat-bar {
+    display: flex; gap: 2px; margin-top: 56px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 14px 20px; flex: 1; min-width: 120px;
+  }
+  .stat-num {
+    font-family: var(--mono); font-size: 22px;
+    font-weight: 700; color: var(--red);
+    line-height: 1; margin-bottom: 4px;
+  }
+  .stat-label {
+    font-family: var(--mono); font-size: 9px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* SECTIONS */
   .section { padding: 72px 0; border-bottom: 1px solid var(--border); }
   .section:last-of-type { border-bottom: none; }
-
   .section-label {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--red);
-    margin-bottom: 40px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--red); margin-bottom: 40px;
+    display: flex; align-items: center; gap: 14px;
   }
-
   .section-label::before { content: '//'; color: var(--red-dim); }
-
-  .section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .section-sublabel {
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-dim); margin: 32px 0 16px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
   }
 
-  /* ─── PROJECTS ─── */
+  /* PROJECTS */
   .projects { display: flex; flex-direction: column; gap: 2px; }
-
   .project-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    padding: 28px 32px;
-    transition: border-color 0.15s;
-    position: relative;
-    overflow: hidden;
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 28px 32px; transition: border-color 0.15s;
+    position: relative; overflow: hidden;
   }
-
   .project-card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 2px;
-    background: transparent;
-    transition: background 0.15s;
+    content: ''; position: absolute;
+    left: 0; top: 0; bottom: 0; width: 2px;
+    background: transparent; transition: background 0.15s;
   }
-
   .project-card:hover { border-color: #222; }
   .project-card:hover::before { background: var(--red); }
-
   .project-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
-    gap: 16px;
+    display: flex; justify-content: space-between;
+    align-items: flex-start; margin-bottom: 12px; gap: 16px;
   }
-
   .project-title {
-    font-family: var(--mono);
-    font-size: 14px;
-    font-weight: 500;
-    color: #fff;
-    letter-spacing: -0.01em;
+    font-family: var(--mono); font-size: 14px;
+    font-weight: 500; color: #fff; letter-spacing: -0.01em;
   }
-
-  .project-tags {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
+  .project-tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
   .tag {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 2px 8px;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    white-space: nowrap;
+    font-family: var(--mono); font-size: 9px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 2px 8px; border: 1px solid var(--border);
+    color: var(--text-dim); white-space: nowrap;
   }
-
-  .tag.red   { border-color: var(--red-dim);   color: var(--red);    }
-  .tag.green { border-color: #004422;           color: var(--green);  }
-  .tag.yellow{ border-color: #443300;           color: var(--yellow); }
-  .tag.blue  { border-color: #223366;           color: var(--blue);   }
-
+  .tag.red   { border-color: var(--red-dim);  color: var(--red);    }
+  .tag.green { border-color: #004422;          color: var(--green);  }
+  .tag.yellow{ border-color: #443300;          color: var(--yellow); }
+  .tag.blue  { border-color: #223366;          color: var(--blue);   }
+  .tag.purple{ border-color: #442266;          color: var(--purple); }
   .project-desc {
-    font-size: 12.5px;
-    color: #888;
-    line-height: 1.75;
-    margin-bottom: 16px;
-    max-width: 620px;
+    font-size: 12.5px; color: #888;
+    line-height: 1.75; margin-bottom: 16px; max-width: 640px;
   }
-
   .project-link {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--red);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--red); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
   }
-
   .project-link::after { content: '→'; }
   .project-link:hover { color: #ff2222; }
 
-  /* ─── WRITEUPS ─── */
-  .writeups { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
-
-  .writeup-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    padding: 24px 26px;
-    text-decoration: none;
-    display: block;
+  /* INTEL REPORTS — downloadable docs */
+  .reports-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .report-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 22px 24px; position: relative;
     transition: border-color 0.15s;
-    position: relative;
   }
-
-  .writeup-card:hover { border-color: #2a2a2a; }
-
-  .writeup-card:hover .writeup-title { color: var(--red); }
-
-  .writeup-num {
-    font-family: var(--mono);
-    font-size: 10px;
+  .report-card:hover { border-color: #252525; }
+  .report-card:hover .report-title { color: var(--yellow); }
+  .report-header {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; margin-bottom: 10px; gap: 12px;
+  }
+  .report-type {
+    font-family: var(--mono); font-size: 9px;
+    letter-spacing: 0.14em; text-transform: uppercase;
     color: var(--text-dim);
-    letter-spacing: 0.1em;
-    margin-bottom: 10px;
   }
-
-  .writeup-title {
-    font-family: var(--mono);
-    font-size: 13px;
-    font-weight: 500;
-    color: #fff;
-    margin-bottom: 8px;
+  .report-badge {
+    font-family: var(--mono); font-size: 9px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 2px 7px; border: 1px solid #443300;
+    color: var(--yellow); white-space: nowrap;
+  }
+  .report-title {
+    font-family: var(--mono); font-size: 13px;
+    font-weight: 500; color: #fff;
+    margin-bottom: 8px; line-height: 1.4;
     transition: color 0.15s;
-    line-height: 1.4;
   }
+  .report-desc {
+    font-size: 12px; color: #666;
+    line-height: 1.65; margin-bottom: 14px;
+  }
+  .report-footer {
+    display: flex; justify-content: space-between;
+    align-items: center; flex-wrap: wrap; gap: 8px;
+  }
+  .report-meta { display: flex; gap: 6px; flex-wrap: wrap; }
+  .report-dl {
+    font-family: var(--mono); font-size: 9px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--yellow); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border: 1px solid #443300;
+    transition: all 0.15s;
+  }
+  .report-dl:hover { background: rgba(204,170,0,0.08); }
+  .report-dl::before { content: '↓'; }
 
+  /* WRITEUPS */
+  .writeups { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .writeup-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 22px 24px; text-decoration: none;
+    display: block; transition: border-color 0.15s; position: relative;
+  }
+  .writeup-card:hover { border-color: #2a2a2a; }
+  .writeup-card:hover .writeup-title { color: var(--red); }
+  .writeup-num {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--text-dim); letter-spacing: 0.1em; margin-bottom: 10px;
+  }
+  .writeup-title {
+    font-family: var(--mono); font-size: 13px;
+    font-weight: 500; color: #fff; margin-bottom: 8px;
+    transition: color 0.15s; line-height: 1.4;
+  }
   .writeup-desc {
-    font-size: 12px;
-    color: #666;
-    line-height: 1.6;
-    margin-bottom: 16px;
+    font-size: 12px; color: #666;
+    line-height: 1.6; margin-bottom: 14px;
   }
+  .writeup-meta { display: flex; gap: 8px; flex-wrap: wrap; }
 
-  .writeup-meta {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  /* ─── SKILLS ─── */
-  .skills-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
-  }
-
+  /* SKILLS */
+  .skills-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
   .skill-group {
-    background: var(--bg2);
-    border: 1px solid var(--border);
+    background: var(--bg2); border: 1px solid var(--border);
     padding: 22px 24px;
   }
-
   .skill-group-title {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--red);
-    margin-bottom: 14px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border);
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--red); margin-bottom: 14px;
+    padding-bottom: 10px; border-bottom: 1px solid var(--border);
   }
-
-  .skill-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
+  .skill-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
   .skill-list li {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: #888;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    font-family: var(--mono); font-size: 12px;
+    color: #888; display: flex; align-items: center; gap: 8px;
+  }
+  .skill-list li::before { content: '─'; color: var(--border); font-size: 10px; }
+  .skill-list li.highlight { color: var(--text); }
+  .skill-list li.highlight::before { color: var(--red-dim); }
+
+  /* CURRICULUM PROGRESS */
+  .curriculum { display: flex; flex-direction: column; gap: 2px; }
+  .curriculum-row {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 12px 20px;
+  }
+  .curriculum-status {
+    font-family: var(--mono); font-size: 10px;
+    width: 16px; text-align: center; flex-shrink: 0;
+  }
+  .curriculum-status.done { color: var(--green); }
+  .curriculum-status.wip  { color: var(--yellow); }
+  .curriculum-status.next { color: var(--text-dim); }
+  .curriculum-name {
+    font-family: var(--mono); font-size: 12px;
+    color: #888; flex: 1;
+  }
+  .curriculum-name.done { color: var(--text); }
+  .curriculum-tag {
+    font-family: var(--mono); font-size: 9px;
+    letter-spacing: 0.08em; padding: 1px 7px;
+    border: 1px solid var(--border); color: var(--text-dim);
+    white-space: nowrap;
   }
 
-  .skill-list li::before {
-    content: '─';
-    color: var(--border);
-    font-size: 10px;
-  }
-
-  /* ─── ABOUT / STATUS ─── */
-  .status-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px;
-    margin-bottom: 2px;
-  }
-
+  /* ABOUT */
+  .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-bottom: 2px; }
   .status-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
+    background: var(--bg2); border: 1px solid var(--border);
     padding: 22px 26px;
   }
-
   .status-card-title {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 12px;
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 12px;
   }
-
-  .status-card p {
-    font-size: 12.5px;
-    color: #888;
-    line-height: 1.75;
-  }
-
+  .status-card p { font-size: 12.5px; color: #888; line-height: 1.75; }
   .status-card p code {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--red);
-    background: rgba(204,0,0,0.08);
+    font-family: var(--mono); font-size: 11px;
+    color: var(--red); background: rgba(204,0,0,0.08);
     padding: 1px 5px;
   }
 
-  /* Blinking cursor */
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
   .cursor {
-    display: inline-block;
-    width: 2px;
-    height: 1em;
-    background: var(--red);
-    vertical-align: text-bottom;
-    margin-left: 2px;
-    animation: blink 1s step-end infinite;
+    display: inline-block; width: 2px; height: 1em;
+    background: var(--red); vertical-align: text-bottom;
+    margin-left: 2px; animation: blink 1s step-end infinite;
   }
 
-  /* ─── FOOTER ─── */
   footer {
     padding: 32px 0 48px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
+    display: flex; justify-content: space-between;
+    align-items: center; flex-wrap: wrap; gap: 12px;
   }
+  .footer-handle { font-family: var(--mono); font-size: 12px; color: var(--red); }
+  .footer-right { font-family: var(--mono); font-size: 11px; color: var(--text-dim); letter-spacing: 0.06em; }
 
-  .footer-handle {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--red);
-  }
-
-  .footer-right {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.06em;
-  }
-
-  /* ─── RESPONSIVE ─── */
   @media (max-width: 640px) {
-    .writeups { grid-template-columns: 1fr; }
+    .writeups, .reports-grid { grid-template-columns: 1fr; }
     .skills-grid { grid-template-columns: 1fr; }
     .status-grid { grid-template-columns: 1fr; }
     .nav-links { display: none; }
     .project-top { flex-direction: column; }
     .project-tags { justify-content: flex-start; }
+    .stat-bar { gap: 2px; }
   }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <div class="nav-inner">
     <a class="nav-logo" href="#">n0rm41<span>.sec</span></a>
     <ul class="nav-links">
       <li><a href="#projects">Projects</a></li>
+      <li><a href="#reports">Intel Reports</a></li>
       <li><a href="#writeups">Writeups</a></li>
       <li><a href="#skills">Skills</a></li>
+      <li><a href="#curriculum">Curriculum</a></li>
       <li><a href="#about">About</a></li>
     </ul>
   </div>
@@ -516,15 +410,39 @@
     <div class="hero-eyebrow">Security Researcher</div>
     <div class="hero-name">n0<span class="red">rm</span>41</div>
     <div class="hero-tagline">
-      Binary Exploitation &nbsp;·&nbsp; <span class="accent">OSINT</span> &nbsp;·&nbsp; Reverse Engineering
+      Binary Exploitation &nbsp;·&nbsp;
+      <span class="accent">OSINT / Threat Intel</span> &nbsp;·&nbsp;
+      <span class="accent2">Reverse Engineering</span>
     </div>
     <p class="hero-desc">
-      (Aspirant) Offensive security researcher focused on binary exploitation, reverse engineering, and OSINT tooling.
-      Building toward a career in the intelligence community. All projects built hands-on — no theory without practice.<span class="cursor"></span>
+      (Aspirant) Offensive security researcher focused on binary exploitation, reverse engineering,
+      and threat intelligence. Building toward a career in the intelligence community.
+      All work is hands-on — no theory without practice.
+      Reports are written to professional analyst standard.<span class="cursor"></span>
     </p>
     <div class="hero-actions">
       <a href="cv.pdf" class="btn btn-primary">Download CV</a>
       <a href="https://github.com/n0rm41" target="_blank" class="btn btn-outline">GitHub</a>
+      <a href="#reports" class="btn btn-outline">Intel Reports</a>
+    </div>
+
+    <div class="stat-bar">
+      <div class="stat">
+        <div class="stat-num">14+</div>
+        <div class="stat-label">OSINT Modules</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">8</div>
+        <div class="stat-label">RE Writeups</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">6</div>
+        <div class="stat-label">Intel Reports</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">5+</div>
+        <div class="stat-label">Projects</div>
+      </div>
     </div>
   </section>
 
@@ -533,7 +451,6 @@
     <div class="section-label">Projects</div>
     <div class="projects">
 
-      <!-- OSINT Pipeline -->
       <div class="project-card">
         <div class="project-top">
           <div class="project-title">iKnowItAll.py</div>
@@ -541,12 +458,15 @@
             <span class="tag yellow">OSINT</span>
             <span class="tag">Python</span>
             <span class="tag">Tor / SOCKS5</span>
+            <span class="tag blue">Threat Intel</span>
           </div>
         </div>
         <p class="project-desc">
-          Multi-module OSINT pipeline integrating web scraping, API intelligence (Shodan, AbuseIPDB, ip-api),
-          anonymized routing via Tor/SOCKS5, change monitoring, forum aggregation (Reddit, HackerNews),
-          and a correlation engine with stylometric analysis. Designed for target profiling with operational security baked in.
+          Multi-module OSINT correlation pipeline integrating web scraping, API intelligence
+          (Shodan, AbuseIPDB, ip-api), anonymized routing via Tor/SOCKS5, change monitoring,
+          forum aggregation (Reddit, HackerNews), and a correlation engine with stylometric analysis.
+          Entity extraction, temporal analysis, and cross-platform pivoting designed for
+          target profiling with operational security baked in.
         </p>
         <div class="project-tags" style="margin-bottom:14px;">
           <span class="tag">BeautifulSoup</span>
@@ -554,11 +474,11 @@
           <span class="tag">stem</span>
           <span class="tag">feedparser</span>
           <span class="tag">ThreadPoolExecutor</span>
+          <span class="tag">spaCy</span>
         </div>
         <a href="#" class="project-link">View on GitHub</a>
       </div>
 
-      <!-- Stack Buffer Overflow -->
       <div class="project-card">
         <div class="project-top">
           <div class="project-title">Stack Buffer Overflow — ret2win</div>
@@ -571,12 +491,11 @@
         <p class="project-desc">
           Exploited a classic stack buffer overflow to redirect execution to a hidden win function.
           Used cyclic pattern methodology for precise offset discovery. Demonstrates foundational
-          stack memory layout understanding and EIP/RIP control.
+          stack memory layout understanding and RIP control.
         </p>
         <a href="#" class="project-link">View on GitHub</a>
       </div>
 
-      <!-- Multi-function ROP -->
       <div class="project-card">
         <div class="project-top">
           <div class="project-title">Multi-Function ROP Chain</div>
@@ -594,7 +513,6 @@
         <a href="#" class="project-link">View on GitHub</a>
       </div>
 
-      <!-- ret2libc -->
       <div class="project-card">
         <div class="project-top">
           <div class="project-title">ret2libc — ASLR Bypass</div>
@@ -612,7 +530,6 @@
         <a href="#" class="project-link">View on GitHub</a>
       </div>
 
-      <!-- Format String -->
       <div class="project-card">
         <div class="project-top">
           <div class="project-title">Format String — Information Disclosure</div>
@@ -630,6 +547,197 @@
         <a href="#" class="project-link">View on GitHub</a>
       </div>
 
+      <div class="project-card">
+        <div class="project-top">
+          <div class="project-title">n0rm41OS — Custom Arch Linux Build</div>
+          <div class="project-tags">
+            <span class="tag purple">Infrastructure</span>
+            <span class="tag">Arch Linux</span>
+            <span class="tag">LUKS2</span>
+            <span class="tag">AppArmor</span>
+          </div>
+        </div>
+        <p class="project-desc">
+          Custom hardened Arch Linux environment purpose-built for offensive security work.
+          Full disk encryption via LUKS2, linux-hardened kernel, AppArmor enforcing mode,
+          nftables default-deny inbound, sysctl hardening, and a full offensive/RE/OSINT
+          toolchain. KDE Plasma with Catppuccin Mocha aesthetic.
+        </p>
+        <a href="#" class="project-link">View on GitHub</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- INTEL REPORTS -->
+  <section class="section" id="reports">
+    <div class="section-label">Intelligence Reports</div>
+    <p style="font-size:12.5px; color:#666; margin-bottom:32px; max-width:620px; line-height:1.8;">
+      Open source threat intelligence reports produced as part of a structured OSINT curriculum.
+      All targets are historical, fully attributed, or public figures. All sources are public record.
+      Reports follow professional analyst standard — confidence ratings, pivot chains, and source attribution throughout.
+    </p>
+
+    <div class="section-sublabel">Threat Actor Attribution</div>
+    <div class="reports-grid">
+
+      <div class="report-card">
+        <div class="report-header">
+          <div class="report-type">Threat Actor · RaaS</div>
+          <div class="report-badge">Advanced</div>
+        </div>
+        <div class="report-title">LockBit Ransomware Group — Full Lifecycle Analysis</div>
+        <p class="report-desc">
+          Operational lifecycle reconstruction from emergence (2019) through Operation Cronos (Feb 2024)
+          and post-disruption rebrand attempts. OPSEC failure analysis of LockBitSupp (Khoroshev).
+          Tradecraft fingerprint for affiliate identification under new names.
+        </p>
+        <div class="report-footer">
+          <div class="report-meta">
+            <span class="tag yellow">DARKINT</span>
+            <span class="tag">Crypto Tracing</span>
+            <span class="tag purple">Attribution</span>
+          </div>
+          <a href="LockBit_ransomware_group.pdf" class="report-dl">Download PDF</a>
+        </div>
+      </div>
+
+      <div class="report-card">
+        <div class="report-header">
+          <div class="report-type">Threat Actor · APT</div>
+          <div class="report-badge">Advanced</div>
+        </div>
+        <div class="report-title">APT28 / Fancy Bear — Infrastructure Mapping</div>
+        <p class="report-desc">
+          GRU Unit 26165 infrastructure analysis from DOJ-documented IP 45.32.129.185.
+          ASN attribution, certificate transparency analysis, passive DNS reconstruction,
+          and corroborating threat intel from Microsoft MSTIC and Europol.
+        </p>
+        <div class="report-footer">
+          <div class="report-meta">
+            <span class="tag red">Nation-State</span>
+            <span class="tag blue">Infrastructure</span>
+            <span class="tag">Shodan</span>
+          </div>
+          <a href="Russian_military_intelligence__GRU_Unit_26165_.pdf" class="report-dl">Download PDF</a>
+        </div>
+      </div>
+
+      <div class="report-card">
+        <div class="report-header">
+          <div class="report-type">Threat Actor · Hacktivism</div>
+          <div class="report-badge">Advanced</div>
+        </div>
+        <div class="report-title">Lapsus$ Group — Attribution Chain Reconstruction</div>
+        <p class="report-desc">
+          Attribution reconstruction of the Lapsus$ collective using public DOJ filings and
+          Chainalysis reporting. Forum activity mapping, OPSEC failure analysis, and the
+          WhiteDoxbin/Oklaqq pivot chain that led to identification and arrest.
+        </p>
+        <div class="report-footer">
+          <div class="report-meta">
+            <span class="tag yellow">SOCMINT</span>
+            <span class="tag">DARKINT</span>
+            <span class="tag purple">Attribution</span>
+          </div>
+          <a href="Lapsus__Group_Report.pdf" class="report-dl">Download PDF</a>
+        </div>
+      </div>
+
+      <div class="report-card">
+        <div class="report-header">
+          <div class="report-type">Threat Actor · Nation-State</div>
+          <div class="report-badge">Advanced</div>
+        </div>
+        <div class="report-title">WannaCry — Ransomware Wallet Transaction Analysis</div>
+        <p class="report-desc">
+          Blockchain forensics on all three hardcoded WannaCry payment wallets attributed to
+          North Korean Lazarus Group. Peel chain identification, puppet wallet loop pattern,
+          Shapeshift/Monero laundering attempt, and operator behavioral analysis.
+        </p>
+        <div class="report-footer">
+          <div class="report-meta">
+            <span class="tag blue">Crypto Tracing</span>
+            <span class="tag red">Nation-State</span>
+            <span class="tag">Blockchain</span>
+          </div>
+          <a href="WannaCry.pdf" class="report-dl">Download PDF</a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section-sublabel" style="margin-top:32px;">Corporate & Financial Intelligence</div>
+    <div class="reports-grid">
+
+      <div class="report-card">
+        <div class="report-header">
+          <div class="report-type">Corporate OSINT · Financial</div>
+          <div class="report-badge">Intermediate</div>
+        </div>
+        <div class="report-title">Yandex N.V. — Corporate Structure & Sanctions Mapping</div>
+        <p class="report-desc">
+          Dutch holding company structure analysis via OpenCorporates and public filings.
+          Ownership deep dive — Lukoil (15%), Chachava (25%) — director departure timeline
+          post-2022 invasion, sanctions analysis, and Lukoil unusual deaths pattern documentation.
+        </p>
+        <div class="report-footer">
+          <div class="report-meta">
+            <span class="tag yellow">Corporate</span>
+            <span class="tag">OFAC</span>
+            <span class="tag purple">Russia</span>
+          </div>
+          <a href="Yandex_N_V_.pdf" class="report-dl">Download PDF</a>
+        </div>
+      </div>
+
+      <div class="report-card">
+        <div class="report-header">
+          <div class="report-type">Crypto Forensics · Case Study</div>
+          <div class="report-badge">Advanced</div>
+        </div>
+        <div class="report-title">Bitfinex Hack 2016 — Laundering Pipeline Reconstruction</div>
+        <p class="report-desc">
+          Stage-by-stage reconstruction of the $4.5B Bitfinex laundering operation.
+          Eight distinct stages: peel chains, AlphaBay mixing, CoinJoin via Wasabi,
+          chain hopping to Monero, and the gift card de-anonymization event that cracked the case.
+        </p>
+        <div class="report-footer">
+          <div class="report-meta">
+            <span class="tag blue">Crypto Forensics</span>
+            <span class="tag">DOJ Case</span>
+            <span class="tag green">$4.5B</span>
+          </div>
+          <a href="Bitfinex_hack_of_2016.pdf" class="report-dl">Download PDF</a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section-sublabel" style="margin-top:32px;">People OSINT</div>
+    <div class="reports-grid">
+
+      <div class="report-card">
+        <div class="report-header">
+          <div class="report-type">People OSINT · Challenge</div>
+          <div class="report-badge">Intermediate</div>
+        </div>
+        <div class="report-title">Konstantin Gladkikh — Identity Reconstruction</div>
+        <p class="report-desc">
+          Full identity reconstruction from a single Gronda profile. Pivot chain: employer → 
+          Instagram (5-point visual confirmation) → Facebook → VK scraper (DOB, education, 
+          last online timestamp) → email discovery. Demonstrates complete people OSINT pipeline.
+        </p>
+        <div class="report-footer">
+          <div class="report-meta">
+            <span class="tag yellow">People OSINT</span>
+            <span class="tag">SOCMINT</span>
+            <span class="tag purple">Pivot Chain</span>
+          </div>
+          <a href="Константин_Гладких.pdf" class="report-dl">Download PDF</a>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -638,230 +746,146 @@
     <div class="section-label">CTF Writeups</div>
     <div class="writeups">
 
-      <!-- RE-01 Keygen -->
       <a href="rev1.html" class="writeup-card">
         <div class="writeup-num">RE-01</div>
         <div class="writeup-title">Password Validator Keygen</div>
-        <p class="writeup-desc">
-          Static RE of a compiled x86 ELF. Reversed compiler-optimized modulo checks
-          (magic multiplier constants), reconstructed validation constraints, and wrote
-          a working keygen from scratch.
-        </p>
+        <p class="writeup-desc">Static RE of compiled x86 ELF. Reversed compiler-optimized modulo checks (magic multiplier constants), reconstructed validation constraints, wrote working keygen from scratch.</p>
         <div class="writeup-meta">
           <span class="tag red">Reverse Engineering</span>
           <span class="tag">IDA Pro</span>
-          <span class="tag">x86</span>
           <span class="tag green">Keygen</span>
         </div>
       </a>
 
-      <!-- Osint Geolocation -->
-      <a href="osint-exercise-001.html" class="writeup-card">
-        <div class="writeup-num">OSINT-02</div>
-        <div class="writeup-title">Geolocating having a single photo</div>
-        <p class="writeup-desc">
-          Geolocating the exact place of an old photo with basic Informations, a full report on what i did.
-        </p>
-        <div class="writeup-meta">
-          <span class="tag yellow">OSINT</span>
-          <span class="tag">Geolocation</span>
-          <span class="tag">Geosint</span>
-        </div>
-      </a>
-
-      <!-- Osint Geolocation -->
-      <a href="osint-exercise-002.html" class="writeup-card">
-        <div class="writeup-num">OSINT-03</div>
-        <div class="writeup-title">Geolocating having a single photo</div>
-        <p class="writeup-desc">
-          Geolocating the exact place of an old photo with basic Informations, a full report on what i did.
-        </p>
-        <div class="writeup-meta">
-          <span class="tag yellow">OSINT</span>
-          <span class="tag">Geolocation</span>
-          <span class="tag">Geosint</span>
-        </div>
-      </a>
-
-      <!-- Osint Geolocation -->
-      <a href="osint-exercise-003.html" class="writeup-card">
-        <div class="writeup-num">OSINT-04</div>
-        <div class="writeup-title">Geolocating having a single photo</div>
-        <p class="writeup-desc">
-          Geolocating the exact place of an old photo with basic Informations, a full report on what i did.
-        </p>
-        <div class="writeup-meta">
-          <span class="tag yellow">OSINT</span>
-          <span class="tag">Geolocation</span>
-          <span class="tag yellow">Event Reconstrucion</span>
-          <span class="tag">Geosint</span>
-        </div>
-      </a>
-      
-      <!-- Trace Labs OSINT -->
-      <a href="#" class="writeup-card">
-        <div class="writeup-num">OSINT-01</div>
-        <div class="writeup-title">Trace Labs OSINT CTF</div>
-        <p class="writeup-desc">
-          Missing persons OSINT competition. Gathered open-source intelligence on
-          real missing individuals using social media analysis, geolocation,
-          reverse image search, and username correlation across platforms.
-        </p>
-        <div class="writeup-meta">
-          <span class="tag yellow">OSINT</span>
-          <span class="tag">Geolocation</span>
-          <span class="tag">Social Media</span>
-        </div>
-      </a>
-
-      <!-- Crypto Pipeline -->
-      <a href="writeup-crypto-pipeline.html" class="writeup-card">
-        <div class="writeup-num">WIN-00</div>
-        <div class="writeup-title">Payload Protection Pipeline</div>
-        <p class="writeup-desc">
-          Layered encryption system in C++ — rolling XOR, RC4 internals,
-          AES-CBC via Windows CNG, compile-time string encryption,
-          and RW→RX loader pattern.
-        </p>
-        <div class="writeup-meta">
-          <span class="tag red">Windows</span>
-          <span class="tag yellow">Cryptography</span>
-          <span class="tag">C++</span>
-          <span class="tag blue">Obfuscation</span>
-        </div>
-      </a>
-
-      <!-- RE-08 Capstone -->
-      <a href="rev8.html" class="writeup-card">
-        <div class="writeup-num">RE-08</div>
-        <div class="writeup-title">Capstone — Full Malware Analysis</div>
-        <p class="writeup-desc">
-          End-to-end analysis of an unknown implant — triage, ptrace bypass,
-          XOR config decode, dual CRC32 + FNV-1a execution gates,
-          and a full intelligence report.
-        </p>
-        <div class="writeup-meta">
-          <span class="tag red">Reverse Engineering</span>
-          <span class="tag yellow">Capstone</span>
-          <span class="tag">IDA Pro</span>
-          <span class="tag green">Intel Report</span>
-        </div>
-      </a>
-
-      <!-- RE-07 Firmware RE -->
-      <a href="rev7.html" class="writeup-card">
-        <div class="writeup-num">RE-07</div>
-        <div class="writeup-title">Firmware &amp; Embedded RE</div>
-        <p class="writeup-desc">
-          binwalk triage, SquashFS extraction, and credential discovery on
-          embedded Linux firmware — shared SSH keys, cleartext passwd,
-          hardcoded Basic Auth, and binary-embedded passwords.
-        </p>
-        <div class="writeup-meta">
-          <span class="tag red">Reverse Engineering</span>
-          <span class="tag yellow">Firmware</span>
-          <span class="tag">binwalk</span>
-          <span class="tag green">4 Findings</span>
-        </div>
-      </a>
-
-      <!-- RE-06 Algorithm Recognition -->
-      <a href="rev6.html" class="writeup-card">
-        <div class="writeup-num">RE-06</div>
-        <div class="writeup-title">Recognizing Common Algorithms</div>
-        <p class="writeup-desc">
-          Identified CRC32, RC4 KSA, and FNV-1a from raw disassembly alone —
-          magic constants, loop structure, and operation order.
-          No source code, no runtime, no search engine.
-        </p>
-        <div class="writeup-meta">
-          <span class="tag red">Reverse Engineering</span>
-          <span class="tag yellow">Crypto / Hash</span>
-          <span class="tag">IDA Pro</span>
-          <span class="tag green">3/3 Identified</span>
-        </div>
-      </a>
-
-      <!-- RE-05 Anti-Analysis -->
-      <a href="rev5.html" class="writeup-card">
-        <div class="writeup-num">RE-05</div>
-        <div class="writeup-title">Anti-Analysis Bypass</div>
-        <p class="writeup-desc">
-          Identified and defeated ptrace anti-debug and nanosecond timing checks
-          via register manipulation in GDB — no binary modification, payload
-          reached from inside the debugger.
-        </p>
-        <div class="writeup-meta">
-          <span class="tag red">Reverse Engineering</span>
-          <span class="tag yellow">Anti-Debug</span>
-          <span class="tag">GDB</span>
-          <span class="tag green">Bypassed</span>
-        </div>
-      </a>
-
-      <!-- RE-04 Dynamic Analysis -->
-      <a href="rev4.html" class="writeup-card">
-        <div class="writeup-num">RE-04</div>
-        <div class="writeup-title">Dynamic Analysis &amp; Behavior Observation</div>
-        <p class="writeup-desc">
-          Three-pass runtime analysis of a simulated malware dropper — ltrace, strace,
-          and GDB register inspection to extract C2 config, sandbox evasion logic,
-          and a plaintext key directly from <code style="font-size:10px;">$eax</code>.
-        </p>
-        <div class="writeup-meta">
-          <span class="tag red">Reverse Engineering</span>
-          <span class="tag yellow">Dynamic Analysis</span>
-          <span class="tag">GDB</span>
-          <span class="tag">strace</span>
-        </div>
-      </a>
-
-      <!-- RE-03 PE Internals -->
-      <a href="rev3.html" class="writeup-card">
-        <div class="writeup-num">RE-03</div>
-        <div class="writeup-title">PE Internals &amp; Windows Triage</div>
-        <p class="writeup-desc">
-          Full static triage of a real Windows PE — timestamp analysis, entropy mapping,
-          import capability fingerprinting, and xref pivoting in IDA to connect
-          imports to behavioral context.
-        </p>
-        <div class="writeup-meta">
-          <span class="tag red">Reverse Engineering</span>
-          <span class="tag yellow">Windows PE</span>
-          <span class="tag">PEStudio</span>
-          <span class="tag">IDA Pro</span>
-        </div>
-      </a>
-
-      <!-- RE-02 Indirect Jumps -->
       <a href="rev2.html" class="writeup-card">
         <div class="writeup-num">RE-02</div>
-        <div class="writeup-title">Indirect Jumps &amp; Obfuscation</div>
-        <p class="writeup-desc">
-          Recovered control flow from a function pointer dispatch table.
-          Demonstrated static and dynamic recovery paths for <code style="font-size:10px;">call eax</code> —
-          the same technique used in real packers and malware loaders.
-        </p>
+        <div class="writeup-title">Indirect Jumps & Obfuscation</div>
+        <p class="writeup-desc">Recovered control flow from a function pointer dispatch table. Demonstrated static and dynamic recovery paths for <code style="font-size:10px;">call eax</code> — same technique used in real packers and malware loaders.</p>
         <div class="writeup-meta">
           <span class="tag red">Reverse Engineering</span>
           <span class="tag yellow">Obfuscation</span>
           <span class="tag">IDA Pro</span>
-          <span class="tag">GDB</span>
         </div>
       </a>
 
-      <!-- crackit RE -->
-      <a href="#" class="writeup-card">
-        <div class="writeup-num">RE-00</div>
-        <div class="writeup-title">crackit — Reverse Engineering</div>
-        <p class="writeup-desc">
-          Binary reverse engineering challenge. Analyzed control flow and
-          string handling routines to extract the correct input without
-          dynamic execution, using static analysis only.
-        </p>
+      <a href="rev3.html" class="writeup-card">
+        <div class="writeup-num">RE-03</div>
+        <div class="writeup-title">PE Internals & Windows Triage</div>
+        <p class="writeup-desc">Full static triage of a real Windows PE — timestamp analysis, entropy mapping, import capability fingerprinting, and xref pivoting in IDA to connect imports to behavioral context.</p>
         <div class="writeup-meta">
           <span class="tag red">Reverse Engineering</span>
-          <span class="tag">Static Analysis</span>
+          <span class="tag yellow">Windows PE</span>
+          <span class="tag">PEStudio</span>
+        </div>
+      </a>
+
+      <a href="rev4.html" class="writeup-card">
+        <div class="writeup-num">RE-04</div>
+        <div class="writeup-title">Dynamic Analysis & Behavior Observation</div>
+        <p class="writeup-desc">Three-pass runtime analysis of a simulated malware dropper — ltrace, strace, and GDB register inspection to extract C2 config, sandbox evasion logic, and plaintext key from <code style="font-size:10px;">$eax</code>.</p>
+        <div class="writeup-meta">
+          <span class="tag red">Reverse Engineering</span>
+          <span class="tag yellow">Dynamic Analysis</span>
+          <span class="tag">strace</span>
+        </div>
+      </a>
+
+      <a href="rev5.html" class="writeup-card">
+        <div class="writeup-num">RE-05</div>
+        <div class="writeup-title">Anti-Analysis Bypass</div>
+        <p class="writeup-desc">Identified and defeated ptrace anti-debug and nanosecond timing checks via register manipulation in GDB — no binary modification, payload reached from inside the debugger.</p>
+        <div class="writeup-meta">
+          <span class="tag red">Reverse Engineering</span>
+          <span class="tag yellow">Anti-Debug</span>
+          <span class="tag green">Bypassed</span>
+        </div>
+      </a>
+
+      <a href="rev6.html" class="writeup-card">
+        <div class="writeup-num">RE-06</div>
+        <div class="writeup-title">Recognizing Common Algorithms</div>
+        <p class="writeup-desc">Identified CRC32, RC4 KSA, and FNV-1a from raw disassembly alone — magic constants, loop structure, and operation order. No source code, no runtime, no search engine.</p>
+        <div class="writeup-meta">
+          <span class="tag red">Reverse Engineering</span>
+          <span class="tag yellow">Crypto / Hash</span>
+          <span class="tag green">3/3 Identified</span>
+        </div>
+      </a>
+
+      <a href="rev7.html" class="writeup-card">
+        <div class="writeup-num">RE-07</div>
+        <div class="writeup-title">Firmware & Embedded RE</div>
+        <p class="writeup-desc">binwalk triage, SquashFS extraction, and credential discovery on embedded Linux firmware — shared SSH keys, cleartext passwd, hardcoded Basic Auth, and binary-embedded passwords.</p>
+        <div class="writeup-meta">
+          <span class="tag red">Reverse Engineering</span>
+          <span class="tag yellow">Firmware</span>
+          <span class="tag green">4 Findings</span>
+        </div>
+      </a>
+
+      <a href="rev8.html" class="writeup-card">
+        <div class="writeup-num">RE-08</div>
+        <div class="writeup-title">Capstone — Full Malware Analysis</div>
+        <p class="writeup-desc">End-to-end analysis of unknown implant — triage, ptrace bypass, XOR config decode, dual CRC32 + FNV-1a execution gates, and full intelligence report.</p>
+        <div class="writeup-meta">
+          <span class="tag red">Reverse Engineering</span>
+          <span class="tag yellow">Capstone</span>
+          <span class="tag green">Intel Report</span>
+        </div>
+      </a>
+
+      <a href="osint-exercise-001.html" class="writeup-card">
+        <div class="writeup-num">OSINT-01</div>
+        <div class="writeup-title">Geolocation — Single Photo</div>
+        <p class="writeup-desc">Geolocating the exact location of an undisclosed photo using visual analysis, shadow direction, architecture fingerprinting, and reverse image search across multiple engines.</p>
+        <div class="writeup-meta">
+          <span class="tag yellow">OSINT</span>
+          <span class="tag">Geolocation</span>
+          <span class="tag">GeoSINT</span>
+        </div>
+      </a>
+
+      <a href="osint-exercise-002.html" class="writeup-card">
+        <div class="writeup-num">OSINT-02</div>
+        <div class="writeup-title">Geolocation — Event Reconstruction</div>
+        <p class="writeup-desc">Multi-anchor geolocation exercise combining vegetation analysis, infrastructure fingerprinting, and temporal signal cross-reference to reconstruct the location and timing of a documented event.</p>
+        <div class="writeup-meta">
+          <span class="tag yellow">OSINT</span>
+          <span class="tag">Geolocation</span>
+          <span class="tag yellow">Event Reconstruction</span>
+        </div>
+      </a>
+
+      <a href="osint-exercise-003.html" class="writeup-card">
+        <div class="writeup-num">OSINT-03</div>
+        <div class="writeup-title">Geolocation — Advanced Visual Analysis</div>
+        <p class="writeup-desc">Advanced geolocation combining EXIF metadata extraction, four-layer visual analysis methodology, and Google Earth Pro corroboration. First anchor point identification documented.</p>
+        <div class="writeup-meta">
+          <span class="tag yellow">OSINT</span>
+          <span class="tag">EXIF</span>
+          <span class="tag">GeoSINT</span>
+        </div>
+      </a>
+
+      <a href="writeup-crypto-pipeline.html" class="writeup-card">
+        <div class="writeup-num">WIN-01</div>
+        <div class="writeup-title">Payload Protection Pipeline</div>
+        <p class="writeup-desc">Layered encryption system in C++ — rolling XOR, RC4 internals, AES-CBC via Windows CNG, compile-time string encryption, and RW→RX loader pattern.</p>
+        <div class="writeup-meta">
+          <span class="tag red">Windows</span>
+          <span class="tag yellow">Cryptography</span>
+          <span class="tag blue">Obfuscation</span>
+        </div>
+      </a>
+
+      <a href="#" class="writeup-card">
+        <div class="writeup-num">OSINT-04</div>
+        <div class="writeup-title">Trace Labs OSINT CTF</div>
+        <p class="writeup-desc">Missing persons OSINT competition. Gathered open-source intelligence on real missing individuals using social media analysis, geolocation, reverse image search, and username correlation.</p>
+        <div class="writeup-meta">
+          <span class="tag yellow">OSINT</span>
+          <span class="tag">Social Media</span>
+          <span class="tag purple">Competition</span>
         </div>
       </a>
 
@@ -874,12 +898,13 @@
     <div class="skills-grid">
 
       <div class="skill-group">
-        <div class="skill-group-title">Exploitation</div>
+        <div class="skill-group-title">Binary Exploitation</div>
         <ul class="skill-list">
-          <li>Stack Buffer Overflows</li>
-          <li>Return Oriented Programming</li>
-          <li>ret2libc / ret2plt</li>
-          <li>Format String Exploits</li>
+          <li class="highlight">Stack Buffer Overflows</li>
+          <li class="highlight">Return Oriented Programming</li>
+          <li class="highlight">ret2libc / ret2plt</li>
+          <li class="highlight">Format String Exploits</li>
+          <li>Heap Exploitation (UAF)</li>
           <li>pwntools</li>
           <li>GDB + pwndbg</li>
         </ul>
@@ -888,11 +913,11 @@
       <div class="skill-group">
         <div class="skill-group-title">Reverse Engineering</div>
         <ul class="skill-list">
-          <li>IDA Pro 9.1</li>
-          <li>x86 / x86-64 ASM</li>
-          <li>Compiler Idiom Recognition</li>
-          <li>Anti-Debug Bypass</li>
-          <li>Algorithm Recognition</li>
+          <li class="highlight">IDA Pro 9.1</li>
+          <li class="highlight">x86 / x86-64 Assembly</li>
+          <li class="highlight">Compiler Idiom Recognition</li>
+          <li class="highlight">Anti-Debug Bypass</li>
+          <li class="highlight">Algorithm Recognition</li>
           <li>Firmware / SquashFS Triage</li>
           <li>PE Internals & Malware Triage</li>
           <li>Dynamic Analysis (strace/ltrace/GDB)</li>
@@ -900,48 +925,94 @@
       </div>
 
       <div class="skill-group">
-        <div class="skill-group-title">OSINT</div>
+        <div class="skill-group-title">OSINT & Threat Intel</div>
         <ul class="skill-list">
-          <li>Shodan / AbuseIPDB</li>
-          <li>Social Media Analysis</li>
+          <li class="highlight">Infrastructure Mapping (Shodan/Censys)</li>
+          <li class="highlight">Crypto Transaction Tracing</li>
+          <li class="highlight">Dark Web Intelligence</li>
+          <li class="highlight">People OSINT & Identity Recon</li>
+          <li class="highlight">SOCMINT (Temporal/Linguistic/Network)</li>
+          <li>Corporate & Financial OSINT</li>
+          <li>Geolocation & GeoSINT</li>
+          <li>SSL Certificate Pivoting</li>
           <li>Stylometric Analysis</li>
-          <li>Geolocation</li>
-          <li>Tor / SOCKS5 Anonymization</li>
-          <li>Web Scraping (Playwright)</li>
+          <li>Threat Actor Attribution</li>
         </ul>
       </div>
 
       <div class="skill-group">
-        <div class="skill-group-title">Languages</div>
+        <div class="skill-group-title">Languages & Tools</div>
         <ul class="skill-list">
-          <li>Python</li>
-          <li>C</li>
-          <li>x86 Assembly</li>
+          <li class="highlight">Python</li>
+          <li class="highlight">C / C++</li>
+          <li class="highlight">x86 Assembly</li>
           <li>Bash</li>
+          <li>nasm</li>
+          <li>mingw-w64 (cross-compile)</li>
         </ul>
       </div>
 
       <div class="skill-group">
-        <div class="skill-group-title">Platforms</div>
+        <div class="skill-group-title">Platforms & Environments</div>
         <ul class="skill-list">
-          <li>Linux (primary)</li>
-          <li>Windows (analysis VM)</li>
-          <li>FlareVM</li>
-          <li>GDB / pwndbg</li>
+          <li class="highlight">Linux (Arch / Kali)</li>
+          <li class="highlight">n0rm41OS (custom hardened)</li>
+          <li>Windows (FlareVM)</li>
+          <li>QEMU/KVM</li>
+          <li>Tor / SOCKS5</li>
+          <li>Docker</li>
         </ul>
       </div>
 
       <div class="skill-group">
-        <div class="skill-group-title">Concepts</div>
+        <div class="skill-group-title">Concepts & Frameworks</div>
         <ul class="skill-list">
-          <li>Memory Corruption</li>
-          <li>ASLR / NX / Stack Canaries</li>
-          <li>ELF / PE Internals</li>
-          <li>Threat Intelligence</li>
-          <li>CTF Methodology</li>
+          <li class="highlight">Memory Corruption Primitives</li>
+          <li class="highlight">ASLR / NX / Stack Canaries / PIE</li>
+          <li class="highlight">ELF / PE Internals</li>
+          <li class="highlight">F3EAD Intelligence Cycle</li>
+          <li>MITRE ATT&CK Framework</li>
+          <li>Blockchain Forensics</li>
+          <li>OPSEC & Counter-OSINT</li>
         </ul>
       </div>
 
+    </div>
+  </section>
+
+  <!-- CURRICULUM -->
+  <section class="section" id="curriculum">
+    <div class="section-label">OSINT Curriculum Progress</div>
+    <p style="font-size:12.5px; color:#666; margin-bottom:28px; max-width:580px; line-height:1.8;">
+      Structured OSINT curriculum modeled after NSA CAE / SANS / GIAC training methodology.
+      All modules completed with real target exercises and professional analyst documentation.
+    </p>
+    <div class="curriculum">
+      <div class="curriculum-row"><span class="curriculum-status done">✓</span><span class="curriculum-name done">Google Dorking & Advanced Search</span><span class="curriculum-tag green">Done</span></div>
+      <div class="curriculum-row"><span class="curriculum-status done">✓</span><span class="curriculum-name done">Leak Database Pivoting</span><span class="curriculum-tag green">Done</span></div>
+      <div class="curriculum-row"><span class="curriculum-status done">✓</span><span class="curriculum-name done">Document Metadata Extraction</span><span class="curriculum-tag green">Done</span></div>
+      <div class="curriculum-row"><span class="curriculum-status done">✓</span><span class="curriculum-name done">Shodan / Infrastructure OSINT</span><span class="curriculum-tag green">Done</span></div>
+      <div class="curriculum-row"><span class="curriculum-status done">✓</span><span class="curriculum-name done">SSL Certificate Pivoting</span><span class="curriculum-tag green">Done</span></div>
+      <div class="curriculum-row"><span class="curriculum-status done">✓</span><span class="curriculum-name done">SOCMINT — Temporal, Linguistic, Network Analysis</span><span class="curriculum-tag green">Done</span></div>
+      <div class="curriculum-row"><span class="curriculum-status done">✓</span><span class="curriculum-name done">Vehicle OSINT</span><span class="curriculum-tag green">Done</span></div>
+      <div class="curriculum-row"><span class="curriculum-status done">✓</span><span class="curriculum-name done">Image & Video OSINT</span><span class="curriculum-tag green">Done</span></div>
+      <div class="curriculum-row"><span class="curriculum-status done">✓</span><span class="curriculum-name done">People OSINT & Identity Reconstruction</span><span class="curriculum-tag green">Done</span></div>
+      <div class="curriculum-row"><span class="curriculum-status done">✓</span><span class="curriculum-name done">Discord OSINT</span><span class="curriculum-tag green">Done</span></div>
+      <div class="curriculum-row"><span class="curriculum-status done">✓</span><span class="curriculum-name done">Corporate & Financial OSINT</span><span class="curriculum-tag green">Done</span></div>
+      <div class="curriculum-row"><span class="curriculum-status done">✓</span><span class="curriculum-name done">DARKINT — Dark Web Intelligence</span><span class="curriculum-tag green">Done</span></div>
+      <div class="curriculum-row"><span class="curriculum-status done">✓</span><span class="curriculum-name done">Cryptocurrency OSINT</span><span class="curriculum-tag green">Done</span></div>
+      <div class="curriculum-row"><span class="curriculum-status done">✓</span><span class="curriculum-name done">Network & Infrastructure OSINT</span><span class="curriculum-tag green">Done</span></div>
+      <div class="curriculum-row"><span class="curriculum-status done">✓</span><span class="curriculum-name done">Crypto Transaction Tracing — Advanced</span><span class="curriculum-tag green">Done</span></div>
+      <div class="curriculum-row"><span class="curriculum-status done">✓</span><span class="curriculum-name done">Dark Web Intelligence — Advanced</span><span class="curriculum-tag green">Done</span></div>
+      <div class="curriculum-row"><span class="curriculum-status wip">→</span><span class="curriculum-name">Geofencing & Wireless OSINT</span><span class="curriculum-tag yellow">In Progress</span></div>
+      <div class="curriculum-row"><span class="curriculum-status next">·</span><span class="curriculum-name">Legality of Public CCTV in OSINT</span><span class="curriculum-tag">Upcoming</span></div>
+      <div class="curriculum-row"><span class="curriculum-status next">·</span><span class="curriculum-name">SIGINT Fundamentals (Public Sources)</span><span class="curriculum-tag">Upcoming</span></div>
+      <div class="curriculum-row"><span class="curriculum-status next">·</span><span class="curriculum-name">HUMINT Theory & Source Handling</span><span class="curriculum-tag">Upcoming</span></div>
+      <div class="curriculum-row"><span class="curriculum-status next">·</span><span class="curriculum-name">Counter-OSINT & Deception Detection</span><span class="curriculum-tag">Upcoming</span></div>
+      <div class="curriculum-row"><span class="curriculum-status next">·</span><span class="curriculum-name">Maritime & Aviation OSINT (AIS/ADS-B)</span><span class="curriculum-tag">Upcoming</span></div>
+      <div class="curriculum-row"><span class="curriculum-status next">·</span><span class="curriculum-name">Social Network Analysis (Graph Theory)</span><span class="curriculum-tag">Upcoming</span></div>
+      <div class="curriculum-row"><span class="curriculum-status next">·</span><span class="curriculum-name">Open Source Threat Hunting (APT)</span><span class="curriculum-tag">Upcoming</span></div>
+      <div class="curriculum-row"><span class="curriculum-status next">·</span><span class="curriculum-name">iKnowItAll Integration + AI-Assisted OSINT</span><span class="curriculum-tag">Upcoming</span></div>
     </div>
   </section>
 
@@ -952,35 +1023,39 @@
       <div class="status-card">
         <div class="status-card-title">Background</div>
         <p>
-          (Aspirant) Offensive security researcher with a focus on binary exploitation and OSINT tooling.
-          Building a structured skill set toward a career in the intelligence community.
-          All work is hands-on — every project in this portfolio was built from scratch,
-          not adapted from tutorials.
+          (Aspirant) Offensive security researcher with focus on binary exploitation,
+          reverse engineering, and open source threat intelligence. Building a structured,
+          verifiable skill set toward a career in the intelligence community.
+          All work is hands-on — every project and report in this portfolio was produced
+          independently from scratch.
         </p>
       </div>
       <div class="status-card">
         <div class="status-card-title">Currently Working On</div>
         <p>
-          Expanding reverse engineering skills — currently on obfuscation and anti-analysis techniques
-          after completing compiler idiom recognition and keygen methodology.
-          Next up: <code>format string %n</code> write primitives and a standalone web crawler OSINT tool.
+          Completing advanced OSINT curriculum — currently on Geofencing & Wireless OSINT.
+          Parallel tracks: Windows exploitation (stack cookies, /GS protection) on FlareVM,
+          and iKnowItAll correlation pipeline development.
+          Next major milestone: <code>full OPSEC architecture upgrade</code>.
         </p>
       </div>
     </div>
     <div class="status-card" style="margin-top:2px;">
-      <div class="status-card-title">Goals</div>
+      <div class="status-card-title">Goals & Methodology</div>
       <p>
-        Intelligence community analyst or operator role with a focus on technical exploitation and signals intelligence.
-        Competing in CTFs (Trace Labs, offensive RE challenges) to build a verifiable public track record.
+        Intelligence community analyst or operator role — technical exploitation and signals intelligence focus.
+        Best opportunity wins regardless of geography.
+        Operational framework: <code>F3EAD</code> (Find → Fix → Finish → Exploit → Analyze → Disseminate),
+        hybrid of Intelligence Cycle + OODA Loop.
+        Competing in CTFs (Trace Labs, offensive RE) to build a verifiable public track record.
         Handle: <code>n0rm41</code>
       </p>
     </div>
   </section>
 
-  <!-- FOOTER -->
   <footer>
     <div class="footer-handle">n0rm41</div>
-    <div class="footer-right">Binary Exploitation &nbsp;·&nbsp; RE &nbsp;·&nbsp; OSINT</div>
+    <div class="footer-right">Binary Exploitation &nbsp;·&nbsp; RE &nbsp;·&nbsp; Threat Intel</div>
   </footer>
 
 </div>
